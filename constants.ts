@@ -1,22 +1,120 @@
 
 import { Achievement } from './types';
 
-export const YEARS = Array.from({ length: 13 }, (_, i) => 2014 + i);
+// Descending order: 2026 down to 2014
+export const YEARS = Array.from({ length: 13 }, (_, i) => 2026 - i);
+
+const LOGOS = {
+  syracuse: 'https://logo.clearbit.com/syracuse.edu',
+  novartis: 'https://logo.clearbit.com/novartis.com',
+  shutterfly: 'https://logo.clearbit.com/shutterfly.com'
+};
 
 export const INITIAL_ACHIEVEMENTS: Achievement[] = [
-  { id: '1', year: 2014, title: 'Rise of Mobile Commerce', description: 'Smartphones become the primary screen for retail worldwide.', category: 'Tech' },
-  { id: '2', year: 2015, title: 'DeepMind AlphaGo Victory', description: 'AI makes a historic breakthrough by defeating a grandmaster.', category: 'Tech' },
-  { id: '3', year: 2016, title: 'LIGO Gravitational Waves', description: 'Scientists confirm Einstein\'s theory with direct observation.', category: 'Space' },
-  { id: '4', year: 2017, title: 'The Crypto Boom', description: 'Mainstream awareness of blockchain and decentralization peaks.', category: 'Business' },
-  { id: '5', year: 2018, title: 'Mars InSight Landing', description: 'NASA successfully lands a robotic probe to study the interior of Mars.', category: 'Space' },
-  { id: '6', year: 2019, title: 'First Black Hole Image', description: 'Event Horizon Telescope captures history with the M87* image.', category: 'Space' },
-  { id: '7', year: 2020, title: 'Remote Work Revolution', description: 'Global shift in labor dynamics due to worldwide connectivity.', category: 'Tech' },
-  { id: '8', year: 2021, title: 'NFT Phenomenon', description: 'Digital ownership finds a new paradigm through tokens.', category: 'Business' },
-  { id: '9', year: 2022, title: 'Generative AI Breakthrough', description: 'LLMs and Diffusion models transform creative industries.', category: 'Tech' },
-  { id: '10', year: 2023, title: 'Quantum Advancements', description: 'Practical error correction brings quantum computing closer.', category: 'Tech' },
-  { id: '11', year: 2024, title: 'The Next Generation', description: 'Focus shifts towards sustainable energy and green mobility.', category: 'Global' },
-  { id: '12', year: 2025, title: 'Mars Base Prototype', description: 'International cooperation on lunar and martian habitats.', category: 'Space' },
-  { id: '13', year: 2026, title: 'Universal Broadband', description: 'Satellite constellations reach full global saturation.', category: 'Tech' },
+  { 
+    id: '2026', 
+    year: 2026, 
+    title: 'Architecting Future Creativity', 
+    description: 'Projected: Leading the evolution of web-based creative tools with a focus on maintainability and global user experience.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2025', 
+    year: 2025, 
+    title: 'Performance Optimization & Splunk', 
+    description: 'Implementing custom Splunk monitoring for sub-second page loads and proactive system health alerting.', 
+    category: 'Innovation',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2024', 
+    year: 2024, 
+    title: 'Reusable UI Component Library', 
+    description: 'Architected a modular UI system to accelerate development velocity and ensure brand consistency across web applications.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2023', 
+    year: 2023, 
+    title: 'Massive "Hot-to-Cold" Migration', 
+    description: 'Led the migration of massive project datasets from Oracle to AWS S3, saving millions in DB costs with zero user downtime.', 
+    category: 'Innovation',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2022', 
+    year: 2022, 
+    title: 'Consumer Product Leadership', 
+    description: 'Owned development of flagship Photo Books, Cards, and Canvas products serving 5M yearly active users.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2021', 
+    year: 2021, 
+    title: 'Senior Software Engineer (Consumer)', 
+    description: 'Transitioned to Consumer Apps. Focused on metrics-driven UX where sub-second performance is a mission-critical requirement.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2020', 
+    year: 2020, 
+    title: 'CI/CD Pipeline Architecture', 
+    description: 'Established modern DevOps practices, reducing manual deployment errors through automated software delivery lifecycles.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2019', 
+    year: 2019, 
+    title: 'Business Logic Orchestration', 
+    description: 'Used Apache Activiti and Camel to orchestrate complex high-volume order processing and data integration tasks.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2018', 
+    year: 2018, 
+    title: 'Asynchronous Workflows with Kafka', 
+    description: 'Optimized system scalability by implementing Kafka-based asynchronous workflows to handle massive enterprise data spikes.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2017', 
+    year: 2017, 
+    title: 'Fault-Tolerant Microservices', 
+    description: 'Built robust microservices with automated recovery protocols and integrated monitoring to ensure 24/7 high availability.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2016', 
+    year: 2016, 
+    title: 'Software Engineer @ Shutterfly', 
+    description: 'Joined the Enterprise division. Engineered 0-to-1 onboarding infrastructure supporting millions in B2B print revenue.', 
+    category: 'Professional',
+    logoUrl: LOGOS.shutterfly
+  },
+  { 
+    id: '2015-1', 
+    year: 2015, 
+    title: 'R&D Summer Intern @ Novartis', 
+    description: 'Architected a scalable relational database and engineered a full-stack web application using C#, ASP.NET Web API, and AngularJS in the NYC Metro Area.', 
+    category: 'Internship',
+    logoUrl: LOGOS.novartis
+  },
+  { 
+    id: '2014', 
+    year: 2014, 
+    title: 'Graduate Student Programmer', 
+    description: 'Began Master in Computer Science at Syracuse University. Specialized in Design & Analysis of Algorithms, Software Modelling, and Operating Systems.', 
+    category: 'Academic',
+    logoUrl: LOGOS.syracuse
+  }
 ];
 
 export const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6', '#34495E'];

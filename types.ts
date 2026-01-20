@@ -6,7 +6,8 @@ export interface Achievement {
   year: number;
   title: string;
   description: string;
-  category: 'Tech' | 'Global' | 'Business' | 'Space';
+  category: 'Academic' | 'Professional' | 'Internship' | 'Innovation';
+  logoUrl?: string;
 }
 
 export interface CanvasObject {
