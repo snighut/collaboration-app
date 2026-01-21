@@ -59,7 +59,7 @@ const App: React.FC = () => {
             onClick={scrollToCreativeHub}
             className="text-blue-600 hover:text-blue-700 font-semibold transition-colors flex items-center gap-1"
           >
-            <Layout size={16} /> Personal Projects
+            <Layout size={16} /> Explore personal projects
           </button>
         </nav>
       </header>
