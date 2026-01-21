@@ -36,3 +36,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:${{ steps.date.outputs.date }}
