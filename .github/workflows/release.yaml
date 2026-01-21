@@ -33,4 +33,6 @@ jobs:
           push: true
           # This handles the "Translation" for your GMKtec automatically
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/collaboration-app:${{ github.sha }}
