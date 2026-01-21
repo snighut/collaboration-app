@@ -51,7 +51,7 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 z-50 flex items-center px-8 shadow-sm">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase tracking-tight">
-          Swapnil Nighut • Engineering Journey
+          Swapnil Nighut • Software Engineering Journey
         </h1>
         <nav className="ml-auto hidden md:flex space-x-6 text-sm font-medium text-gray-600">
           <a href="#achievements" className="hover:text-blue-600 transition-colors">Career Timeline</a>
