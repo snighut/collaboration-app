@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: chronos-canvas
-        image: your-registry/chronos-canvas:latest
+        image: sbnighut/chronos-canvas:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         resources:
@@ -39,4 +40,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type: LoadBalancer
+      nodePort: 30080
+  type: NodePort
