@@ -114,6 +114,49 @@ kubectl get svc collaboration-app-service
 
 ---
 
+### 🔄 7. Forcefully Updating Production (The `:latest` Trap)
+
+Because we are using the `:latest` Docker tag, the **GMKtec K8 Plus** won't always realize a new image is available on Docker Hub. Use these commands to force a fresh pull and watch the update happen in real-time.
+
+#### **The "One-Two Punch" Command**
+
+Run this on your **M4 Mac Mini** terminal to trigger the update and monitor the transition:
+
+```bash
+# Trigger a rolling restart of the deployment
+kubectl rollout restart deployment collaboration-app && kubectl get pods -w
+
+```
+
+#### **What these commands do:**
+
+1. **`kubectl rollout restart`**: This adds a "restartedAt" timestamp to your Deployment's metadata. Kubernetes sees this change and realizes it needs to create new pods. Because the image tag is `:latest`, it will reach out to Docker Hub to pull the most recent version.
+2. **`&&`**: This chains the commands. It only starts the "watch" if the restart command succeeds.
+3. **`kubectl get pods -w`**: This opens a live stream of your pod statuses. You will see:
+* **Pending/ContainerCreating**: The new version starting up.
+* **Running**: The new version is healthy.
+* **Terminating**: The old version being gracefully shut down.
+
+
+
+> **Pro Tip:** If the "AGE" column of the new pods says only a few seconds, you have successfully updated your production environment! Use `Ctrl + C` to exit the watch mode.
+
+---
+
+### Why this section is important for your setup
+
+In your current CI/CD flow:
+
+* **GitHub Actions** pushes a new image to Docker Hub.
+* **Flux CD** watches your `fleet-infra` repo for YAML changes.
+* **The Problem:** Since the YAML file still says `image: ...:latest`, Flux thinks nothing has changed.
+
+The commands above "kick" Kubernetes into checking for that new image manually.
+
+**Now that your README is complete, would you like to explore setting up "Flux Image Automation" so you can delete this "Force Update" section entirely and let the cluster handle it automatically?**
+
+---
+
 ### 📋 Status Check
 
 To see the health of your production deployment:
