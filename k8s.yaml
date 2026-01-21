@@ -19,7 +19,7 @@ spec:
       - name: chronos-canvas
         image: your-registry/chronos-canvas:latest
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         resources:
           limits:
             cpu: "500m"
@@ -38,5 +38,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 3000
   type: LoadBalancer
