@@ -19,6 +19,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const touchHoldTimer = useRef<NodeJS.Timeout | null>(null);
   const [isHolding, setIsHolding] = useState(false);
   const [isEditingText, setIsEditingText] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (obj.type === 'text' && isEditingText) {
@@ -133,22 +134,31 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const renderContent = () => {
     switch (obj.type) {
       case 'text':
-        return isEditingText ? (
+        return (
           <textarea
+            ref={textareaRef}
             className="w-full h-full bg-transparent p-2 resize-none outline-none font-medium text-gray-800 dark:text-gray-100"
             value={obj.content}
             onChange={(e) => onUpdate({ content: e.target.value })}
             onBlur={() => setIsEditingText(false)}
-            autoFocus
-            style={{ color: obj.color }}
+            readOnly={!isEditingText}
+            placeholder="Double-click to edit"
+            onFocus={(e) => {
+              // Preserve cursor position on focus
+              if (isEditingText) {
+                const target = e.target as HTMLTextAreaElement;
+                const cursorPos = target.selectionStart;
+                setTimeout(() => {
+                  target.setSelectionRange(cursorPos, cursorPos);
+                }, 0);
+              }
+            }}
+            style={{ 
+              color: obj.color,
+              cursor: isEditingText ? 'text' : 'move',
+              pointerEvents: isEditingText ? 'auto' : 'none'
+            }}
           />
-        ) : (
-          <div 
-            className="w-full h-full p-2 font-medium text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words"
-            style={{ color: obj.color }}
-          >
-            {obj.content || 'Double-click to edit'}
-          </div>
         );
       case 'image':
         return <img src={obj.content} alt="Asset" className="w-full h-full object-cover rounded-lg pointer-events-none" />;
