@@ -20,13 +20,19 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const [isHolding, setIsHolding] = useState(false);
   const [isEditingText, setIsEditingText] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastTapTime = useRef<number>(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Only process left click
+    if (e.button !== 0) {
+      return;
+    }
     if (obj.type === 'text' && isEditingText) {
       // Allow text interaction when in edit mode
       return;
     }
     e.stopPropagation();
+    e.preventDefault();
     onSelect();
     setIsDragging(true);
     setDragOffset({
@@ -56,6 +62,27 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     }
     e.stopPropagation();
     const touch = e.touches[0];
+    const currentTime = new Date().getTime();
+    const tapGap = currentTime - lastTapTime.current;
+    
+    // Check for double tap (within 300ms)
+    if (tapGap < 300 && tapGap > 0 && obj.type === 'text') {
+      // Double tap detected - enter edit mode
+      if (touchHoldTimer.current) {
+        clearTimeout(touchHoldTimer.current);
+      }
+      setIsEditingText(true);
+      onSelect();
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 0);
+      lastTapTime.current = 0; // Reset
+      return;
+    }
+    
+    lastTapTime.current = currentTime;
     onSelect();
     
     // Set up hold timer for 100ms
@@ -153,23 +180,35 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const renderContent = () => {
     switch (obj.type) {
       case 'text':
-        return (
+        return isEditingText ? (
           <textarea
             ref={textareaRef}
             className="w-full h-full bg-transparent p-2 resize-none outline-none font-medium text-gray-800 dark:text-gray-100"
             value={obj.content}
             onChange={(e) => onUpdate({ content: e.target.value })}
             onBlur={() => setIsEditingText(false)}
-            readOnly={!isEditingText}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
             placeholder="Double-click to edit"
+            autoFocus
             style={{ 
               color: obj.color,
-              cursor: isEditingText ? 'text' : 'move',
-              pointerEvents: isEditingText ? 'auto' : 'none',
+              cursor: 'text',
               fontSize: obj.fontSize ? `${obj.fontSize}px` : '14px',
               fontStyle: obj.fontStyle || 'normal'
             }}
           />
+        ) : (
+          <div 
+            className="w-full h-full p-2 font-medium text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words pointer-events-none"
+            style={{ 
+              color: obj.color,
+              fontSize: obj.fontSize ? `${obj.fontSize}px` : '14px',
+              fontStyle: obj.fontStyle || 'normal'
+            }}
+          >
+            {obj.content || 'Double-click to edit'}
+          </div>
         );
       case 'image':
         return <img src={obj.content} alt="Asset" className="w-full h-full object-cover rounded-lg pointer-events-none" />;
@@ -209,6 +248,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onDoubleClick={handleDoubleClick}
+      onContextMenu={(e) => e.preventDefault()}
     >
       {renderContent()}
       
