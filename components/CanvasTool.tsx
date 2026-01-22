@@ -54,9 +54,9 @@ const CanvasTool: React.FC = () => {
   }, [objects]);
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex flex-col md:flex-row">
       {/* Left Panel: Assets (20%) */}
-      <aside className="w-1/5 bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+      <aside className="w-full md:w-1/5 h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
         <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Assets</h3>
         
         <div className="grid grid-cols-2 gap-3">
@@ -131,7 +131,7 @@ const CanvasTool: React.FC = () => {
       {/* Right: Canvas (80%) */}
       <section 
         ref={canvasRef}
-        className="w-4/5 relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
+        className="w-full md:w-4/5 h-[60%] md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
         onMouseDown={() => setActiveId(null)}
       >
         <div className="absolute top-4 right-4 flex gap-2">
