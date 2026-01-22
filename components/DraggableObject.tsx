@@ -242,7 +242,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
         width: obj.width,
         height: obj.height,
         zIndex: active ? 1000 : obj.zIndex,
-        backgroundColor: obj.type === 'text' ? 'white' : 'transparent',
+        backgroundColor: obj.type === 'text' ? (obj.backgroundColor || 'white') : 'transparent',
         borderRadius: obj.type === 'image' || obj.type === 'color' ? '8px' : '0px',
       }}
       onMouseDown={handleMouseDown}

@@ -103,7 +103,23 @@ const CanvasTool: React.FC = () => {
             {COLORS.map((color) => (
               <button 
                 key={color}
-                onClick={() => setSelectedColor(color)}
+                onClick={() => {
+                  setSelectedColor(color);
+                  // If there's an active object, apply color based on type
+                  if (activeId) {
+                    const activeObj = objects.find(obj => obj.id === activeId);
+                    if (activeObj) {
+                      if (activeObj.type === 'text') {
+                        // Change text background color
+                        updateObject(activeId, { backgroundColor: color });
+                      } else if (activeObj.type === 'svg') {
+                        // Change SVG icon color
+                        updateObject(activeId, { color });
+                      }
+                      // Do nothing for image assets
+                    }
+                  }
+                }}
                 style={{ backgroundColor: color }}
                 className={`w-8 h-8 rounded-full border-2 transition-transform ${selectedColor === color ? 'border-gray-800 dark:border-gray-200 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
               />

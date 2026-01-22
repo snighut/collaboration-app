@@ -19,6 +19,7 @@ export interface CanvasObject {
   height: number;
   content: string; // text, url, or svg path
   color?: string;
+  backgroundColor?: string;
   zIndex: number;
   borderColor?: string;
   borderWidth?: number;
