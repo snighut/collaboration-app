@@ -254,10 +254,14 @@ const CanvasTool: React.FC = () => {
         className="w-full md:w-4/5 h-[60%] md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
         onMouseDown={() => setActiveId(null)}
       >
-        <div className="absolute top-4 right-4 flex gap-2">
+        <div className="absolute top-4 right-4 flex gap-2 z-[1001]">
            {activeId && (
               <button 
-                onClick={(e) => { e.stopPropagation(); removeObject(activeId); }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  removeObject(activeId); 
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors shadow-lg"
               >
                 <Trash2 size={20} />
