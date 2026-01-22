@@ -14,104 +14,104 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
   { 
     id: '2026', 
     year: 2026, 
-    title: 'Architecting Future Creativity', 
-    description: 'Projected: Leading the evolution of web-based creative tools with a focus on maintainability and global user experience.', 
-    category: 'Professional',
+    title: 'New Beginnings: The AI-Powered Era', 
+    description: 'Launching immutable homelab infrastructure (Talos Kubernetes on Ryzen) for rapid AI experimentation. Leveraging 8+ years of full-stack and system design expertise to build native AI-powered applications. Making this the most productive year through learn-by-doing approach with hands-on AI deployment.', 
+    category: 'Innovation',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2025', 
     year: 2025, 
-    title: 'Performance Optimization & Splunk', 
-    description: 'Implementing custom Splunk monitoring for sub-second page loads and proactive system health alerting.', 
-    category: 'Innovation',
+    title: 'Production Excellence & Reliability', 
+    description: 'Continued optimizing consumer products at scale. Implemented advanced monitoring with Splunk for sub-second performance and proactive alerting. Maintained 99.9% uptime for mission-critical services serving millions of users.', 
+    category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2024', 
     year: 2024, 
-    title: 'Reusable UI Component Library', 
-    description: 'Architected a modular UI system to accelerate development velocity and ensure brand consistency across web applications.', 
-    category: 'Professional',
+    title: 'Cost Optimization at Scale: $3M+ Savings', 
+    description: 'Spearheaded the hot-to-cold storage migration project, moving dormant user projects from Oracle to AWS S3. Achieved zero downtime while saving $3M+ annually. Designed automated archival pipelines with intelligent data lifecycle policies.', 
+    category: 'Innovation',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2023', 
     year: 2023, 
-    title: 'Massive "Hot-to-Cold" Migration', 
-    description: 'Led the migration of massive project datasets from Oracle to AWS S3, saving millions in DB costs with zero user downtime.', 
-    category: 'Innovation',
+    title: 'Owning Critical Infrastructure', 
+    description: 'Full ownership of MyProjects and Project Service — the backbone of user data management. Handled critical errors, performance bottlenecks, and data consistency challenges. Built monitoring dashboards and automated recovery systems for 24/7 reliability.', 
+    category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2022', 
     year: 2022, 
-    title: 'Consumer Product Leadership', 
-    description: 'Owned development of flagship Photo Books, Cards, and Canvas products serving 5M yearly active users.', 
-    category: 'Professional',
+    title: 'Engineering Velocity: 80% Time Reduction', 
+    description: 'Built multiple applications and services that reduced Shutterfly product creation time by 80%+. Optimized build pipelines and deployment processes. Enabled designers and engineers to iterate 5x faster through automation and tooling.', 
+    category: 'Innovation',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2021', 
     year: 2021, 
-    title: 'Senior Software Engineer (Consumer)', 
-    description: 'Transitioned to Consumer Apps. Focused on metrics-driven UX where sub-second performance is a mission-critical requirement.', 
+    title: 'Automation & Developer Productivity', 
+    description: 'Created utility tools for release candidate generation and CCPA delete request handling, saving hours of manual work weekly. Explored machine learning in spare time, building classification models and understanding AI fundamentals. Set foundation for future AI integration.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2020', 
     year: 2020, 
-    title: 'CI/CD Pipeline Architecture', 
-    description: 'Established modern DevOps practices, reducing manual deployment errors through automated software delivery lifecycles.', 
+    title: 'Mastering RESTful Architecture at Scale', 
+    description: 'Engineered high-performance RESTful services optimized for scalability. Focused obsessively on latency reduction, load testing, and canary deployments. Implemented monitoring for customer engagement metrics and sub-second response times.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2019', 
     year: 2019, 
-    title: 'Business Logic Orchestration', 
-    description: 'Used Apache Activiti and Camel to orchestrate complex high-volume order processing and data integration tasks.', 
+    title: 'Transition to Consumer-Facing Products', 
+    description: 'Moved from Enterprise to Consumer Engineering. Started building features used by 5M+ active users with pinpoint focus on error rates and user experience. Learned the art of balancing speed with quality in high-traffic consumer applications.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2018', 
     year: 2018, 
-    title: 'Asynchronous Workflows with Kafka', 
-    description: 'Optimized system scalability by implementing Kafka-based asynchronous workflows to handle massive enterprise data spikes.', 
+    title: 'Build Fast, Fail Fast Philosophy', 
+    description: 'Embraced rapid prototyping and experimentation. Mastered handling edge cases and anomalies in production systems. Built workflows for large-scale print ordering with Kafka-based async processing. Learned that failing fast leads to learning faster.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2017', 
     year: 2017, 
-    title: 'Fault-Tolerant Microservices', 
-    description: 'Built robust microservices with automated recovery protocols and integrated monitoring to ensure 24/7 high availability.', 
+    title: 'Learning from Mistakes & Building Resilience', 
+    description: 'Built fault-tolerant microservices with automated recovery and 24/7 monitoring. Learned invaluable lessons from production failures and system design mistakes. Developed deep understanding of distributed systems, circuit breakers, and graceful degradation.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
     id: '2016', 
     year: 2016, 
-    title: 'Software Engineer @ Shutterfly', 
-    description: 'Joined the Enterprise division. Engineered 0-to-1 onboarding infrastructure supporting millions in B2B print revenue.', 
+    title: 'First Full-Time Job: The Warm Beginning', 
+    description: 'Moved from breezy cold winters to one of the warmest cities in the USA. Joined Shutterfly Enterprise division, working on large-scale print customer onboarding. Built platforms from ground zero for big clients. Started as a "coding monkey" learning through hands-on experience.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
   { 
-    id: '2015-1', 
+    id: '2015', 
     year: 2015, 
-    title: 'R&D Summer Intern @ Novartis', 
-    description: 'Architected a scalable relational database and engineered a full-stack web application using C#, ASP.NET Web API, and AngularJS in the NYC Metro Area.', 
+    title: 'First Dollars & Life-Changing Experiences', 
+    description: 'Earned first paycheck through R&D Summer Internship at Novartis in NYC Metro Area. Built full-stack application with C#, ASP.NET Web API, and AngularJS. Explored places only seen on TV before. The second half became the most intense and rewarding period of life.', 
     category: 'Internship',
     logoUrl: LOGOS.novartis
   },
   { 
     id: '2014', 
     year: 2014, 
-    title: 'Graduate Student Programmer', 
-    description: 'Began Master in Computer Science at Syracuse University. Specialized in Design & Analysis of Algorithms, Software Modelling, and Operating Systems.', 
+    title: 'The Journey Begins: Masters at Syracuse', 
+    description: 'Started Computer Science Masters with glitter in eyes, staying away from home for the first time. Made lifelong friends while mastering algorithms and system design. Learned time management, discipline, humility, and pragmatic problem-solving from professors, lab projects, and peers. Foundation for everything that followed.', 
     category: 'Academic',
     logoUrl: LOGOS.syracuse
   }
