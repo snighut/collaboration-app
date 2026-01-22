@@ -56,20 +56,20 @@ const CanvasTool: React.FC = () => {
   return (
     <div className="h-full flex">
       {/* Left Panel: Assets (20%) */}
-      <aside className="w-1/5 bg-gray-50 border-r border-gray-200 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Assets</h3>
+      <aside className="w-1/5 bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Assets</h3>
         
         <div className="grid grid-cols-2 gap-3">
           <button 
             onClick={() => addObject('text')}
-            className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm"
+            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all shadow-sm text-gray-900 dark:text-gray-100"
           >
             <Type size={20} />
             <span className="text-[10px] mt-2 font-semibold">TEXT</span>
           </button>
           <button 
             onClick={() => addObject('image', 'https://picsum.photos/200/200')}
-            className="flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm"
+            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all shadow-sm text-gray-900 dark:text-gray-100"
           >
             <Image size={20} />
             <span className="text-[10px] mt-2 font-semibold">IMAGE</span>
@@ -77,7 +77,7 @@ const CanvasTool: React.FC = () => {
         </div>
 
         <div>
-          <h4 className="text-xs font-bold text-gray-500 mb-3 flex items-center gap-2">
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Star size={14} /> ICONS
           </h4>
           <div className="grid grid-cols-4 gap-2">
@@ -85,9 +85,9 @@ const CanvasTool: React.FC = () => {
               <button 
                 key={svg.name}
                 onClick={() => addObject('svg', svg.path)}
-                className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center"
+                className="p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 flex items-center justify-center"
               >
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-gray-600">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-gray-600 dark:text-gray-300">
                   <path d={svg.path} />
                 </svg>
               </button>
@@ -96,7 +96,7 @@ const CanvasTool: React.FC = () => {
         </div>
 
         <div>
-          <h4 className="text-xs font-bold text-gray-500 mb-3 flex items-center gap-2">
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Palette size={14} /> COLORS
           </h4>
           <div className="grid grid-cols-4 gap-2">
@@ -105,24 +105,24 @@ const CanvasTool: React.FC = () => {
                 key={color}
                 onClick={() => setSelectedColor(color)}
                 style={{ backgroundColor: color }}
-                className={`w-8 h-8 rounded-full border-2 transition-transform ${selectedColor === color ? 'border-gray-800 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
+                className={`w-8 h-8 rounded-full border-2 transition-transform ${selectedColor === color ? 'border-gray-800 dark:border-gray-200 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
               />
             ))}
           </div>
           <button 
             onClick={() => addObject('color', selectedColor)}
-            className="w-full mt-3 py-2 bg-gray-800 text-white text-[10px] font-bold rounded-lg hover:bg-black transition-colors"
+            className="w-full mt-3 py-2 bg-gray-800 dark:bg-slate-600 text-white text-[10px] font-bold rounded-lg hover:bg-black dark:hover:bg-slate-500 transition-colors"
           >
             ADD COLOR BLOCK
           </button>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-gray-200">
+        <div className="mt-auto pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-             <span className="text-xs text-gray-400">Layer Stack</span>
-             <Layers size={14} className="text-gray-400" />
+             <span className="text-xs text-gray-400 dark:text-gray-500">Layer Stack</span>
+             <Layers size={14} className="text-gray-400 dark:text-gray-500" />
           </div>
-          <p className="text-[10px] text-gray-400 italic">
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">
             Overlapping items below others will be grayed out automatically.
           </p>
         </div>
@@ -131,14 +131,14 @@ const CanvasTool: React.FC = () => {
       {/* Right: Canvas (80%) */}
       <section 
         ref={canvasRef}
-        className="w-4/5 relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
+        className="w-4/5 relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
         onMouseDown={() => setActiveId(null)}
       >
         <div className="absolute top-4 right-4 flex gap-2">
            {activeId && (
               <button 
                 onClick={(e) => { e.stopPropagation(); removeObject(activeId); }}
-                className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors shadow-lg"
+                className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors shadow-lg"
               >
                 <Trash2 size={20} />
               </button>
