@@ -40,6 +40,12 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       e.stopPropagation();
       setIsEditingText(true);
       onSelect();
+      // Focus the textarea after state update
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 0);
     }
   };
 
@@ -128,6 +134,19 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     };
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
+  // Auto-focus text objects when they become active and have default content
+  useEffect(() => {
+    if (obj.type === 'text' && active && obj.content === 'New Text Idea' && !isEditingText) {
+      setIsEditingText(true);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.select(); // Select all text for easy replacement
+        }
+      }, 0);
+    }
+  }, [obj.type, active, obj.content, isEditingText]);
+
   const baseClasses = `absolute cursor-move select-none transition-[filter,opacity] duration-300 ${active ? 'ring-2 ring-blue-500 shadow-xl z-[100]' : 'shadow-md'}`;
   const grayedClasses = isGrayedOut && !active ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100 grayscale-0 blur-0';
 
@@ -143,20 +162,12 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             onBlur={() => setIsEditingText(false)}
             readOnly={!isEditingText}
             placeholder="Double-click to edit"
-            onFocus={(e) => {
-              // Preserve cursor position on focus
-              if (isEditingText) {
-                const target = e.target as HTMLTextAreaElement;
-                const cursorPos = target.selectionStart;
-                setTimeout(() => {
-                  target.setSelectionRange(cursorPos, cursorPos);
-                }, 0);
-              }
-            }}
             style={{ 
               color: obj.color,
               cursor: isEditingText ? 'text' : 'move',
-              pointerEvents: isEditingText ? 'auto' : 'none'
+              pointerEvents: isEditingText ? 'auto' : 'none',
+              fontSize: obj.fontSize ? `${obj.fontSize}px` : '14px',
+              fontStyle: obj.fontStyle || 'normal'
             }}
           />
         );

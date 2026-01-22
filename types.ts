@@ -22,6 +22,9 @@ export interface CanvasObject {
   zIndex: number;
   borderColor?: string;
   borderWidth?: number;
+  cursorPosition?: number;
+  fontSize?: number;
+  fontStyle?: string;
 }
 
 export interface YearRange {
