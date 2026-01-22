@@ -39,7 +39,7 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     id: '2023', 
     year: 2023, 
     title: 'Stewarding Core Infrastructure', 
-    description: 'Assumed full ownership of the "MyProjects" ecosystem—the data backbone of the company. Transformed a legacy project service into a resilient, self-healing system by resolving long-standing consistency bottlenecks and building comprehensive health dashboards.', 
+    description: 'Assumed full ownership of the Project Service—the data backbone storing millions of users\' creative projects in digital form—and the MyProjects frontend that surfaces these creations. Transformed this legacy system into a resilient, self-healing architecture by resolving long-standing consistency bottlenecks and building comprehensive health dashboards for proactive monitoring.', 
     category: 'Professional',
     logoUrl: LOGOS.shutterfly
   },
