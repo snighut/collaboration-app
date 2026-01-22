@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { CanvasObject } from '../types';
 
 interface DraggableObjectProps {
@@ -16,6 +16,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const touchHoldTimer = useRef<NodeJS.Timeout | null>(null);
+  const [isHolding, setIsHolding] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -26,6 +28,46 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       y: e.clientY - obj.y,
     });
   };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    onSelect();
+    
+    // Set up hold timer for 100ms
+    touchHoldTimer.current = setTimeout(() => {
+      setIsHolding(true);
+      setIsDragging(true);
+      setDragOffset({
+        x: touch.clientX - obj.x,
+        y: touch.clientY - obj.y,
+      });
+    }, 100);
+  };
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging || !canvasRef.current || !isHolding) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    let newX = touch.clientX - dragOffset.x;
+    let newY = touch.clientY - dragOffset.y;
+
+    // Constrain within canvas
+    newX = Math.max(0, Math.min(newX, canvasRect.width - obj.width));
+    newY = Math.max(0, Math.min(newY, canvasRect.height - obj.height));
+
+    onUpdate({ x: newX, y: newY });
+  }, [isDragging, isHolding, dragOffset, obj, onUpdate, canvasRef]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchHoldTimer.current) {
+      clearTimeout(touchHoldTimer.current);
+    }
+    setIsDragging(false);
+    setIsHolding(false);
+  }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !canvasRef.current) return;
@@ -49,15 +91,24 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
     } else {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      if (touchHoldTimer.current) {
+        clearTimeout(touchHoldTimer.current);
+      }
     };
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   const baseClasses = `absolute cursor-move select-none transition-[filter,opacity] duration-300 ${active ? 'ring-2 ring-blue-500 shadow-xl z-[100]' : 'shadow-md'}`;
   const grayedClasses = isGrayedOut && !active ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100 grayscale-0 blur-0';
@@ -102,6 +153,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
         borderRadius: obj.type === 'image' || obj.type === 'color' ? '8px' : '0px',
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       {renderContent()}
       
