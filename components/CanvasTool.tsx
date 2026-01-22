@@ -2,7 +2,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { AssetType, CanvasObject } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
-import { Type, Image, Star, Palette, Trash2, Layers } from 'lucide-react';
+import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate } from 'lucide-react';
 import DraggableObject from './DraggableObject';
 
 const CanvasTool: React.FC = () => {
@@ -115,6 +115,66 @@ const CanvasTool: React.FC = () => {
           >
             ADD COLOR BLOCK
           </button>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            <LayoutTemplate size={14} /> LAYOUTS
+          </h4>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => {
+                if (!canvasRef.current) return;
+                
+                // Get canvas dimensions
+                const canvasRect = canvasRef.current.getBoundingClientRect();
+                const canvasHeight = canvasRect.height;
+                const canvasWidth = canvasRect.width;
+                
+                // Calculate dimensions for 80% vertical height with 8.5:11 aspect ratio
+                const height = canvasHeight * 0.8;
+                const width = height * (8.5 / 11);
+                
+                // Center the layout
+                const x = (canvasWidth - width) / 2;
+                const y = (canvasHeight - height) / 2;
+                
+                // Add a single page layout (8.5 x 11 rectangle)
+                const id = Math.random().toString(36).substr(2, 9);
+                const pageObj: CanvasObject = {
+                  id,
+                  type: 'color',
+                  x,
+                  y,
+                  width,
+                  height,
+                  content: '',
+                  color: 'transparent',
+                  borderColor: '#3B82F6',
+                  borderWidth: 3,
+                  zIndex: objects.length + 1,
+                };
+                setObjects([...objects, pageObj]);
+                setActiveId(id);
+              }}
+              className="flex items-center justify-center p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-all"
+              title="Single Page (8.5x11)"
+            >
+              <svg width="50" height="50" viewBox="0 0 50 50" className="w-full h-full">
+                <rect
+                  x="6"
+                  y="0"
+                  width="38"
+                  height="50"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-gray-400 dark:text-gray-500"
+                  rx="2"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="mt-auto pt-6 border-t border-gray-200 dark:border-slate-700">
