@@ -179,34 +179,71 @@ const CanvasTool: React.FC = () => {
 
         <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-             <span className="text-xs text-gray-400 dark:text-gray-500">Layer Stack</span>
+             <span className="text-xs text-gray-400 dark:text-gray-500">Everything below is for development environment</span>
              <Layers size={14} className="text-gray-400 dark:text-gray-500" />
           </div>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">
-            Overlapping items below others will be grayed out automatically.
-          </p>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-slate-700">
+        <div className="order-t border-gray-200 dark:border-slate-700">
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
             DEBUG PANEL
           </h4>
           <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
-{`{
-  "canvas": {
-    "objectCount": ${objects.length},
-    "activeObjectId": ${activeId ? `"${activeId}"` : 'null'}
-  },
-  "system": {
-    "platform": "web",
-    "darkMode": true,
-    "timestamp": "${new Date().toISOString()}"
-  },
-  "debug": {
-    "message": "Canvas state tracking",
-    "status": "active"
+{(() => {
+  const activeObj = objects.find(obj => obj.id === activeId);
+  if (!activeObj) {
+    return JSON.stringify({
+      canvas: {
+        objectCount: objects.length,
+        activeObject: null
+      },
+      message: "No object selected"
+    }, null, 2);
   }
-}`}
+  
+  const debugInfo: any = {
+    type: activeObj.type,
+    id: activeObj.id,
+    position: {
+      x: Math.round(activeObj.x),
+      y: Math.round(activeObj.y)
+    },
+    dimensions: {
+      width: Math.round(activeObj.width),
+      height: Math.round(activeObj.height)
+    },
+    zIndex: activeObj.zIndex
+  };
+  
+  if (activeObj.type === 'text') {
+    debugInfo.text = {
+      content: activeObj.content,
+      length: activeObj.content.length,
+      cursorPosition: activeObj.cursorPosition ?? 0,
+      fontSize: activeObj.fontSize || 14,
+      fontStyle: activeObj.fontStyle || 'normal',
+      color: activeObj.color
+    };
+  } else if (activeObj.type === 'image') {
+    debugInfo.image = {
+      url: activeObj.content,
+      dimensions: `${Math.round(activeObj.width)}x${Math.round(activeObj.height)}`
+    };
+  } else if (activeObj.type === 'svg') {
+    debugInfo.svg = {
+      pathLength: activeObj.content.length,
+      color: activeObj.color
+    };
+  } else if (activeObj.type === 'color') {
+    debugInfo.color = {
+      value: activeObj.color,
+      borderColor: activeObj.borderColor,
+      borderWidth: activeObj.borderWidth
+    };
+  }
+  
+  return JSON.stringify(debugInfo, null, 2);
+})()}
           </pre>
         </div>
       </aside>
