@@ -20,6 +20,8 @@ export interface CanvasObject {
   content: string; // text, url, or svg path
   color?: string;
   zIndex: number;
+  borderColor?: string;
+  borderWidth?: number;
 }
 
 export interface YearRange {

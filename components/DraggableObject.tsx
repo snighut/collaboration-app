@@ -18,8 +18,13 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const touchHoldTimer = useRef<NodeJS.Timeout | null>(null);
   const [isHolding, setIsHolding] = useState(false);
+  const [isEditingText, setIsEditingText] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (obj.type === 'text' && isEditingText) {
+      // Allow text interaction when in edit mode
+      return;
+    }
     e.stopPropagation();
     onSelect();
     setIsDragging(true);
@@ -29,7 +34,19 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     });
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (obj.type === 'text') {
+      e.stopPropagation();
+      setIsEditingText(true);
+      onSelect();
+    }
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (obj.type === 'text' && isEditingText) {
+      // Allow text interaction when in edit mode
+      return;
+    }
     e.stopPropagation();
     const touch = e.touches[0];
     onSelect();
@@ -116,14 +133,22 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const renderContent = () => {
     switch (obj.type) {
       case 'text':
-        return (
+        return isEditingText ? (
           <textarea
-            className="w-full h-full bg-transparent p-2 resize-none outline-none font-medium text-gray-800"
+            className="w-full h-full bg-transparent p-2 resize-none outline-none font-medium text-gray-800 dark:text-gray-100"
             value={obj.content}
             onChange={(e) => onUpdate({ content: e.target.value })}
-            onMouseDown={(e) => e.stopPropagation()}
+            onBlur={() => setIsEditingText(false)}
+            autoFocus
             style={{ color: obj.color }}
           />
+        ) : (
+          <div 
+            className="w-full h-full p-2 font-medium text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words"
+            style={{ color: obj.color }}
+          >
+            {obj.content || 'Double-click to edit'}
+          </div>
         );
       case 'image':
         return <img src={obj.content} alt="Asset" className="w-full h-full object-cover rounded-lg pointer-events-none" />;
@@ -134,7 +159,15 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
           </svg>
         );
       case 'color':
-        return <div className="w-full h-full rounded-lg" style={{ backgroundColor: obj.color }} />;
+        return (
+          <div 
+            className="w-full h-full rounded-lg" 
+            style={{ 
+              backgroundColor: obj.color,
+              border: obj.borderColor && obj.borderWidth ? `${obj.borderWidth}px solid ${obj.borderColor}` : 'none'
+            }} 
+          />
+        );
       default:
         return null;
     }
@@ -154,6 +187,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
+      onDoubleClick={handleDoubleClick}
     >
       {renderContent()}
       
