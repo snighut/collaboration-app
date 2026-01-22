@@ -15,7 +15,7 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     id: '2026', 
     year: 2026, 
     title: 'The AI-Native Frontier', 
-    description: 'Bridging the gap between infrastructure and intelligence. Architected an immutable "Production" homelab using Talos Kubernetes on Ryzen to host 24/7 AI agents and microservices. Currently leveraging 8+ years of systems expertise to develop "collaboration-app," focusing on native AI integration and high-performance local LLM testing via MLX.', 
+    description: 'I’m great at connecting the dots and integrating different parts of a project. Right now I am bridging the gap between infrastructure and intelligence. Architected an immutable "Production" homelab using Talos Kubernetes on Ryzen to host 24/7 AI agents and microservices. Currently leveraging 8+ years of systems expertise to develop "collaboration-app," focusing on native AI integration and high-performance local LLM testing via MLX.', 
     category: 'Innovation',
     logoUrl: LOGOS.shutterfly
   },
