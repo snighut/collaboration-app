@@ -177,7 +177,7 @@ const CanvasTool: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-gray-200 dark:border-slate-700">
+        <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
              <span className="text-xs text-gray-400 dark:text-gray-500">Layer Stack</span>
              <Layers size={14} className="text-gray-400 dark:text-gray-500" />
@@ -185,6 +185,29 @@ const CanvasTool: React.FC = () => {
           <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">
             Overlapping items below others will be grayed out automatically.
           </p>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-slate-700">
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
+            DEBUG PANEL
+          </h4>
+          <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
+{`{
+  "canvas": {
+    "objectCount": ${objects.length},
+    "activeObjectId": ${activeId ? `"${activeId}"` : 'null'}
+  },
+  "system": {
+    "platform": "web",
+    "darkMode": true,
+    "timestamp": "${new Date().toISOString()}"
+  },
+  "debug": {
+    "message": "Canvas state tracking",
+    "status": "active"
+  }
+}`}
+          </pre>
         </div>
       </aside>
 
