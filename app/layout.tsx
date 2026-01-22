@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ChronosCanvas',
+  title: 'Creative Labs',
   description: 'Collaborative timeline and canvas application',
 }
 
