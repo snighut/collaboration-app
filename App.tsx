@@ -85,7 +85,6 @@ const App: React.FC = () => {
             </button>
           </div>
           
-          <a href="#achievements" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Career Timeline</a>
           <button 
             onClick={scrollToCreativeHub}
             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors flex items-center gap-1"
