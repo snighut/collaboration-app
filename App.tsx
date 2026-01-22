@@ -117,8 +117,8 @@ const App: React.FC = () => {
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Creative Hub</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">Ready to brainstorm? Open the collaborative canvas to start placing assets and visualizing the future.</p>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Creative Text to Design App</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-8">Transform spoken ideas into visual diagrams instantly. Speak your thoughts, and our AI engine converts speech to text, identifies key concepts and their relationships, then automatically generates a clean visual representation using canvas assets. When assets don't exist for a concept, intelligent text placeholders fill the gaps. Smart spacing algorithms ensure minimal overlap, creating professional diagrams from your voice in seconds. Think out loud, visualize instantly.</p>
               <button 
                 onClick={() => setIsCanvasVisible(true)}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
