@@ -15,7 +15,7 @@ export async function sendChatMessage(messages: Message[]) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama2',
+        model: 'mistral-nemo:latest',
         messages: messages,
         stream: false,
       }),
