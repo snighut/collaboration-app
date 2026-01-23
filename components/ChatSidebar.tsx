@@ -95,12 +95,21 @@ const ChatSidebar: React.FC = () => {
           isExpanded ? 'w-full md:w-96' : 'w-0'
         }`}
       >
-        {/* Chat Header */}
+        {/* Chat Header - Fixed at top */}
         {isExpanded && (
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-              AI Assistant
-            </h2>
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                AI Assistant
+              </h2>
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                aria-label="Close AI chat"
+              >
+                <X size={20} />
+              </button>
+            </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Ask me anything about the portfolio or projects
             </p>
@@ -173,9 +182,9 @@ const ChatSidebar: React.FC = () => {
           </div>
         )}
 
-        {/* Input Area */}
+        {/* Input Area - Fixed at bottom */}
         {isExpanded && (
-          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-10">
+          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-10 shrink-0">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <textarea
                 ref={inputRef}
@@ -186,7 +195,11 @@ const ChatSidebar: React.FC = () => {
                 rows={2}
                 className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 disabled={isLoading}
-                style={{ fontSize: '16px' }}
+                style={{ 
+                  fontSize: '16px',
+                  WebkitTextSizeAdjust: '100%',
+                  touchAction: 'manipulation'
+                }}
               />
               <button
                 type="submit"
@@ -204,27 +217,20 @@ const ChatSidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="fixed top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group"
-        style={{
-          right: isExpanded ? 'calc(100vw - 100%)' : '0',
-          borderTopLeftRadius: '0.75rem',
-          borderBottomLeftRadius: '0.75rem',
-        }}
-        aria-label={isExpanded ? 'Collapse AI chat' : 'Open AI chat'}
-        title={isExpanded ? 'Close AI Assistant' : 'Open AI Assistant'}
-      >
-        {isExpanded ? (
-          <X size={24} className="group-hover:scale-110 transition-transform" />
-        ) : (
+      {/* Toggle Button - Only show when collapsed */}
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="fixed top-1/2 right-0 -translate-y-1/2 z-50 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
+          aria-label="Open AI chat"
+          title="Open AI Assistant"
+        >
           <div className="relative">
             <Bot size={24} className="group-hover:scale-110 transition-transform" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
           </div>
-        )}
-      </button>
+        </button>
+      )}
     </>
   );
 };
