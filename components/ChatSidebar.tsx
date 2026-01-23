@@ -92,7 +92,7 @@ const ChatSidebar: React.FC = () => {
       {/* Expandable Sidebar */}
       <div
         className={`fixed top-16 right-0 h-[calc(100vh-64px)] bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 shadow-2xl transition-all duration-300 ease-in-out z-40 flex flex-col ${
-          isExpanded ? 'w-96' : 'w-0'
+          isExpanded ? 'w-full md:w-96' : 'w-0'
         }`}
       >
         {/* Chat Header */}
@@ -175,32 +175,31 @@ const ChatSidebar: React.FC = () => {
 
         {/* Input Area */}
         {isExpanded && (
-          <div className="p-4 border-t border-gray-200 dark:border-slate-700">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-10">
+            <form onSubmit={handleSubmit} className="flex gap-2">
               <textarea
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a question..."
-                rows={3}
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                rows={2}
+                className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 disabled={isLoading}
+                style={{ fontSize: '16px' }}
               />
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-gray-400 dark:text-gray-500">
-                  Press Enter to send, Shift+Enter for new line
-                </p>
-                <button
-                  type="submit"
-                  disabled={!inputValue.trim() || isLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send size={16} />
-                  Send
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={!inputValue.trim() || isLoading}
+                className="flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end"
+              >
+                <Send size={18} />
+                <span className="hidden md:inline">Send</span>
+              </button>
             </form>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 hidden md:block">
+              Press Enter to send, Shift+Enter for new line
+            </p>
           </div>
         )}
       </div>
@@ -208,9 +207,12 @@ const ChatSidebar: React.FC = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`fixed top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 rounded-l-xl shadow-lg transition-all duration-300 group ${
-          isExpanded ? 'right-96' : 'right-0'
-        }`}
+        className="fixed top-1/2 -translate-y-1/2 z-50 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group"
+        style={{
+          right: isExpanded ? 'calc(100vw - 100%)' : '0',
+          borderTopLeftRadius: '0.75rem',
+          borderBottomLeftRadius: '0.75rem',
+        }}
         aria-label={isExpanded ? 'Collapse AI chat' : 'Open AI chat'}
         title={isExpanded ? 'Close AI Assistant' : 'Open AI Assistant'}
       >
