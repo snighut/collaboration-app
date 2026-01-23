@@ -104,6 +104,13 @@ const ChatSidebar: React.FC = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Ask me anything about the portfolio or projects
             </p>
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                This chat interface is powered by a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span>, running on my custom, AI-native infrastructure for low-latency, private inference. Have fun and tell me more about your experiences via{' '}
+                <a href="mailto:swapnil.nighut@example.com" className="underline hover:text-blue-600 dark:hover:text-blue-400">email</a> or{' '}
+                <a href="https://linkedin.com/in/swapnilnighut" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600 dark:hover:text-blue-400">LinkedIn</a>!
+              </p>
+            </div>
           </div>
         )}
 
