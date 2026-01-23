@@ -13,6 +13,22 @@ const App: React.FC = () => {
   const [isCanvasVisible, setIsCanvasVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
+  // Check URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    // Auto-scroll to Creative Hub section if parameter is present
+    if (params.get('scroll') === 'creative-hub') {
+      // Wait for content to load before scrolling
+      setTimeout(() => {
+        const element = document.getElementById('creative-hub-trigger');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, []);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
