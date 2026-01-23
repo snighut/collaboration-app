@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Timeline from './components/Timeline';
 import AchievementSection from './components/AchievementSection';
 import CanvasTool from './components/CanvasTool';
+import ChatSidebar from './components/ChatSidebar';
 import { YEARS, INITIAL_ACHIEVEMENTS } from './constants';
 import { Sparkles, X, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
 
@@ -248,6 +249,9 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Chat Sidebar */}
+      <ChatSidebar />
     </div>
   );
 };

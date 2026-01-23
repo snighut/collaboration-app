@@ -21,7 +21,7 @@ const CanvasTool: React.FC = () => {
       width: type === 'text' ? 200 : 100,
       height: type === 'text' ? 60 : 100,
       content: content || (type === 'text' ? 'New Text Idea' : ''),
-      color: type === 'color' ? content : selectedColor,
+      color: type === 'color' ? content : (type === 'text' ? '#000000' : selectedColor),
       zIndex: objects.length + 1,
     };
     setObjects([...objects, newObj]);
