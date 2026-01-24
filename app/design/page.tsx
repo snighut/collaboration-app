@@ -30,7 +30,7 @@ function DesignPageContent() {
         </button>
         <h2 className="ml-4 text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
-          {designId === 'new' ? 'New Collaboration Design Canvas' : 'Edit Design'}
+          {designId === 'new' ? 'New Visual Design' : 'Edit Design'}
         </h2>
       </div>
       <div className="flex-1 overflow-hidden">
