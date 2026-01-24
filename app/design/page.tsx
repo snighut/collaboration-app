@@ -22,11 +22,11 @@ export default function DesignPage() {
     <div className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900">
       <div className="h-16 border-b border-gray-200 dark:border-slate-700 flex items-center px-8 bg-white dark:bg-slate-800 shrink-0">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/mydesigns')}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           <ArrowLeft size={20} />
-          <span className="font-medium">Back</span>
+          <span className="font-medium">My Designs</span>
         </button>
         <h2 className="ml-4 text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
