@@ -3,29 +3,29 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Image as ImageIcon, Calendar, Clock, MoreVertical, Trash2, Edit, Eye, Grid3x3, List, Loader2 } from 'lucide-react';
-import { getProjects, deleteProject, type Project } from '../actions/projects';
+import { getDesigns, deleteDesign, type Design } from '../actions/designs';
 
-export default function MyProjects() {
+export default function MyDesigns() {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [designs, setDesigns] = useState<Design[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch projects on mount
+  // Fetch designs on mount
   useEffect(() => {
-    loadProjects();
+    loadDesigns();
   }, []);
 
-  const loadProjects = async () => {
+  const loadDesigns = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getProjects();
+      const response = await getDesigns();
       if (response.success) {
-        setProjects(response.data);
+        setDesigns(response.data);
       } else {
-        setError(response.error || 'Failed to load projects');
+        setError(response.error || 'Failed to load designs');
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -34,15 +34,15 @@ export default function MyProjects() {
     }
   };
 
-  const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+  const handleDeleteDesign = async (designId: string) => {
+    if (!confirm('Are you sure you want to delete this design?')) return;
     
-    const result = await deleteProject(projectId);
+    const result = await deleteDesign(designId);
     if (result.success) {
       // Optimistically remove from UI
-      setProjects(prev => prev.filter(p => p.id !== projectId));
+      setDesigns(prev => prev.filter(p => p.id !== designId));
     } else {
-      alert(result.error || 'Failed to delete project');
+      alert(result.error || 'Failed to delete design');
     }
   };
 
@@ -68,7 +68,7 @@ export default function MyProjects() {
             <span className="font-medium">Back</span>
           </button>
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight">
-            My Projects
+            My Designs
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -98,9 +98,12 @@ export default function MyProjects() {
             </button>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors">
+          <button 
+            onClick={() => router.push('/design?id=new')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors"
+          >
             <Plus size={18} />
-            <span>New Project</span>
+            <span>New Design</span>
           </button>
         </div>
       </header>
@@ -111,8 +114,8 @@ export default function MyProjects() {
           {/* Stats Bar */}
           <div className="mb-8 flex gap-4">
             <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-xl border border-gray-200 dark:border-slate-700">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Projects</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{projects.length}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Designs</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{designs.length}</p>
             </div>
           </div>
 
@@ -121,7 +124,7 @@ export default function MyProjects() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <Loader2 className="w-12 h-12 text-purple-600 dark:text-purple-400 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Loading projects...</p>
+                <p className="text-gray-600 dark:text-gray-400">Loading designs...</p>
               </div>
             </div>
           )}
@@ -144,17 +147,17 @@ export default function MyProjects() {
           {/* Projects Grid View */}
           {!isLoading && !error && viewMode === 'grid' && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
-              {projects.map((project) => (
+              {designs.map((design) => (
                 <div
-                  key={project.id}
+                  key={design.id}
                   className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
                 >
                 {/* Thumbnail */}
                 <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 relative overflow-hidden">
-                  {project.thumbnail ? (
+                  {design.thumbnail ? (
                     <img
-                      src={project.thumbnail}
-                      alt={project.name}
+                      src={design.thumbnail}
+                      alt={design.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
@@ -170,7 +173,7 @@ export default function MyProjects() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/project?id=${project.id}`);
+                        router.push(`/project?id=${design.id}`);
                       }}
                       className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                     >
@@ -179,7 +182,7 @@ export default function MyProjects() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteProject(project.id);
+                        handleDeleteDesign(design.id);
                       }}
                       className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                     >
@@ -191,31 +194,31 @@ export default function MyProjects() {
                 {/* Content */}
                 <div className="p-2 md:p-3">
                   <h3 className="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
-                    {project.name}
+                    {design.name}
                   </h3>
                   
                   <div className="space-y-0.5 text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Calendar size={10} />
-                      <span className="truncate">{formatDate(project.createdAt)}</span>
+                      <span className="truncate">{formatDate(design.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={10} />
-                      <span className="truncate">{formatDate(project.updatedAt)}</span>
+                      <span className="truncate">{formatDate(design.updatedAt)}</span>
                     </div>
                   </div>
 
                   {/* Tags/Status */}
-                  {project.data?.status && (
+                  {design.data?.status && (
                     <div className="mt-2">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                        project.data.status === 'active' 
+                        design.data.status === 'active' 
                           ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : project.data.status === 'in-progress'
+                          : design.data.status === 'in-progress'
                           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                           : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                       }`}>
-                        {project.data.status}
+                        {design.data.status}
                       </span>
                     </div>
                   )}
@@ -228,18 +231,18 @@ export default function MyProjects() {
           {/* Projects List View */}
           {!isLoading && !error && viewMode === 'list' && (
             <div className="space-y-2">
-              {projects.map((project) => (
+              {designs.map((design) => (
                 <div
-                  key={project.id}
+                  key={design.id}
                   className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md transition-all duration-300 group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     {/* Thumbnail */}
                     <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 overflow-hidden shrink-0">
-                      {project.thumbnail ? (
+                      {design.thumbnail ? (
                         <img
-                          src={project.thumbnail}
-                          alt={project.name}
+                          src={design.thumbnail}
+                          alt={design.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -252,26 +255,26 @@ export default function MyProjects() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
-                        {project.name}
+                        {design.name}
                       </h3>
                       <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                           <Calendar size={12} />
-                          <span>Created: {formatDate(project.createdAt)}</span>
+                          <span>Created: {formatDate(design.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock size={12} />
-                          <span>Updated: {formatDate(project.updatedAt)}</span>
+                          <span>Updated: {formatDate(design.updatedAt)}</span>
                         </div>
-                        {project.data?.status && (
+                        {design.data?.status && (
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                            project.data.status === 'active' 
+                            design.data.status === 'active' 
                               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : project.data.status === 'in-progress'
+                              : design.data.status === 'in-progress'
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                               : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                           }`}>
-                            {project.data.status}
+                            {design.data.status}
                           </span>
                         )}
                       </div>
@@ -285,7 +288,7 @@ export default function MyProjects() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/project?id=${project.id}`);
+                          router.push(`/project?id=${design.id}`);
                         }}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                       >
@@ -294,7 +297,7 @@ export default function MyProjects() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteProject(project.id);
+                          handleDeleteDesign(design.id);
                         }}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                       >
@@ -308,16 +311,16 @@ export default function MyProjects() {
           )}
 
           {/* Empty State */}
-          {!isLoading && !error && projects.length === 0 && (
+          {!isLoading && !error && designs.length === 0 && (
             <div className="text-center py-20">
               <div className="w-20 h-20 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Plus size={32} className="text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                No projects yet
+                No designs yet
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Create your first project to get started
+                Create your first design to get started
               </p>
               <button className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
                 <Plus size={18} />

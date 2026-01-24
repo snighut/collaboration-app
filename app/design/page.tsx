@@ -5,18 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import CanvasTool from '../../components/CanvasTool';
 
-export default function ProjectPage() {
+export default function DesignPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const projectId = searchParams.get('id');
+  const designId = searchParams.get('id');
 
-  // TODO: If projectId !== 'new', load existing project data and populate canvas
+  // TODO: If designId !== 'new', load existing design data and populate canvas
   useEffect(() => {
-    if (projectId && projectId !== 'new') {
-      // Load existing project data here when API is ready
-      console.log('Loading project:', projectId);
+    if (designId && designId !== 'new') {
+      // Load existing design data here when API is ready
+      console.log('Loading design:', designId);
     }
-  }, [projectId]);
+  }, [designId]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900">
@@ -30,7 +30,7 @@ export default function ProjectPage() {
         </button>
         <h2 className="ml-4 text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
-          {projectId === 'new' ? 'New Collaboration Canvas' : 'Edit Project'}
+          {designId === 'new' ? 'New Collaboration Design Canvas' : 'Edit Design'}
         </h2>
       </div>
       <div className="flex-1 overflow-hidden">

@@ -1,6 +1,6 @@
 'use server'
 
-export interface Project {
+export interface Design {
   id: string;
   name: string;
   thumbnail?: string;
@@ -9,15 +9,15 @@ export interface Project {
   data: any; // JSON context
 }
 
-interface ProjectsResponse {
+interface DesignsResponse {
   success: boolean;
-  data: Project[];
+  data: Design[];
   total: number;
   error?: string;
 }
 
 // Mock data - remove this when real API is ready
-const MOCK_PROJECTS: Project[] = [
+const MOCK_DESIGNS: Design[] = [
   {
     id: '1',
     name: 'E-Commerce Dashboard',
@@ -122,16 +122,16 @@ const MOCK_PROJECTS: Project[] = [
 ];
 
 /**
- * Fetch all projects from the API
+ * Fetch all designs from the API
  * 
  * TODO: Replace with real API call when deployed
- * Real endpoint: http://www.nighutlabs.com/api/v1/projects
+ * Real endpoint: http://www.nighutlabs.com/api/v1/designs
  */
-export async function getProjects(): Promise<ProjectsResponse> {
+export async function getDesigns(): Promise<DesignsResponse> {
   try {
     // TODO: Uncomment when real API is ready
     // const apiUrl = process.env.NIGHUTLABS_API_URL || 'http://www.nighutlabs.com/api/v1';
-    // const response = await fetch(`${apiUrl}/projects`, {
+    // const response = await fetch(`${apiUrl}/designs`, {
     //   method: 'GET',
     //   headers: {
     //     'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export async function getProjects(): Promise<ProjectsResponse> {
     // const data = await response.json();
     // return {
     //   success: true,
-    //   data: data.projects,
+    //   data: data.designs,
     //   total: data.total
     // };
 
@@ -158,32 +158,32 @@ export async function getProjects(): Promise<ProjectsResponse> {
     // MOCK: Return mock data
     return {
       success: true,
-      data: MOCK_PROJECTS,
-      total: MOCK_PROJECTS.length
+      data: MOCK_DESIGNS,
+      total: MOCK_DESIGNS.length
     };
 
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error('Error fetching designs:', error);
     return {
       success: false,
       data: [],
       total: 0,
-      error: error instanceof Error ? error.message : 'Failed to fetch projects'
+      error: error instanceof Error ? error.message : 'Failed to fetch designs'
     };
   }
 }
 
 /**
- * Delete a project by ID
+ * Delete a design by ID
  * 
  * TODO: Replace with real API call when deployed
- * Real endpoint: DELETE http://www.nighutlabs.com/api/v1/projects/{id}
+ * Real endpoint: DELETE http://www.nighutlabs.com/api/v1/designs/{id}
  */
-export async function deleteProject(projectId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteDesign(designId: string): Promise<{ success: boolean; error?: string }> {
   try {
     // TODO: Uncomment when real API is ready
     // const apiUrl = process.env.NIGHUTLABS_API_URL || 'http://www.nighutlabs.com/api/v1';
-    // const response = await fetch(`${apiUrl}/projects/${projectId}`, {
+    // const response = await fetch(`${apiUrl}/designs/${designId}`, {
     //   method: 'DELETE',
     //   headers: {
     //     'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export async function deleteProject(projectId: string): Promise<{ success: boole
     // });
     // 
     // if (!response.ok) {
-    //   throw new Error(`Failed to delete project: ${response.statusText}`);
+    //   throw new Error(`Failed to delete design: ${response.statusText}`);
     // }
     // 
     // return { success: true };
@@ -203,10 +203,10 @@ export async function deleteProject(projectId: string): Promise<{ success: boole
     return { success: true };
 
   } catch (error) {
-    console.error('Error deleting project:', error);
+    console.error('Error deleting design:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete project'
+      error: error instanceof Error ? error.message : 'Failed to delete design'
     };
   }
 }
