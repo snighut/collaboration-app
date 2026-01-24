@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import CanvasTool from '../../components/CanvasTool';
 
-export default function DesignPage() {
+function DesignPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const designId = searchParams.get('id');
@@ -37,5 +37,20 @@ export default function DesignPage() {
         <CanvasTool />
       </div>
     </div>
+  );
+}
+
+export default function DesignPage() {
+  return (
+    <Suspense fallback={
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-slate-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading design...</p>
+        </div>
+      </div>
+    }>
+      <DesignPageContent />
+    </Suspense>
   );
 }

@@ -135,7 +135,7 @@ export default function MyDesigns() {
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 max-w-md mx-auto">
                 <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
                 <button 
-                  onClick={loadProjects}
+                  onClick={loadDesigns}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
                 >
                   Try Again
