@@ -263,7 +263,7 @@ const App: React.FC = () => {
            className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
          >
            <Layout size={18} className="text-blue-400" />
-           Explore personal designs
+           Explore personal projects
          </button>
       </div>
 
