@@ -3,16 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Timeline from './components/Timeline';
 import AchievementSection from './components/AchievementSection';
-import CanvasTool from './components/CanvasTool';
 import ChatSidebar from './components/ChatSidebar';
 import { YEARS, INITIAL_ACHIEVEMENTS } from './constants';
-import { Sparkles, X, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
+import { Sparkles, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
 
 const App: React.FC = () => {
   const router = useRouter();
   // Initialize with 2026 as the top-most year
   const [activeYear, setActiveYear] = useState<number>(2026);
-  const [isCanvasVisible, setIsCanvasVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
   // Check URL params on mount
@@ -143,7 +141,7 @@ const App: React.FC = () => {
               </p>
               <div className="flex justify-center">
                 <button 
-                  onClick={() => setIsCanvasVisible(true)}
+                  onClick={() => router.push('/project?id=new')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
                   Launch Collaboration Tool
@@ -259,38 +257,15 @@ const App: React.FC = () => {
       </footer>
 
       {/* Floating Entry Button */}
-      {!isCanvasVisible && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 md:hidden lg:block">
-           <button 
-             onClick={scrollToCreativeHub}
-             className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
-           >
-             <Layout size={18} className="text-blue-400" />
-             Explore personal projects
-           </button>
-        </div>
-      )}
-
-      {/* Collaborative Canvas Modal */}
-      {isCanvasVisible && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900 animate-in slide-in-from-bottom duration-500">
-          <div className="h-16 border-b border-gray-200 dark:border-slate-700 flex items-center px-8 bg-white dark:bg-slate-800 shrink-0">
-            <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
-              Collaboration Canvas
-            </h2>
-            <button 
-              onClick={() => setIsCanvasVisible(false)}
-              className="ml-auto p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <CanvasTool />
-          </div>
-        </div>
-      )}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 md:hidden lg:block">
+         <button 
+           onClick={scrollToCreativeHub}
+           className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
+         >
+           <Layout size={18} className="text-blue-400" />
+           Explore personal projects
+         </button>
+      </div>
 
       {/* Chat Sidebar */}
       <ChatSidebar />
