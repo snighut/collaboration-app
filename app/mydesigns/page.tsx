@@ -65,7 +65,7 @@ export default function MyDesigns() {
             className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             <ArrowLeft size={20} />
-            <span className="font-medium">Back</span>
+            <span className="font-medium">Home</span>
           </button>
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight">
             My Designs
@@ -173,7 +173,7 @@ export default function MyDesigns() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/project?id=${design.id}`);
+                        router.push(`/design?id=${design.id}`);
                       }}
                       className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                     >
@@ -288,7 +288,7 @@ export default function MyDesigns() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/project?id=${design.id}`);
+                          router.push(`/design?id=${design.id}`);
                         }}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                       >

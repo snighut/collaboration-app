@@ -20,104 +20,107 @@ interface DesignsResponse {
 const MOCK_DESIGNS: Design[] = [
   {
     id: '1',
-    name: 'E-Commerce Dashboard',
-    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
+    name: 'User Auth Flow → PostgreSQL',
+    thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop',
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-20T15:30:00Z',
-    data: { type: 'dashboard', status: 'active' }
+    data: { type: 'data-flow', status: 'active' }
   },
   {
     id: '2',
-    name: 'Mobile App Design',
-    thumbnail: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop',
+    name: 'Microservices Architecture',
+    thumbnail: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=300&fit=crop',
     createdAt: '2024-01-10T08:00:00Z',
     updatedAt: '2024-01-22T12:00:00Z',
-    data: { type: 'design', status: 'in-progress' }
+    data: { type: 'architecture', status: 'in-progress' }
   },
   {
     id: '3',
-    name: 'Marketing Website',
+    name: 'API Gateway Design',
+    thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop',
     createdAt: '2024-01-05T09:00:00Z',
     updatedAt: '2024-01-18T14:00:00Z',
-    data: { type: 'website', status: 'completed' }
+    data: { type: 'system-design', status: 'completed' }
   },
   {
     id: '4',
-    name: 'Social Media Campaign',
-    thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop',
+    name: 'Nginx → Node.js → Redis',
+    thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
     createdAt: '2024-01-12T11:00:00Z',
     updatedAt: '2024-01-19T16:00:00Z',
-    data: { type: 'marketing', status: 'active' }
+    data: { type: 'infrastructure', status: 'active' }
   },
   {
     id: '5',
-    name: 'API Documentation',
-    thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop',
+    name: 'Event-Driven Pipeline',
+    thumbnail: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop',
     createdAt: '2024-01-08T07:00:00Z',
     updatedAt: '2024-01-21T13:00:00Z',
-    data: { type: 'documentation', status: 'in-progress' }
+    data: { type: 'data-pipeline', status: 'in-progress' }
   },
   {
     id: '6',
-    name: 'Brand Identity',
-    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
+    name: 'Database Cluster Topology',
+    thumbnail: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=400&h=300&fit=crop',
     createdAt: '2024-01-03T10:00:00Z',
     updatedAt: '2024-01-17T11:00:00Z',
-    data: { type: 'design', status: 'completed' }
+    data: { type: 'database', status: 'completed' }
   },
   {
     id: '7',
-    name: 'Analytics Platform',
-    thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop',
+    name: 'Analytics Dashboard Schema',
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
     createdAt: '2024-01-14T09:00:00Z',
     updatedAt: '2024-01-23T10:00:00Z',
-    data: { type: 'dashboard', status: 'active' }
+    data: { type: 'data-model', status: 'active' }
   },
   {
     id: '8',
-    name: 'User Research',
+    name: 'Kubernetes Deployment',
+    thumbnail: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=400&h=300&fit=crop',
     createdAt: '2024-01-06T08:00:00Z',
     updatedAt: '2024-01-16T12:00:00Z',
-    data: { type: 'research', status: 'completed' }
+    data: { type: 'devops', status: 'completed' }
   },
   {
     id: '9',
-    name: 'Content Management System',
-    thumbnail: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=400&h=300&fit=crop',
+    name: 'CI/CD Pipeline Flow',
+    thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop',
     createdAt: '2024-01-11T10:00:00Z',
     updatedAt: '2024-01-24T09:00:00Z',
-    data: { type: 'development', status: 'in-progress' }
+    data: { type: 'devops', status: 'in-progress' }
   },
   {
     id: '10',
-    name: 'Payment Integration',
-    thumbnail: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=300&fit=crop',
+    name: 'Payment Gateway Integration',
+    thumbnail: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300&fit=crop',
     createdAt: '2024-01-09T11:00:00Z',
     updatedAt: '2024-01-22T14:00:00Z',
-    data: { type: 'development', status: 'active' }
+    data: { type: 'integration', status: 'active' }
   },
   {
     id: '11',
-    name: 'Video Production',
-    thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&h=300&fit=crop',
+    name: 'Message Queue Architecture',
+    thumbnail: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&h=300&fit=crop',
     createdAt: '2024-01-07T12:00:00Z',
     updatedAt: '2024-01-20T16:00:00Z',
-    data: { type: 'media', status: 'in-progress' }
+    data: { type: 'messaging', status: 'in-progress' }
   },
   {
     id: '12',
-    name: 'Customer Portal',
-    thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop',
+    name: 'Load Balancer Setup',
+    thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop',
     createdAt: '2024-01-13T13:00:00Z',
     updatedAt: '2024-01-23T15:00:00Z',
-    data: { type: 'development', status: 'active' }
+    data: { type: 'infrastructure', status: 'active' }
   },
   {
     id: '13',
-    name: 'Email Templates',
+    name: 'Service Mesh Diagram',
+    thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
     createdAt: '2024-01-04T14:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z',
-    data: { type: 'design', status: 'completed' }
+    data: { type: 'networking', status: 'completed' }
   },
 ];
 
