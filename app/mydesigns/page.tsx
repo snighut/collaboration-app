@@ -98,9 +98,19 @@ export default function MyDesigns() {
             </button>
           </div>
 
+          {/* Mobile: Icon only */}
           <button 
             onClick={() => router.push('/design?id=new')}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors"
+            className="md:hidden p-2.5 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white rounded-lg transition-colors"
+            title="New Design"
+          >
+            <Plus size={20} />
+          </button>
+
+          {/* Desktop: Icon + Text */}
+          <button 
+            onClick={() => router.push('/design?id=new')}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors"
           >
             <Plus size={18} />
             <span>New Design</span>
