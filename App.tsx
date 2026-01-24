@@ -129,19 +129,42 @@ const App: React.FC = () => {
           ))}
           
           {/* Bottom Trigger Section */}
-          <div id="creative-hub-trigger" className="flex flex-col items-center justify-center py-20 border-t border-gray-100 dark:border-slate-800 scroll-mt-24">
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 text-center max-w-md">
+          <div id="creative-hub-trigger" className="flex flex-col items-center justify-center py-20 border-t border-gray-100 dark:border-slate-800 scroll-mt-24 gap-8">
+            {/* Creative Text to Design App */}
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Creative Text to Design App</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">Transform spoken ideas into visual diagrams instantly. Speak your thoughts, and our AI engine converts speech to text, identifies key concepts and their relationships, then automatically generates a clean visual representation using canvas assets. When assets don't exist for a concept, intelligent text placeholders fill the gaps. Smart spacing algorithms ensure minimal overlap, creating professional diagrams from your voice in seconds. Think out loud, visualize instantly.</p>
-              <button 
-                onClick={() => setIsCanvasVisible(true)}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
-              >
-                Launch Collaboration Tool
-              </button>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Text to Design App</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
+                Transform spoken ideas into visual diagrams instantly. Speak your thoughts, and our AI engine converts speech to text, identifies key concepts and their relationships, then automatically generates a clean visual representation using canvas assets. When assets don't exist for a concept, intelligent text placeholders fill the gaps. Smart spacing algorithms ensure minimal overlap, creating professional diagrams from your voice in seconds. Think out loud, visualize instantly.
+              </p>
+              <div className="flex justify-center">
+                <button 
+                  onClick={() => setIsCanvasVisible(true)}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
+                >
+                  Launch Collaboration Tool
+                </button>
+              </div>
+            </div>
+
+            {/* My Projects */}
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
+              <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Layout className="text-purple-600 dark:text-purple-400" size={32} />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">My Collab Projects</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
+                Read, delete, and update your projects from this place. Manage all your creative work in one centralized hub with full control over your project lifecycle.
+              </p>
+              <div className="flex justify-center">
+                <button 
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
+                >
+                  Manage Projects
+                </button>
+              </div>
             </div>
           </div>
         </div>
