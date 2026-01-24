@@ -21,6 +21,11 @@ docker buildx build --platform linux/amd64 -t sbnighut/collaboration-app:${NEW_T
 FLEET_INFRA_PATH="${FLEET_INFRA_PATH:-/Users/swapnilnighut/git/fleet-infra}"
 YAML_FILE="${FLEET_INFRA_PATH}/clusters/production/collaboration-app/app.yaml"
 
+# Pull latest changes first
+echo -e "${BLUE}📥 Pulling latest changes from fleet-infra...${NC}"
+cd "${FLEET_INFRA_PATH}"
+git pull --rebase origin main
+
 echo -e "${BLUE}📝 Updating ${YAML_FILE}...${NC}"
 
 # Backup the original file
@@ -32,12 +37,6 @@ sed -i '' "s|image: docker.io/sbnighut/collaboration-app:.*|image: docker.io/sbn
 echo -e "${GREEN}✅ Updated image tag to ${NEW_TAG}${NC}"
 
 # Step 3: Commit and push changes to fleet-infra
-cd "${FLEET_INFRA_PATH}"
-
-# Pull latest changes first
-echo -e "${BLUE}📥 Pulling latest changes from fleet-infra...${NC}"
-git pull --rebase origin main
-
 git add "${YAML_FILE}"
 git commit -m "Deploy collaboration-app:${NEW_TAG}"
 git push origin main
