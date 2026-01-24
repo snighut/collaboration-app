@@ -167,7 +167,13 @@ export default function MyProjects() {
                     <button className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors">
                       <Eye size={14} className="text-gray-900" />
                     </button>
-                    <button className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/project?id=${project.id}`);
+                      }}
+                      className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
+                    >
                       <Edit size={14} className="text-gray-900" />
                     </button>
                     <button 
@@ -276,7 +282,13 @@ export default function MyProjects() {
                       <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
                         <Eye size={16} className="text-gray-600 dark:text-gray-400" />
                       </button>
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/project?id=${project.id}`);
+                        }}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      >
                         <Edit size={16} className="text-gray-600 dark:text-gray-400" />
                       </button>
                       <button 
