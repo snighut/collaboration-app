@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Timeline from './components/Timeline';
 import AchievementSection from './components/AchievementSection';
 import CanvasTool from './components/CanvasTool';
@@ -8,6 +9,7 @@ import { YEARS, INITIAL_ACHIEVEMENTS } from './constants';
 import { Sparkles, X, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
 
 const App: React.FC = () => {
+  const router = useRouter();
   // Initialize with 2026 as the top-most year
   const [activeYear, setActiveYear] = useState<number>(2026);
   const [isCanvasVisible, setIsCanvasVisible] = useState<boolean>(false);
@@ -160,6 +162,7 @@ const App: React.FC = () => {
               </p>
               <div className="flex justify-center">
                 <button 
+                  onClick={() => router.push('/myprojects')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
                   Manage Projects
