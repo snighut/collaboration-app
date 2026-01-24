@@ -130,40 +130,40 @@ const App: React.FC = () => {
           
           {/* Bottom Trigger Section */}
           <div id="creative-hub-trigger" className="flex flex-col items-center justify-center py-20 border-t border-gray-100 dark:border-slate-800 scroll-mt-24 gap-8">
-            {/* Creative Text to Design App */}
+            {/* Creative Voice to Design App */}
             <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Text to Design App</h3>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Voice to Visual Design App</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
                 Transform spoken ideas into visual diagrams instantly. Speak your thoughts, and our AI engine converts speech to text, identifies key concepts and their relationships, then automatically generates a clean visual representation using canvas assets. When assets don't exist for a concept, intelligent text placeholders fill the gaps. Smart spacing algorithms ensure minimal overlap, creating professional diagrams from your voice in seconds. Think out loud, visualize instantly.
               </p>
               <div className="flex justify-center">
                 <button 
-                  onClick={() => router.push('/project?id=new')}
+                  onClick={() => router.push('/design?id=new')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
-                  Launch Collaboration Tool
+                  Start Designing by Voice
                 </button>
               </div>
             </div>
 
-            {/* My Projects */}
+            {/* My Designs */}
             <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
               <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Layout className="text-purple-600 dark:text-purple-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">My Collab Projects</h3>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Designs</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
-                Read, delete, and update your projects from this place. Manage all your creative work in one centralized hub with full control over your project lifecycle.
+                Read, delete, and update your designs from this place. Manage all your creative work in one centralized hub with full control over your design lifecycle.
               </p>
               <div className="flex justify-center">
                 <button 
-                  onClick={() => router.push('/myprojects')}
+                  onClick={() => router.push('/mydesigns')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
-                  Manage Projects
+                  My Designs
                 </button>
               </div>
             </div>
@@ -263,7 +263,7 @@ const App: React.FC = () => {
            className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
          >
            <Layout size={18} className="text-blue-400" />
-           Explore personal projects
+           Explore personal designs
          </button>
       </div>
 
