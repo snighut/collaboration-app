@@ -33,6 +33,12 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     }
     e.stopPropagation();
     e.preventDefault();
+    
+    // If clicking on an already active text object, allow drag instead of entering edit mode
+    if (obj.type === 'text' && active) {
+      setIsEditingText(false);
+    }
+    
     onSelect();
     setIsDragging(true);
     setDragOffset({
@@ -162,8 +168,10 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   // Auto-focus text objects when they become active and have default content
+  // But only if they were just created (not already selected)
+  const prevActive = useRef(active);
   useEffect(() => {
-    if (obj.type === 'text' && active && obj.content === 'New Text Idea' && !isEditingText) {
+    if (obj.type === 'text' && active && !prevActive.current && obj.content === 'New Text Idea' && !isEditingText) {
       setIsEditingText(true);
       setTimeout(() => {
         if (textareaRef.current) {
@@ -172,6 +180,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
         }
       }, 0);
     }
+    prevActive.current = active;
   }, [obj.type, active, obj.content, isEditingText]);
 
   const baseClasses = `absolute cursor-move select-none transition-[filter,opacity] duration-300 ${active ? 'ring-2 ring-blue-500 shadow-xl z-[100]' : 'shadow-md'}`;
