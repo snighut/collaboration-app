@@ -136,8 +136,8 @@ const App: React.FC = () => {
                 <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Voice to Visual Design App</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
-                Transform spoken ideas into visual diagrams instantly. Speak your thoughts, and our AI engine converts speech to text, identifies key concepts and their relationships, then automatically generates a clean visual representation using canvas assets. When assets don't exist for a concept, intelligent text placeholders fill the gaps. Smart spacing algorithms ensure minimal overlap, creating professional diagrams from your voice in seconds. Think out loud, visualize instantly.
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
+                Turn speech into visual diagrams instantly. Our AI converts your voice to text, maps relationships, and auto-generates clean layouts. It uses canvas assets or smart placeholders with optimized spacing for a professional look. Think it, see it.
               </p>
               <div className="flex justify-center">
                 <button 
@@ -155,7 +155,7 @@ const App: React.FC = () => {
                 <Layout className="text-purple-600 dark:text-purple-400" size={32} />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Designs</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-left">
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
                 Read, delete, and update your designs from this place. Manage all your creative work in one centralized hub with full control over your design lifecycle.
               </p>
               <div className="flex justify-center">
