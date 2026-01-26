@@ -7,7 +7,7 @@ import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, Arro
 
 import DraggableObject from './DraggableObject';
 import { Save } from 'lucide-react';
-import { saveDesign } from '../app/actions/design-service';
+import { saveDesign } from '../app/actions/designs';
 
 const CanvasTool: React.FC = () => {
   const [resetInteraction, setResetInteraction] = useState(0);
@@ -18,7 +18,6 @@ const CanvasTool: React.FC = () => {
     const handleSave = async () => {
       setSaving(true);
       setSaveSuccess(false);
-      console.log('objects to save:', objects);
       const payload = {
         name: 'Untitled Design',
         data: {
