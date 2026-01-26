@@ -4,10 +4,38 @@ import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
 import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle } from 'lucide-react';
+
 import DraggableObject from './DraggableObject';
+import { Save } from 'lucide-react';
+import { saveDesign } from '../app/actions/design-service';
 
 const CanvasTool: React.FC = () => {
-    const [resetInteraction, setResetInteraction] = useState(0);
+  const [resetInteraction, setResetInteraction] = useState(0);
+  // Save state for feedback
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+    // Save handler
+    const handleSave = async () => {
+      setSaving(true);
+      setSaveSuccess(false);
+      console.log('objects to save:', objects);
+      const payload = {
+        name: 'Untitled Design',
+        data: {
+          objects,
+          connections,
+        },
+      };
+      try {
+        const result = await saveDesign(payload);
+        setSaving(false);
+        setSaveSuccess(result.success);
+        setTimeout(() => setSaveSuccess(false), 1200);
+      } catch (e) {
+        setSaving(false);
+        setSaveSuccess(false);
+      }
+    };
   const [objects, setObjects] = useState<CanvasObject[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
@@ -317,6 +345,33 @@ const CanvasTool: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col md:flex-row">
+      {/* Save icon for mobile/iPhone view */}
+      <div className="fixed top-3 right-3 z-[2000] flex items-center md:hidden">
+        <button
+          onClick={handleSave}
+          className="p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors"
+          disabled={saving}
+          aria-label="Save Design"
+        >
+          {saving ? (
+            <svg className="animate-spin w-6 h-6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="4" fill="none"/></svg>
+          ) : saveSuccess ? (
+            <span className="text-xs font-bold">Saved!</span>
+          ) : (
+            <Save size={24} />
+          )}
+        </button>
+      </div>
+      {/* Save button for desktop view */}
+      <div className="fixed top-3 right-3 z-[2000] hidden md:flex items-center">
+        <button
+          onClick={handleSave}
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white font-bold shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors text-base"
+          disabled={saving}
+        >
+          {saving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save'}
+        </button>
+      </div>
       {/* Left Panel: Assets (20%) */}
       <aside className="w-full md:w-1/5 h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
         <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Assets</h3>
