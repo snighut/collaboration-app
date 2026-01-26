@@ -99,21 +99,21 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     }
   };
 
-  // Handle double-tap for connection on mobile devices
-  const lastTapTime = useRef(0);
-  const handleConnectionDoubleTap = () => {
-    if (obj.type === 'text') {
-      // For text objects, use normal double-tap for editing
-      handleTextDblClick();
-      return;
+  // Handle tap-and-hold for connection on mobile devices
+  const holdTimer = useRef<NodeJS.Timeout | null>(null);
+  const isHoldingForConnection = useRef(false);
+  
+  const handleTouchStart = (e: any) => {
+    // Clear any existing timer
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
     }
-
-    // For other objects, initiate connection drag from nearest anchor to touch point
-    const currentTime = Date.now();
-    const tapGap = currentTime - lastTapTime.current;
     
-    if (tapGap < 300 && tapGap > 0) {
-      // Double tap detected
+    // Start 1-second hold timer
+    holdTimer.current = setTimeout(() => {
+      isHoldingForConnection.current = true;
+      
+      // Start connection drag from nearest anchor
       if (onAnchorDragStart && groupRef.current) {
         const stage = groupRef.current.getStage();
         if (stage) {
@@ -146,11 +146,25 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
           }
         }
       }
-      lastTapTime.current = 0; // Reset to prevent triple-tap
-    } else {
-      lastTapTime.current = currentTime;
-    }
+    }, 1000); // 1 second hold
   };
+  
+  const handleTouchEnd = () => {
+    // Clear the hold timer if touch ends before 1 second
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+    }
+    isHoldingForConnection.current = false;
+  };
+  
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (holdTimer.current) {
+        clearTimeout(holdTimer.current);
+      }
+    };
+  }, []);
 
   // Auto-focus new text objects
   const prevActive = useRef(active);
@@ -395,13 +409,12 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       ref={groupRef}
       x={obj.x}
       y={obj.y}
-      draggable
+      draggable={!isHoldingForConnection.current}
       onDragEnd={handleDragEnd}
       onClick={onSelect}
-      onTap={(e) => {
-        onSelect();
-        handleConnectionDoubleTap();
-      }}
+      onTap={onSelect}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       onDblClick={handleTextDblClick}
       onDblTap={handleTextDblClick}
     >
