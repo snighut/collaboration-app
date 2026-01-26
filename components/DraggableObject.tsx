@@ -99,6 +99,59 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     }
   };
 
+  // Handle double-tap for connection on mobile devices
+  const lastTapTime = useRef(0);
+  const handleConnectionDoubleTap = () => {
+    if (obj.type === 'text') {
+      // For text objects, use normal double-tap for editing
+      handleTextDblClick();
+      return;
+    }
+
+    // For other objects, initiate connection drag from nearest anchor to touch point
+    const currentTime = Date.now();
+    const tapGap = currentTime - lastTapTime.current;
+    
+    if (tapGap < 300 && tapGap > 0) {
+      // Double tap detected
+      if (onAnchorDragStart && groupRef.current) {
+        const stage = groupRef.current.getStage();
+        if (stage) {
+          const pointerPos = stage.getPointerPosition();
+          if (pointerPos) {
+            // Find nearest anchor to the tap position
+            const anchors = getAnchorPoints();
+            const absPos = groupRef.current.absolutePosition();
+            
+            let nearestAnchor = anchors[0];
+            let minDistance = Infinity;
+            
+            anchors.forEach(anchor => {
+              const anchorAbsX = absPos.x + anchor.x;
+              const anchorAbsY = absPos.y + anchor.y;
+              const distance = Math.sqrt(
+                Math.pow(pointerPos.x - anchorAbsX, 2) + 
+                Math.pow(pointerPos.y - anchorAbsY, 2)
+              );
+              if (distance < minDistance) {
+                minDistance = distance;
+                nearestAnchor = anchor;
+              }
+            });
+            
+            // Start connection drag from nearest anchor
+            const anchorAbsX = absPos.x + nearestAnchor.x;
+            const anchorAbsY = absPos.y + nearestAnchor.y;
+            onAnchorDragStart(nearestAnchor.position, anchorAbsX, anchorAbsY);
+          }
+        }
+      }
+      lastTapTime.current = 0; // Reset to prevent triple-tap
+    } else {
+      lastTapTime.current = currentTime;
+    }
+  };
+
   // Auto-focus new text objects
   const prevActive = useRef(active);
   useEffect(() => {
@@ -345,7 +398,10 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       draggable
       onDragEnd={handleDragEnd}
       onClick={onSelect}
-      onTap={onSelect}
+      onTap={(e) => {
+        onSelect();
+        handleConnectionDoubleTap();
+      }}
       onDblClick={handleTextDblClick}
       onDblTap={handleTextDblClick}
     >
