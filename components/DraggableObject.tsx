@@ -101,7 +101,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
 
   // Handle tap-and-hold for connection on mobile devices
   const holdTimer = useRef<NodeJS.Timeout | null>(null);
-  const isHoldingForConnection = useRef(false);
+  const [isHoldingForConnection, setIsHoldingForConnection] = useState(false);
   
   const handleTouchStart = (e: any) => {
     // Clear any existing timer
@@ -111,7 +111,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     
     // Start 1-second hold timer
     holdTimer.current = setTimeout(() => {
-      isHoldingForConnection.current = true;
+      setIsHoldingForConnection(true);
       
       // Start connection drag from nearest anchor
       if (onAnchorDragStart && groupRef.current) {
@@ -154,7 +154,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     if (holdTimer.current) {
       clearTimeout(holdTimer.current);
     }
-    isHoldingForConnection.current = false;
+    setIsHoldingForConnection(false);
   };
   
   // Cleanup timer on unmount
@@ -409,7 +409,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       ref={groupRef}
       x={obj.x}
       y={obj.y}
-      draggable={!isHoldingForConnection.current}
+      draggable={!isHoldingForConnection}
       onDragEnd={handleDragEnd}
       onClick={onSelect}
       onTap={onSelect}
