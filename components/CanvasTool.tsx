@@ -91,6 +91,8 @@ const CanvasTool: React.FC = () => {
 
   const removeObject = (id: string) => {
     setObjects(prev => prev.filter(obj => obj.id !== id));
+    // Remove all connections involving this object
+    setConnections(prev => prev.filter(conn => conn.from !== id && conn.to !== id));
     setActiveId(null);
   };
 
