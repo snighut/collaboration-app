@@ -7,6 +7,7 @@ import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, Arro
 import DraggableObject from './DraggableObject';
 
 const CanvasTool: React.FC = () => {
+    const [resetInteraction, setResetInteraction] = useState(0);
   const [objects, setObjects] = useState<CanvasObject[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
@@ -216,6 +217,7 @@ const CanvasTool: React.FC = () => {
       setIsDraggingConnection(false);
       setConnectionDragStart(null);
       setConnectionDragEnd(null);
+      setResetInteraction((v) => v + 1);
       return;
     }
 
@@ -225,6 +227,7 @@ const CanvasTool: React.FC = () => {
       setIsDraggingConnection(false);
       setConnectionDragStart(null);
       setConnectionDragEnd(null);
+      setResetInteraction((v) => v + 1);
       return;
     }
 
@@ -256,6 +259,7 @@ const CanvasTool: React.FC = () => {
       
       // Highlight the destination object
       setActiveId(targetObj.id);
+      setResetInteraction((v) => v + 1);
     } else {
       // No target found - duplicate the source object at cursor position
       const sourceObj = objects.find(o => o.id === connectionDragStart.objId);
@@ -284,6 +288,7 @@ const CanvasTool: React.FC = () => {
           }
         ]);
         setActiveId(newId); // Select the new object
+        setResetInteraction((v) => v + 1);
       }
     }
 
@@ -291,6 +296,7 @@ const CanvasTool: React.FC = () => {
     setIsDraggingConnection(false);
     setConnectionDragStart(null);
     setConnectionDragEnd(null);
+    setResetInteraction((v) => v + 1);
   };
 
 // Update stage dimensions on container resize
@@ -746,6 +752,7 @@ const CanvasTool: React.FC = () => {
                 onAnchorDragStart={(anchorPosition, x, y) => {
                   handleAnchorDragStart(obj.id, anchorPosition, x, y);
                 }}
+                resetInteraction={resetInteraction}
               />
             ))}
           </Layer>

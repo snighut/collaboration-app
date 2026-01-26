@@ -12,6 +12,7 @@ interface DraggableObjectProps {
   onUpdate: (updates: Partial<CanvasObject>) => void;
   onStartTextEdit?: (position: { x: number; y: number }) => void;
   onAnchorDragStart?: (anchorPosition: string, x: number, y: number) => void;
+  resetInteraction?: number;
 }
 
 // Component to handle image loading
@@ -44,10 +45,22 @@ const ImageShape: React.FC<{ obj: CanvasObject; active: boolean; isGrayedOut: bo
   );
 };
 
-const DraggableObject: React.FC<DraggableObjectProps> = ({ 
-  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart
+const DraggableObject: React.FC<DraggableObjectProps> = ({
+  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart, resetInteraction
 }) => {
+  // Cancel hold timer and set drag state on any drag move
+  const handleDragMove = () => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+    isDraggingRef.current = true;
+    setIsHoldingForConnection(false);
+    setDraggable(true);
+  };
   const groupRef = useRef<any>(null);
+  const [draggable, setDraggable] = useState(true);
+  const isDraggingRef = useRef(false);
 
   // Calculate anchor points based on object type
   const getAnchorPoints = () => {
@@ -102,17 +115,21 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   // Handle tap-and-hold for connection on mobile devices
   const holdTimer = useRef<NodeJS.Timeout | null>(null);
   const [isHoldingForConnection, setIsHoldingForConnection] = useState(false);
+  const initialPosition = useRef<{ x: number; y: number } | null>(null);
   
   const handleTouchStart = (e: any) => {
     // Clear any existing timer
     if (holdTimer.current) {
       clearTimeout(holdTimer.current);
     }
-    
+    // Store initial position
+    initialPosition.current = { x: obj.x, y: obj.y };
+    isDraggingRef.current = false;
     // Start 1-second hold timer
     holdTimer.current = setTimeout(() => {
+      if (isDraggingRef.current) return; // Don't start connection if drag started
       setIsHoldingForConnection(true);
-      
+      setDraggable(false); // Disable dragging when starting connection
       // Start connection drag from nearest anchor
       if (onAnchorDragStart && groupRef.current) {
         const stage = groupRef.current.getStage();
@@ -122,10 +139,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             // Find nearest anchor to the tap position
             const anchors = getAnchorPoints();
             const absPos = groupRef.current.absolutePosition();
-            
             let nearestAnchor = anchors[0];
             let minDistance = Infinity;
-            
             anchors.forEach(anchor => {
               const anchorAbsX = absPos.x + anchor.x;
               const anchorAbsY = absPos.y + anchor.y;
@@ -138,7 +153,6 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
                 nearestAnchor = anchor;
               }
             });
-            
             // Start connection drag from nearest anchor
             const anchorAbsX = absPos.x + nearestAnchor.x;
             const anchorAbsY = absPos.y + nearestAnchor.y;
@@ -155,16 +169,35 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       clearTimeout(holdTimer.current);
     }
     setIsHoldingForConnection(false);
+    setDraggable(true); // Re-enable dragging after connection ends
+    initialPosition.current = null;
+    isDraggingRef.current = false;
   };
   
   // Cleanup timer on unmount
   useEffect(() => {
+    // Cleanup timer and drag state on unmount or when obj.id changes
     return () => {
       if (holdTimer.current) {
         clearTimeout(holdTimer.current);
+        holdTimer.current = null;
       }
+      isDraggingRef.current = false;
+      setIsHoldingForConnection(false);
+      setDraggable(true);
     };
-  }, []);
+  }, [obj.id]);
+
+  // Reset drag/connection state when resetInteraction changes
+  useEffect(() => {
+    setIsHoldingForConnection(false);
+    setDraggable(true);
+    isDraggingRef.current = false;
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  }, [resetInteraction]);
 
   // Auto-focus new text objects
   const prevActive = useRef(active);
@@ -181,6 +214,20 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       x: node.x(),
       y: node.y(),
     });
+    
+    // Reset position tracking
+    initialPosition.current = null;
+  };
+
+  const handleDragStart = () => {
+    // Cancel connection timer when drag starts
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+    isDraggingRef.current = true;
+    setIsHoldingForConnection(false);
+    setDraggable(true); // Always re-enable dragging on drag start
   };
 
   const renderShape = () => {
@@ -409,7 +456,9 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       ref={groupRef}
       x={obj.x}
       y={obj.y}
-      draggable={!isHoldingForConnection}
+      draggable={draggable}
+      onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
       onClick={onSelect}
       onTap={onSelect}
