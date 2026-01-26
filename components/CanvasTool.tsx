@@ -662,6 +662,22 @@ const CanvasTool: React.FC = () => {
               setTextInputPosition(null);
             }
           }}
+          onTouchMove={(e) => {
+            if (isDraggingConnection) {
+              const pos = e.target.getStage()?.getPointerPosition();
+              if (pos) {
+                handleConnectionDrag(pos.x, pos.y);
+              }
+            }
+          }}
+          onTouchEnd={(e) => {
+            if (isDraggingConnection) {
+              const pos = e.target.getStage()?.getPointerPosition();
+              if (pos) {
+                handleAnchorDragEnd(pos.x, pos.y);
+              }
+            }
+          }}
         >
           <Layer>
             {/* Render connection lines between objects */}
