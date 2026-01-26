@@ -10,13 +10,6 @@ function DesignPageContent() {
   const searchParams = useSearchParams();
   const designId = searchParams.get('id');
 
-  // TODO: If designId !== 'new', load existing design data and populate canvas
-  useEffect(() => {
-    if (designId && designId !== 'new') {
-      // Load existing design data here when API is ready
-      console.log('Loading design:', designId);
-    }
-  }, [designId]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900">
@@ -34,7 +27,7 @@ function DesignPageContent() {
         </h2>
       </div>
       <div className="flex-1 overflow-hidden">
-        <CanvasTool />
+        <CanvasTool designId={designId} />
       </div>
     </div>
   );

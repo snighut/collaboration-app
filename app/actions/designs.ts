@@ -15,15 +15,15 @@ export interface SaveDesignResponse {
 /**
  * Server Action: Save a design via the Node.js API
  */
-export async function saveDesign(payload: SaveDesignPayload): Promise<SaveDesignResponse> {
+export async function saveDesign(payload: SaveDesignPayload, id: string): Promise<SaveDesignResponse> {
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
 
-  if (!payload.id) {
+  if (!id) {
     return { success: false, error: 'Design ID is required for saving.' };
   }
 
   try {
-    const response = await fetch(`${apiUrl}/api/v1/designs/${payload.id}`, {
+    const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -42,6 +42,8 @@ export async function saveDesign(payload: SaveDesignPayload): Promise<SaveDesign
 
 
 export interface Design {
+  description: string;
+  items(items: any): unknown;
   id: string;
   name: string;
   thumbnail?: string;
@@ -203,6 +205,28 @@ export async function getDesigns(): Promise<DesignsResponse> {
       total: 0,
       error: error instanceof Error ? error.message : 'Failed to fetch designs'
     };
+  }
+}
+
+/**
+ * Server Action: Fetch a single design by ID from the Node.js API
+ */
+export async function getDesign(id: string): Promise<{ success: boolean; data?: Design; error?: string }> {
+  const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+    }
+    const data = await response.json();
+    console.log('Fetched design:', data);
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error?.message || 'Unknown error' };
   }
 }
 

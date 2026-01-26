@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject } from '../types';
@@ -7,38 +6,122 @@ import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, Arro
 
 import DraggableObject from './DraggableObject';
 import { Save } from 'lucide-react';
-import { saveDesign } from '../app/actions/designs';
+import { saveDesign, getDesign } from '../app/actions/designs';
 
-const CanvasTool: React.FC = () => {
+import { useEffect } from 'react';
+
+interface CanvasToolProps {
+  designId?: string | null;
+}
+
+// Define a type for the design data used in CanvasTool
+interface CanvasDesign {
+  id?: string;
+  name: string;
+  description: string;
+  thumbnail: string | null;
+  objects: CanvasObject[];
+  connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
+}
+
+const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
   const [resetInteraction, setResetInteraction] = useState(0);
   // Save state for feedback
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-    // Save handler
-    const handleSave = async () => {
-      setSaving(true);
-      setSaveSuccess(false);
-      const payload = {
-        name: 'Untitled Design',
-        data: {
-          objects,
-          connections,
-        },
-      };
-      try {
-        const result = await saveDesign(payload);
-        setSaving(false);
-        setSaveSuccess(result.success);
-        setTimeout(() => setSaveSuccess(false), 1200);
-      } catch (e) {
-        setSaving(false);
-        setSaveSuccess(false);
-      }
-    };
-  const [objects, setObjects] = useState<CanvasObject[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Use the new CanvasDesign type for designData
+  const [designData, setDesignData] = useState<CanvasDesign>({
+    name: '',
+    description: '',
+    thumbnail: null,
+    objects: [],
+    connections: [],
+  });
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
+
+  // Fetch design data if designId is provided
+  useEffect(() => {
+    if (designId && designId !== 'new') {
+      setLoading(true);
+      setLoadError(null);
+      getDesign(designId)
+        .then((result) => {
+          if (result.success && result.data) {
+            // Safely coerce types for objects and connections
+            const objects: CanvasObject[] = Array.isArray(result.data.items)
+              ? result.data.items as unknown as CanvasObject[]
+              : [];
+            const connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }> =
+              Array.isArray(result.data.connections)
+                ? result.data.connections as unknown as Array<{ from: string; to: string; fromPoint: string; toPoint: string }>
+                : [];
+            console.log('Setting design data:', {
+              id: result.data.id,
+              name: result.data.name || '',
+              description: result.data.description || '',
+              thumbnail: result.data.thumbnail || null,
+              objects,
+              connections,
+            });
+            console.log('result:', result);
+            setDesignData({
+              id: result.data.id,
+              name: result.data.name || '',
+              description: result.data.description || '',
+              thumbnail: result.data.thumbnail || null,
+              objects,
+              connections,
+            });
+          } else {
+            setLoadError(result.error || 'Failed to load design');
+          }
+        })
+        .catch((e) => setLoadError(e?.message || 'Unknown error'))
+        .finally(() => setLoading(false));
+    }
+  }, [designId]);
+
+  // Local state for objects and connections, derived from designData
+  const [objects, setObjects] = useState<CanvasObject[]>([]);
   const [connections, setConnections] = useState<Array<{ from: string; to: string; fromPoint: string; toPoint: string }>>([]);
+
+  // Sync objects/connections from designData when loaded
+  useEffect(() => {
+    setObjects(designData.objects);
+    setConnections(designData.connections);
+  }, [designData]);
+
+  // Save handler      
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveSuccess(false);
+    const id = designId || designData.id;
+    const payload = {
+      name: designData.name || 'Untitled Design',
+      description: designData.description || '',
+      thumbnail: designData.thumbnail,
+      data: {
+        objects,
+        connections,
+      },
+    };
+    try {
+      console.log('payload for id:', id, payload);
+      const result = await saveDesign({ ...payload }, id); // Pass id as a separate argument
+      console.log('Payload from save response:', id, payload, id);
+      setSaving(false);
+      setSaveSuccess(result.success);
+      setTimeout(() => setSaveSuccess(false), 1200);
+    } catch (e) {
+      setSaving(false);
+      setSaveSuccess(false);
+    }
+  };
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDraggingConnection, setIsDraggingConnection] = useState(false);
@@ -341,6 +424,21 @@ const CanvasTool: React.FC = () => {
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-gray-500">Loading design...</span>
+      </div>
+    );
+  }
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-red-500">{loadError}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col md:flex-row">
