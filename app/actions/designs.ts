@@ -1,4 +1,45 @@
-'use server'
+"use server";
+// Types for saving a design
+export interface SaveDesignPayload {
+  id?: string;
+  name: string;
+  data: any;
+}
+
+export interface SaveDesignResponse {
+  success: boolean;
+  id?: string;
+  error?: string;
+}
+
+/**
+ * Server Action: Save a design via the Node.js API
+ */
+export async function saveDesign(payload: SaveDesignPayload): Promise<SaveDesignResponse> {
+  const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
+
+  if (!payload.id) {
+    return { success: false, error: 'Design ID is required for saving.' };
+  }
+
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/designs/${payload.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+    }
+
+    const data = await response.json();
+    return { success: true, id: data.id };
+  } catch (error: any) {
+    return { success: false, error: error?.message || 'Unknown error' };
+  }
+}
+
 
 export interface Design {
   id: string;
@@ -132,39 +173,28 @@ const MOCK_DESIGNS: Design[] = [
  */
 export async function getDesigns(): Promise<DesignsResponse> {
   try {
-    // TODO: Uncomment when real API is ready
-    // const apiUrl = process.env.NIGHUTLABS_API_URL || 'http://www.nighutlabs.com/api/v1';
-    // const response = await fetch(`${apiUrl}/designs`, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     // Add authentication headers when needed
-    //     // 'Authorization': `Bearer ${process.env.API_TOKEN}`
-    //   },
-    //   cache: 'no-store', // or 'force-cache' depending on requirements
-    // });
-    // 
-    // if (!response.ok) {
-    //   throw new Error(`API request failed: ${response.statusText}`);
-    // }
-    // 
-    // const data = await response.json();
-    // return {
-    //   success: true,
-    //   data: data.designs,
-    //   total: data.total
-    // };
+    // Use the Node.js service URL for fetching designs
+    const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://localhost:3000';
+    const response = await fetch(`${apiUrl}/api/v1/designs`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
 
-    // MOCK: Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
 
-    // MOCK: Return mock data
+    const data = await response.json();
+
+    console.log('Fetched designs:', data);
     return {
       success: true,
-      data: MOCK_DESIGNS,
-      total: MOCK_DESIGNS.length
+      data: data.designs || data,
+      total: data.total || (Array.isArray(data.designs) ? data.designs.length : Array.isArray(data) ? data.length : 0)
     };
-
   } catch (error) {
     console.error('Error fetching designs:', error);
     return {
