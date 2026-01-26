@@ -253,6 +253,9 @@ const CanvasTool: React.FC = () => {
           toPoint: nearestAnchor
         }
       ]);
+      
+      // Highlight the destination object
+      setActiveId(targetObj.id);
     } else {
       // No target found - duplicate the source object at cursor position
       const sourceObj = objects.find(o => o.id === connectionDragStart.objId);
