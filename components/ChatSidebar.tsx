@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Bot, X } from 'lucide-react';
-import { sendChatMessage } from '../app/actions/chat';
+import { sendChatMessage, askMistral } from '../app/actions/chat';
 
 interface Message {
   id: string;
@@ -16,6 +16,8 @@ const ChatSidebar: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // For streaming completion
+  const [streamingCompletion, setStreamingCompletion] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,9 +35,9 @@ const ChatSidebar: React.FC = () => {
     }
   }, [isExpanded]);
 
+  // Streaming chat handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -48,26 +50,36 @@ const ChatSidebar: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
+    setStreamingCompletion('');
 
     try {
-      // Prepare messages for server action
-      const conversationHistory = [
-        ...messages.map(m => ({ role: m.role, content: m.content })),
-        { role: 'user' as const, content: userMessage.content }
-      ];
-
-      const result = await sendChatMessage(conversationHistory);
-      
+      // Only send the latest user message as prompt for streaming demo
+      const stream = await askMistral(userMessage.content);
+      if (!stream) throw new Error('No stream returned');
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let completion = '';
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (value) {
+          const token = decoder.decode(value, { stream: true });
+          completion += token;
+          setStreamingCompletion(completion);
+        }
+        done = streamDone;
+      }
+      // Add the assistant message after streaming is done
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: result.content,
+        content: completion,
         timestamp: new Date(),
       };
-      
       setMessages(prev => [...prev, assistantMessage]);
+      setStreamingCompletion('');
     } catch (error) {
-      console.error('Error calling chat action:', error);
+      console.error('Error calling streaming chat:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -75,6 +87,7 @@ const ChatSidebar: React.FC = () => {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
+      setStreamingCompletion('');
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +152,7 @@ const ChatSidebar: React.FC = () => {
               </div>
             ) : (
               <>
-                {messages.map((message) => (
+                {messages.map((message, idx) => (
                   <div
                     key={message.id}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -153,6 +166,10 @@ const ChatSidebar: React.FC = () => {
                     >
                       <p className="text-sm whitespace-pre-wrap break-words">
                         {message.content}
+                        {/* If this is the last assistant message and streaming, append streamingCompletion */}
+                        {idx === messages.length - 1 && isLoading && streamingCompletion && message.role === 'assistant' && (
+                          <span>{streamingCompletion}</span>
+                        )}
                       </p>
                       <p
                         className={`text-xs mt-1 ${
@@ -169,6 +186,14 @@ const ChatSidebar: React.FC = () => {
                     </div>
                   </div>
                 ))}
+                {/* Show streaming completion as a new message if not yet added to messages */}
+                {isLoading && streamingCompletion && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-gray-100">
+                      <p className="text-sm whitespace-pre-wrap break-words">{streamingCompletion}</p>
+                    </div>
+                  </div>
+                )}
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-4 py-3">
