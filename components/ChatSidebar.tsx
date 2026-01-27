@@ -70,6 +70,16 @@ const ChatSidebar: React.FC = () => {
           }
           done = streamDone;
         }
+
+        // When you call decoder.decode() without any arguments, the stream option automatically defaults to false. 
+        // This is a built-in signal to the decoder that the stream is officially over, 
+        // telling it to flush any "dangling" bytes (like half of a multi-byte character) and clear its internal buffer.
+        const finalBit = decoder.decode(); 
+        if (finalBit) {
+          completion += finalBit;
+          setStreamingCompletion(completion);
+        }
+
       } catch (readError) {
         // If we have completion text, it's just a 'Connection Closed' at the tail end.
         // We log it as a warning instead of a crash.
