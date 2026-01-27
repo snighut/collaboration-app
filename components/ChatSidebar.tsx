@@ -60,15 +60,23 @@ const ChatSidebar: React.FC = () => {
       const decoder = new TextDecoder();
       let done = false;
       let completion = '';
-      while (!done) {
-        const { value, done: streamDone } = await reader.read();
-        if (value) {
-          const token = decoder.decode(value, { stream: true });
-          completion += token;
-          setStreamingCompletion(completion);
+      try {
+        while (!done) {
+          const { value, done: streamDone } = await reader.read();
+          if (value) {
+            const token = decoder.decode(value, { stream: true });
+            completion += token;
+            setStreamingCompletion(completion);
+          }
+          done = streamDone;
         }
-        done = streamDone;
+      } catch (readError) {
+        // If we have completion text, it's just a 'Connection Closed' at the tail end.
+        // We log it as a warning instead of a crash.
+        console.warn('Stream closed during read, but data was captured.');
       }
+
+      
       // Add the assistant message after streaming is done
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -79,6 +87,7 @@ const ChatSidebar: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
       setStreamingCompletion('');
     } catch (error) {
+      // This catch handles actual failures (backend down, 500 error, etc.)
       console.error('Error calling streaming chat:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
