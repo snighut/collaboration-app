@@ -60,15 +60,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
               Array.isArray(result.data.connections)
                 ? result.data.connections as unknown as Array<{ from: string; to: string; fromPoint: string; toPoint: string }>
                 : [];
-            console.log('Setting design data:', {
-              id: result.data.id,
-              name: result.data.name || '',
-              description: result.data.description || '',
-              thumbnail: result.data.thumbnail || null,
-              objects,
-              connections,
-            });
-            console.log('result:', result);
+
             setDesignData({
               id: result.data.id,
               name: result.data.name || '',
@@ -111,9 +103,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
       },
     };
     try {
-      console.log('payload for id:', id, payload);
       const result = await saveDesign({ ...payload }, id); // Pass id as a separate argument
-      console.log('Payload from save response:', id, payload, id);
       setSaving(false);
       setSaveSuccess(result.success);
       setTimeout(() => setSaveSuccess(false), 1200);

@@ -85,7 +85,6 @@ export async function getDesigns(): Promise<DesignsResponse> {
 
     const data = await response.json();
 
-    console.log('Fetched designs:', data);
     return {
       success: true,
       data: data.designs || data,
@@ -117,7 +116,6 @@ export async function getDesign(id: string): Promise<{ success: boolean; data?: 
       return { success: false, error: `API error: ${response.status} ${response.statusText}` };
     }
     const data = await response.json();
-    console.log('Fetched design:', data);
     return { success: true, data };
   } catch (error: any) {
     return { success: false, error: error?.message || 'Unknown error' };
