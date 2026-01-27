@@ -60,13 +60,35 @@ const ChatSidebar: React.FC = () => {
       const decoder = new TextDecoder();
       let done = false;
       let completion = '';
+      
+      // We keep a buffer for incoming text to handle partial SSE frames
+      let buffer = '';
+
       try {
         while (!done) {
           const { value, done: streamDone } = await reader.read();
           if (value) {
-            const token = decoder.decode(value, { stream: true });
-            completion += token;
-            setStreamingCompletion(completion);
+            // Append new chunk to our buffer
+            buffer += decoder.decode(value, { stream: true });
+            
+            // SSE standard uses double newlines to separate data packets
+            const parts = buffer.split('\n\n');
+            
+            // The last part might be incomplete, so we keep it in the buffer
+            buffer = parts.pop() || '';
+
+            for (const part of parts) {
+              const line = part.trim();
+              if (line.startsWith('data: ')) {
+                const content = line.replace('data: ', '');
+                
+                // Only append if it's not the [DONE] signal
+                if (content !== '[DONE]') {
+                  completion += content;
+                  setStreamingCompletion(completion);
+                }
+              }
+            }
           }
           done = streamDone;
         }
@@ -76,7 +98,18 @@ const ChatSidebar: React.FC = () => {
         // telling it to flush any "dangling" bytes (like half of a multi-byte character) and clear its internal buffer.
         const finalBit = decoder.decode(); 
         if (finalBit) {
-          completion += finalBit;
+          // Process any remaining data in the final bit/buffer
+          const finalFull = buffer + finalBit;
+          const finalParts = finalFull.split('\n\n');
+          for (const part of finalParts) {
+            const line = part.trim();
+            if (line.startsWith('data: ')) {
+              const content = line.replace('data: ', '');
+              if (content !== '[DONE]') {
+                completion += content;
+              }
+            }
+          }
           setStreamingCompletion(completion);
         }
 
