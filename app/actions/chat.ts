@@ -8,7 +8,7 @@ interface Message {
 // Streaming server action for Mistral LLM
 export async function askMistral(prompt: string) {
   // Use an env var that changes based on where the app is running
-  const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || 'http://localhost:3002';
+  const BACKEND_URL = process.env.DESIGN_SERVICE_URL || 'http://localhost:3002';
   const res = await fetch(`${BACKEND_URL}/api/v1/llm/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
