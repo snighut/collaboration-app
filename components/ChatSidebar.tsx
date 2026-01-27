@@ -76,15 +76,16 @@ const ChatSidebar: React.FC = () => {
         console.warn('Stream closed during read, but data was captured.');
       }
 
-      
-      // Add the assistant message after streaming is done
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: completion,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+      // Only add the assistant message if we actually got content
+      if (completion.trim()) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: completion,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      }
       setStreamingCompletion('');
     } catch (error) {
       // This catch handles actual failures (backend down, 500 error, etc.)
