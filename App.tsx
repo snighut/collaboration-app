@@ -188,7 +188,7 @@ const App: React.FC = () => {
               <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Connect</h3>
               <div className="flex flex-col space-y-2">
                 <a 
-                  href="mailto:swapnil.nighut@example.com" 
+                  href="mailto:sbnighut@gmail.com" 
                   className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <Mail size={16} />
