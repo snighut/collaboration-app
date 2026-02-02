@@ -1,3 +1,34 @@
+// Design entity and response contracts
+export interface Design {
+  connections(connections: any): unknown;
+  description: string;
+  items(items: any): unknown;
+  id: string;
+  name: string;
+  thumbnail?: string;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  data: any; // JSON context
+}
+
+export interface DesignsResponse {
+  success: boolean;
+  data: Design[];
+  total: number;
+  error?: string;
+}
+// Design API contracts
+export interface SaveDesignPayload {
+  id?: string;
+  name: string;
+  data: any;
+}
+
+export interface SaveDesignResponse {
+  success: boolean;
+  id?: string;
+  error?: string;
+}
 
 export type AssetType = 'text' | 'image' | 'svg' | 'color' | 'line' | 'arrow' | 'circle' | 'rectangle' | 'triangle';
 

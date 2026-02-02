@@ -1,25 +1,34 @@
+"use server";
+
+import type { SaveDesignPayload, SaveDesignResponse } from '../../types';
+
 /**
- * Create a new design via the Node.js API
- * Calls the real API endpoint in the Kubernetes cluster
+ * Server Action: Create a new design via the Node.js API (POST)
  */
-export async function createDesign(formData: FormData): Promise<any> {
-  // Use the internal Kubernetes service DNS name for the Node.js API
+export async function createDesign(payload: SaveDesignPayload, accessToken?: string): Promise<SaveDesignResponse> {
+  if (!accessToken) {
+    return { success: false, error: 'Unauthorized: No access token provided.' };
+  }
+
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
 
-  // Convert FormData to JSON object
-  const data: Record<string, any> = {};
-  formData.forEach((value, key) => {
-    data[key] = value;
-  });
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/designs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const response = await fetch(`${apiUrl}/api/v1/designs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
+    if (!response.ok) {
+      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+    }
 
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
+    const data = await response.json();
+    return { success: true, id: data.id };
+  } catch (error: any) {
+    return { success: false, error: error?.message || 'Unknown error' };
   }
-  return response.json();
 }

@@ -11,6 +11,7 @@ import { Save } from 'lucide-react';
 import { saveDesign, getDesign } from '../app/actions/designs';
 
 import { useEffect } from 'react';
+import { createDesign } from '@/app/actions/createDesign';
 
 interface CanvasToolProps {
   designId?: string | null;
@@ -67,7 +68,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
               Array.isArray(result.data.connections)
                 ? result.data.connections as unknown as Array<{ from: string; to: string; fromPoint: string; toPoint: string }>
                 : [];
-
+            console.log('Setting design data:', {
+              id: result.data.id,
+              name: result.data.name || '',
+              description: result.data.description || '',
+              thumbnail: result.data.thumbnail || null,
+              objects,
+              connections,
+            });
+            console.log('result:', result);
             setDesignData({
               id: result.data.id,
               name: result.data.name || '',
@@ -119,11 +128,32 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
         connections,
       },
     };
+    const accessToken = session?.access_token;
     try {
-      const result = await saveDesign({ ...payload }, id); // Pass id as a separate argument
+      let result;
+      let newId = id;
+      if (!id || id === 'new') {
+        result = await createDesign({ ...payload }, accessToken);
+        if (result.success && result.id) {
+          // Update the URL to use the new id
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('id', result.id);
+            window.history.replaceState({}, '', url.toString());
+          }
+          newId = result.id;
+        }
+      } else {
+        result = await saveDesign({ ...payload }, id, accessToken);
+      }
       setSaving(false);
       setSaveSuccess(result.success);
       setTimeout(() => setSaveSuccess(false), 1200);
+      // After creation, always use saveDesign for future saves
+      if (!id || id === 'new') {
+        // Optionally update local state to reflect newId
+        setDesignData(prev => ({ ...prev, id: newId }));
+      }
     } catch (e) {
       setSaving(false);
       setSaveSuccess(false);

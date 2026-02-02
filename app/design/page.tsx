@@ -25,45 +25,46 @@ function DesignPageContent() {
   const { user } = useAuth();
   const { toggleTheme } = useTheme();
 
-  const handleSave = async () => {
-    if (!session) {
-      toast.error("Please sign in to save your design.");
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/design';
-      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-      return;
-    }
+  // dead code
+  // const handleSave = async () => {
+  //   if (!session) {
+  //     toast.error("Please sign in to save your design.");
+  //     const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/design';
+  //     router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+  //     return;
+  //   }
 
-    startTransition(async () => {
-      // In a real app, you'd get the canvas content from the CanvasTool component
-      const designData = {
-        id: designId === "new" ? undefined : designId,
-        name: "My amazing design", // You might want a way to name designs
-        content: JSON.stringify({}), // This would be the canvas data
-      };
+  //   startTransition(async () => {
+  //     // In a real app, you'd get the canvas content from the CanvasTool component
+  //     const designData = {
+  //       id: designId === "new" ? undefined : designId,
+  //       name: "My amazing design", // You might want a way to name designs
+  //       content: JSON.stringify({}), // This would be the canvas data
+  //     };
 
-      const formData = new FormData();
-      Object.entries(designData).forEach(([key, value]) => {
-        if (value !== undefined) {
-          formData.append(key, value);
-        }
-      });
+  //     const formData = new FormData();
+  //     Object.entries(designData).forEach(([key, value]) => {
+  //       if (value !== undefined) {
+  //         formData.append(key, value);
+  //       }
+  //     });
 
-      try {
-        const result = await createDesign(formData);
-        if (result.id) {
-          toast.success("Design saved successfully!");
-          if (designId === "new") {
-            router.push(`/design?id=${result.id}`);
-          }
-        } else {
-          toast.error(result.error || "Failed to save design.");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("An unexpected error occurred.");
-      }
-    });
-  };
+  //     try {
+  //       const result = await createDesign(formData);
+  //       if (result.id) {
+  //         toast.success("Design saved successfully!");
+  //         if (designId === "new") {
+  //           router.push(`/design?id=${result.id}`);
+  //         }
+  //       } else {
+  //         toast.error(result.error || "Failed to save design.");
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast.error("An unexpected error occurred.");
+  //     }
+  //   });
+  // };
 
   return (
     <>
