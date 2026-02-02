@@ -107,7 +107,7 @@ const App: React.FC = () => {
             onClick={scrollToCreativeHub}
             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors flex items-center gap-1"
           >
-            <Layout size={16} /> Explore personal projects
+            <Layout size={16} /> Sample Creations
           </button>
         </nav>
       </header>
@@ -267,7 +267,7 @@ const App: React.FC = () => {
            className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
          >
            <Layout size={18} className="text-blue-400" />
-           Explore personal projects
+           Explore Experimental Creations
          </button>
       </div>
 
