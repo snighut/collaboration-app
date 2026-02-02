@@ -1,40 +1,34 @@
 "use server";
 import { createServer } from "@/lib/supabaseServer";
+import { SaveDesignPayload, SaveDesignResponse, Design, DesignsResponse } from "@/types";
 
-// Types for saving a design
-export interface SaveDesignPayload {
-  id?: string;
-  name: string;
-  data: any;
-}
 
-export interface SaveDesignResponse {
-  success: boolean;
-  id?: string;
-  error?: string;
-}
 
 /**
  * Server Action: Save a design via the Node.js API
  */
-export async function saveDesign(payload: SaveDesignPayload, id: string): Promise<SaveDesignResponse> {
-  const supabase = createServer();
-  const { data: { session }} = await supabase.auth.getSession();
+export async function saveDesign(payload: SaveDesignPayload, id: string, accessToken?: string): Promise<SaveDesignResponse> {
+  // Optionally use accessToken to initialize Supabase server client if needed
+  // const supabase = createServer(accessToken); // If your createServer supports token injection
+  // If not, you can skip session check here, since token is passed from frontend
 
-  if (!session) {
-    return { success: false, error: 'Unauthorized: You must be logged in to save a design.' };
+  if (!accessToken) {
+    return { success: false, error: 'Unauthorized: No access token provided.' };
   }
 
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
-
   if (!id) {
+    console.error('Design ID is missing in payload:', payload);
     return { success: false, error: 'Design ID is required for saving.' };
   }
 
   try {
     const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
       body: JSON.stringify(payload),
     });
 
@@ -47,26 +41,6 @@ export async function saveDesign(payload: SaveDesignPayload, id: string): Promis
   } catch (error: any) {
     return { success: false, error: error?.message || 'Unknown error' };
   }
-}
-
-
-export interface Design {
-  connections(connections: any): unknown;
-  description: string;
-  items(items: any): unknown;
-  id: string;
-  name: string;
-  thumbnail?: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  data: any; // JSON context
-}
-
-interface DesignsResponse {
-  success: boolean;
-  data: Design[];
-  total: number;
-  error?: string;
 }
 
 
@@ -107,7 +81,7 @@ export async function getDesigns(): Promise<DesignsResponse> {
       total: data.total || (Array.isArray(data.designs) ? data.designs.length : Array.isArray(data) ? data.length : 0)
     };
   } catch (error) {
-    console.error('Error fetching designs:', error);
+    console.error('Error fetching designs:', process.env.DESIGN_SERVICE_URL, error);
     return {
       success: false,
       data: [],
