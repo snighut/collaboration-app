@@ -1,15 +1,14 @@
-import { LogIn } from 'lucide-react';
+import React from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaFacebook, FaAmazon } from 'react-icons/fa';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthProvider';
 import type { Provider } from '@supabase/auth-js';
 
-const PROVIDERS: { id: Provider; label: string; icon: JSX.Element }[] = [
+const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   { id: 'google', label: 'Google', icon: <FcGoogle size={22} /> },
   { id: 'apple', label: 'Apple', icon: <FaApple size={22} className="text-black dark:text-white" /> },
   { id: 'facebook', label: 'Facebook', icon: <FaFacebook size={22} className="text-blue-600" /> },
-  { id: 'amazon', label: 'Amazon', icon: <FaAmazon size={22} className="text-yellow-600" /> },
 ];
 
 export default function AuthProviders({ redirect }: { redirect?: string }) {
