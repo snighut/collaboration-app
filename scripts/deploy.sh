@@ -39,7 +39,7 @@ echo -e "${GREEN}✅ Updated image tag to ${NEW_TAG}${NC}"
 # Step 3: Commit and push changes to fleet-infra
 git add "${YAML_FILE}"
 git commit -m "Deploy collaboration-app:${NEW_TAG}"
-git push origin vocal-canvas
+git push origin main
 
 echo -e "${GREEN}✅ Pushed changes to fleet-infra${NC}"
 
