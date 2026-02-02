@@ -98,7 +98,6 @@ function MyDesigns() {
         </div>
         {/* Desktop actions */}
         <div className="hidden sm:flex items-center gap-2">
-          <ThemeToggleButton />
           <ProfileSignInMenu />
           {/* View Toggle */}
           <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">

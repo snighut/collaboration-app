@@ -86,7 +86,6 @@ function DesignPageContent() {
           </div>
           {/* Desktop actions */}
           <div className="hidden sm:flex items-center gap-2">
-            <ThemeToggleButton />
             <ProfileSignInMenu />
           </div>
           {/* Mobile actions: only menu button */}
