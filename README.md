@@ -1,8 +1,5 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
-# Run and deploy your AI Studio app
+# Run and deploy your Vocal Canvas app
 
 This contains everything you need to run your app locally.
 
@@ -151,9 +148,6 @@ In your current CI/CD flow:
 * **The Problem:** Since the YAML file still says `image: ...:latest`, Flux thinks nothing has changed.
 
 The commands above "kick" Kubernetes into checking for that new image manually.
-
-**Now that your README is complete, would you like to explore setting up "Flux Image Automation" so you can delete this "Force Update" section entirely and let the cluster handle it automatically?**
-
 ---
 
 ### 📋 Status Check
