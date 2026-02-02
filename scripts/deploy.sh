@@ -24,7 +24,7 @@ YAML_FILE="${FLEET_INFRA_PATH}/clusters/production/collaboration-app/app.yaml"
 # Pull latest changes first
 echo -e "${BLUE}📥 Pulling latest changes from fleet-infra...${NC}"
 cd "${FLEET_INFRA_PATH}"
-git pull --rebase origin vocal-canvas
+git pull --rebase origin main
 
 echo -e "${BLUE}📝 Updating ${YAML_FILE}...${NC}"
 
