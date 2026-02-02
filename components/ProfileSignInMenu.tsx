@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ThemeToggleButton } from './ThemeToggleButton';
 import { useRouter } from 'next/navigation';
 import { UserCircle } from 'lucide-react';
 import { useAuth } from './AuthProvider';
@@ -26,13 +27,17 @@ export default function ProfileSignInMenu() {
 
   if (user) {
     return (
-      <div className="relative">
+      <div className="relative flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600 dark:text-gray-300">DARK MODE</span>
+          <ThemeToggleButton />
+        </div>
         <button
           className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="true"
           aria-expanded={open}
-          style={{ marginRight: 70 }}
+          style={{ marginRight: 50 }}
         >
           {user.user_metadata?.avatar_url ? (
             <img
@@ -45,7 +50,7 @@ export default function ProfileSignInMenu() {
           )}
         </button>
         {open && (
-          <div className="absolute right-0 mt-2 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
+          <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
             <button
               className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
               onClick={() => {
@@ -72,7 +77,11 @@ export default function ProfileSignInMenu() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600 dark:text-gray-300">DARK MODE</span>
+        <ThemeToggleButton />
+      </div>
       <button
         className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
         onClick={() => { setOpen((v) => !v); handleMenuClick('/login'); }}
@@ -84,7 +93,7 @@ export default function ProfileSignInMenu() {
         <span>Sign In</span>
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
           {/* <button
             className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-slate-700"
             onClick={() => handleMenuClick('/login')}
