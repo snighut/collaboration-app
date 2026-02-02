@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Timeline from './components/Timeline';
 import AchievementSection from './components/AchievementSection';
 import ChatSidebar from './components/ChatSidebar';
+import Auth from './components/Auth';
 import { YEARS, INITIAL_ACHIEVEMENTS } from './constants';
 import { Sparkles, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
 
@@ -102,6 +102,7 @@ const App: React.FC = () => {
             </button>
           </div>
           
+          
           <button 
             onClick={scrollToCreativeHub}
             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors flex items-center gap-1"
@@ -144,7 +145,7 @@ const App: React.FC = () => {
                   onClick={() => router.push('/design?id=new')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
-                  Start Designing by Voice
+                  Start Creating
                 </button>
               </div>
             </div>
@@ -154,7 +155,7 @@ const App: React.FC = () => {
               <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Layout className="text-purple-600 dark:text-purple-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Designs</h3>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Creations</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
                 Read, delete, and update your designs from this place. Manage all your creative work in one centralized hub with full control over your design lifecycle.
               </p>
@@ -163,7 +164,7 @@ const App: React.FC = () => {
                   onClick={() => router.push('/mydesigns')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
-                  My Designs
+                  Go To My Creations
                 </button>
               </div>
             </div>
@@ -252,6 +253,9 @@ const App: React.FC = () => {
                 <Linkedin size={20} />
               </a>
             </div>
+          </div>
+          <div className="pt-4 text-[11px] text-gray-400 dark:text-gray-500 text-center max-w-3xl mx-auto">
+            This website is a personal, non-commercial open-source project created for educational and portfolio purposes only. It is not an offer of services for hire, and no revenue is generated from this platform. All code and content represent personal learning and technical exploration.
           </div>
         </div>
       </footer>

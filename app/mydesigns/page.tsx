@@ -1,16 +1,28 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Image as ImageIcon, Calendar, Clock, MoreVertical, Trash2, Edit, Eye, Grid3x3, List, Loader2 } from 'lucide-react';
 import { getDesigns, deleteDesign, type Design } from '../actions/designs';
+import { ThemeToggleButton } from '@/components/ThemeToggleButton';
+import { useTheme } from '../../components/ThemeProvider';
+import MenuIcon from '../../components/MenuIcon';
+import AppMobileMenu from '../../components/AppMobileMenu';
+import Auth from '@/components/Auth';
+import ProfileSignInMenu from '@/components/ProfileSignInMenu';
+import ChatSidebar from '@/components/ChatSidebar';
+import { toast } from 'sonner';
+import { Home, Grid3x3, List, Plus, Loader2, ImageIcon, Edit, Trash2, Calendar, Clock, Eye } from 'lucide-react';
 
-export default function MyDesigns() {
+function MyDesigns() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { toggleTheme } = useTheme();
   const router = useRouter();
   const [designs, setDesigns] = useState<Design[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Fetch designs on mount
   useEffect(() => {
@@ -25,7 +37,12 @@ export default function MyDesigns() {
       if (response.success) {
         setDesigns(response.data);
       } else {
-        setError(response.error || 'Failed to load designs');
+        // If user is not logged in, simply clear the designs and don't show an error
+        if (response.error === 'User not authenticated') {
+          setDesigns([]);
+        } else {
+          setError(response.error || 'Failed to load designs');
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -37,13 +54,18 @@ export default function MyDesigns() {
   const handleDeleteDesign = async (designId: string) => {
     if (!confirm('Are you sure you want to delete this design?')) return;
     
-    const result = await deleteDesign(designId);
-    if (result.success) {
-      // Optimistically remove from UI
-      setDesigns(prev => prev.filter(p => p.id !== designId));
-    } else {
-      alert(result.error || 'Failed to delete design');
-    }
+    setDeletingId(designId);
+    startTransition(async () => {
+      const result = await deleteDesign(designId);
+      if (result.success) {
+        // Optimistically remove from UI
+        setDesigns(prev => prev.filter(p => p.id !== designId));
+        toast.success("Design deleted successfully!");
+      } else {
+        toast.error(result.error || 'Failed to delete design');
+      }
+      setDeletingId(null);
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -56,22 +78,28 @@ export default function MyDesigns() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <>
+      <ChatSidebar />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center justify-between px-8 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center justify-between px-4 sm:px-8 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors min-w-0"
+            title="Click here to load Swapnil's Homepage"
           >
-            <ArrowLeft size={20} />
-            <span className="font-medium">Home</span>
+            <Home size={20} />
+            <span className="font-medium hidden xs:inline">Home</span>
           </button>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight">
-            My Designs
+          <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight truncate">
+            My Creations
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Desktop actions */}
+        <div className="hidden sm:flex items-center gap-2">
+          <ThemeToggleButton />
+          <ProfileSignInMenu />
           {/* View Toggle */}
           <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <button
@@ -97,17 +125,6 @@ export default function MyDesigns() {
               <List size={18} />
             </button>
           </div>
-
-          {/* Mobile: Icon only */}
-          <button 
-            onClick={() => router.push('/design?id=new')}
-            className="md:hidden p-2.5 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white rounded-lg transition-colors"
-            title="New Design"
-          >
-            <Plus size={20} />
-          </button>
-
-          {/* Desktop: Icon + Text */}
           <button 
             onClick={() => router.push('/design?id=new')}
             className="hidden md:flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors"
@@ -116,7 +133,41 @@ export default function MyDesigns() {
             <span>New Design</span>
           </button>
         </div>
+        {/* Mobile actions: only menu button and new design */}
+        <div className="flex sm:hidden items-center gap-1">
+          <button 
+            onClick={() => router.push('/design?id=new')}
+            className="p-2.5 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white rounded-lg transition-colors"
+            title="New Design"
+          >
+            <Plus size={20} />
+          </button>
+          <button
+            className="ml-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span className="sr-only">Open menu</span>
+            <MenuIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+          </button>
+        </div>
       </header>
+      {/* MobileMenu overlay */}
+      <AppMobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onThemeToggle={() => { 
+          toggleTheme(); 
+          // setMenuOpen(false); 
+        }}
+        onHome={() => { setMenuOpen(false); router.push('/'); }}
+        onSignOut={async () => {
+          setMenuOpen(false);
+          const { supabase } = await import('../../lib/supabaseClient');
+          await supabase.auth.signOut();
+          router.refresh && router.refresh();
+        }}
+      />
 
       {/* Main Content */}
       <main className="pt-24 px-8 pb-16">
@@ -177,27 +228,38 @@ export default function MyDesigns() {
                   )}
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                    <button className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors">
-                      <Eye size={14} className="text-gray-900" />
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/design?id=${design.id}`);
-                      }}
-                      className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
-                    >
-                      <Edit size={14} className="text-gray-900" />
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteDesign(design.id);
-                      }}
-                      className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
-                    >
-                      <Trash2 size={14} className="text-red-600" />
-                    </button>
+                    {isPending && deletingId === design.id ? (
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    ) : (
+                      <>
+                        <button 
+                          className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
+                          disabled={isPending}
+                        >
+                          <Eye size={14} className="text-gray-900" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/design?id=${design.id}`);
+                          }}
+                          className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
+                          disabled={isPending}
+                        >
+                          <Edit size={14} className="text-gray-900" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDesign(design.id);
+                          }}
+                          className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
+                          disabled={isPending}
+                        >
+                          <Trash2 size={14} className="text-red-600" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -291,28 +353,39 @@ export default function MyDesigns() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-                        <Eye size={16} className="text-gray-600 dark:text-gray-400" />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/design?id=${design.id}`);
-                        }}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        <Edit size={16} className="text-gray-600 dark:text-gray-400" />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteDesign(design.id);
-                        }}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={16} className="text-red-600 dark:text-red-400" />
-                      </button>
+                    <div className="flex items-center gap-1">
+                      {isPending && deletingId === design.id ? (
+                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                      ) : (
+                        <>
+                          <button 
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            disabled={isPending}
+                          >
+                            <Eye size={16} className="text-gray-600 dark:text-gray-400" />
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/design?id=${design.id}`);
+                            }}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            disabled={isPending}
+                          >
+                            <Edit size={16} className="text-gray-600 dark:text-gray-400" />
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteDesign(design.id);
+                            }}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            disabled={isPending}
+                          >
+                            <Trash2 size={16} className="text-red-600 dark:text-red-400" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -332,7 +405,10 @@ export default function MyDesigns() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Create your first design to get started
               </p>
-              <button className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
+              <button 
+                onClick={() => router.push('/design?id=new')}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+              >
                 <Plus size={18} />
                 Create Project
               </button>
@@ -341,5 +417,8 @@ export default function MyDesigns() {
         </div>
       </main>
     </div>
+    </>
   );
 }
+
+export default MyDesigns;

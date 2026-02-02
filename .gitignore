@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Deployment environment file
+.env.deploy
+
 # Next.js
 .next/
 out/

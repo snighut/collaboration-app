@@ -3,6 +3,8 @@ import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
 import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle } from 'lucide-react';
+import { useAuth } from './AuthProvider';
+import AuthProviders from './AuthProviders';
 
 import DraggableObject from './DraggableObject';
 import { Save } from 'lucide-react';
@@ -25,6 +27,8 @@ interface CanvasDesign {
 }
 
 const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
+  const { session } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [resetInteraction, setResetInteraction] = useState(0);
   // Save state for feedback
   const [saving, setSaving] = useState(false);
@@ -90,6 +94,16 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
 
   // Save handler      
   const handleSave = async () => {
+    if (!session) {
+      if (typeof window !== 'undefined') {
+        const fullPath = window.location.pathname + window.location.search;
+        window.location.href = `/login?redirect=${encodeURIComponent(fullPath)}`;
+        return;
+      }
+      setShowAuthModal(true);
+      return;
+    }
+
     setSaving(true);
     setSaveSuccess(false);
     const id = designId || designData.id;
@@ -432,8 +446,27 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
 
   return (
     <div className="h-full flex flex-col md:flex-row">
+       {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[3000]">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Sign In to Save
+            </h2>
+            <div className="mb-6 text-center text-gray-700 dark:text-gray-200 text-lg font-medium">
+              Continue with
+            </div>
+            <AuthProviders redirect={typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined} />
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="mt-4 w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       {/* Save icon for mobile/iPhone view */}
-      <div className="fixed top-3 right-3 z-[2000] flex items-center md:hidden">
+      <div className="fixed top-20 right-4 z-[2000] flex items-center md:hidden">
         <button
           onClick={handleSave}
           className="p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors"
