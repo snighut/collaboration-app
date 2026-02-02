@@ -24,7 +24,7 @@ YAML_FILE="${FLEET_INFRA_PATH}/clusters/production/collaboration-app/app.yaml"
 # Pull latest changes first
 echo -e "${BLUE}📥 Pulling latest changes from fleet-infra...${NC}"
 cd "${FLEET_INFRA_PATH}"
-git pull --rebase origin main
+git pull --rebase origin vocal-canvas
 
 echo -e "${BLUE}📝 Updating ${YAML_FILE}...${NC}"
 
@@ -39,7 +39,7 @@ echo -e "${GREEN}✅ Updated image tag to ${NEW_TAG}${NC}"
 # Step 3: Commit and push changes to fleet-infra
 git add "${YAML_FILE}"
 git commit -m "Deploy collaboration-app:${NEW_TAG}"
-git push origin main
+git push origin vocal-canvas
 
 echo -e "${GREEN}✅ Pushed changes to fleet-infra${NC}"
 
