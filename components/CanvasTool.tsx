@@ -30,6 +30,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
   const { session } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [resetInteraction, setResetInteraction] = useState(0);
+    // PATCH CANVAS panel state
+    const [patchJson, setPatchJson] = useState('');
+    const [patchError, setPatchError] = useState('');
   // Save state for feedback
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -724,65 +727,99 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
             DEBUG PANEL
           </h4>
           <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
-{(() => {
-  const activeObj = objects.find(obj => obj.id === activeId);
-  if (!activeObj) {
-    return JSON.stringify({
-      canvas: {
-        objectCount: objects.length,
-        activeObject: null
-      },
-      message: "No object selected"
-    }, null, 2);
-  }
-  
-  const debugInfo: any = {
-    canvas: {
-      objectCount: objects.length
-    },
-    type: activeObj.type,
-    id: activeObj.id,
-    position: {
-      x: Math.round(activeObj.x),
-      y: Math.round(activeObj.y)
-    },
-    dimensions: {
-      width: Math.round(activeObj.width),
-      height: Math.round(activeObj.height)
-    },
-    zIndex: activeObj.zIndex
-  };
-  
-  if (activeObj.type === 'text') {
-    debugInfo.text = {
-      content: activeObj.content,
-      length: activeObj.content.length,
-      cursorPosition: activeObj.cursorPosition ?? 0,
-      fontSize: activeObj.fontSize || 14,
-      fontStyle: activeObj.fontStyle || 'normal',
-      color: activeObj.color
-    };
-  } else if (activeObj.type === 'image') {
-    debugInfo.image = {
-      url: activeObj.content,
-      dimensions: `${Math.round(activeObj.width)}x${Math.round(activeObj.height)}`
-    };
-  } else if (activeObj.type === 'svg') {
-    debugInfo.svg = {
-      pathLength: activeObj.content.length,
-      color: activeObj.color
-    };
-  } else if (activeObj.type === 'color') {
-    debugInfo.color = {
-      value: activeObj.color,
-      borderColor: activeObj.borderColor,
-      borderWidth: activeObj.borderWidth
-    };
-  }
-  
-  return JSON.stringify(debugInfo, null, 2);
-})()}
+          {(() => {
+            const activeObj = objects.find(obj => obj.id === activeId);
+            if (!activeObj) {
+              return JSON.stringify({
+                canvas: {
+                  objectCount: objects.length,
+                  activeObject: null
+                },
+                message: "No object selected"
+              }, null, 2);
+            }
+            
+            const debugInfo: any = {
+              canvas: {
+                objectCount: objects.length
+              },
+              type: activeObj.type,
+              id: activeObj.id,
+              position: {
+                x: Math.round(activeObj.x),
+                y: Math.round(activeObj.y)
+              },
+              dimensions: {
+                width: Math.round(activeObj.width),
+                height: Math.round(activeObj.height)
+              },
+              zIndex: activeObj.zIndex
+            };
+            
+            if (activeObj.type === 'text') {
+              debugInfo.text = {
+                content: activeObj.content,
+                length: activeObj.content.length,
+                cursorPosition: activeObj.cursorPosition ?? 0,
+                fontSize: activeObj.fontSize || 14,
+                fontStyle: activeObj.fontStyle || 'normal',
+                color: activeObj.color
+              };
+            } else if (activeObj.type === 'image') {
+              debugInfo.image = {
+                url: activeObj.content,
+                dimensions: `${Math.round(activeObj.width)}x${Math.round(activeObj.height)}`
+              };
+            } else if (activeObj.type === 'svg') {
+              debugInfo.svg = {
+                pathLength: activeObj.content.length,
+                color: activeObj.color
+              };
+            } else if (activeObj.type === 'color') {
+              debugInfo.color = {
+                value: activeObj.color,
+                borderColor: activeObj.borderColor,
+                borderWidth: activeObj.borderWidth
+              };
+            }
+            
+            return JSON.stringify(debugInfo, null, 2);
+          })()}
           </pre>
+        </div>
+
+                {/* PATCH CANVAS Panel */}
+        <div>
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">PATCH CANVAS</h4>
+          <textarea
+            id="patch-canvas-json"
+            style={{ color: 'green', backgroundColor: 'rgb(0 0 0 / 1)' }}
+            className="w-full min-h-[80px] max-h-40 p-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-800 text-xs font-mono mb-2"
+            placeholder="Paste JSON object here..."
+            value={patchJson}
+            onChange={e => { setPatchJson(e.target.value); setPatchError(''); }}
+          />
+          {patchError && (
+            <div className="text-xs text-red-500 mb-2">{patchError}</div>
+          )}
+          <button
+            className="w-full py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+            onClick={() => {
+              try {
+                const obj = JSON.parse(patchJson);
+                // Validate structure
+                if (!obj.objects || !Array.isArray(obj.objects) || !obj.connections || !Array.isArray(obj.connections)) {
+                  setPatchError('JSON must have "objects" and "connections" arrays.');
+                  return;
+                }
+                setObjects(obj.objects);
+                setConnections(obj.connections);
+                setPatchError('');
+              } catch (e) {
+                setPatchError('Invalid JSON: ' + (e.message || e));
+              }
+            }}
+          >Apply</button>
         </div>
       </aside>
 
