@@ -138,7 +138,7 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Voice to Visual Design App</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
-                Turn speech into visual diagrams instantly. Our AI converts your voice to text, maps relationships, and auto-generates clean layouts. It uses canvas assets or smart placeholders with optimized spacing for a professional look. Think it, see it.
+                An experimental voice-to-diagram orchestration engine. This project demonstrates how AI can synthesize natural language into structured visual relationships and auto-generate optimized layouts. Developed as a technical deep-dive into LLM-driven UI design and distributed homelab architecture
               </p>
               <div className="flex justify-center">
                 <button 
@@ -157,7 +157,7 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Creations</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
-                Read, delete, and update your designs from this place. Manage all your creative work in one centralized hub with full control over your design lifecycle.
+                Explore full lifecycle management for generated diagrams. This interface demonstrates persistent state handling—allowing for the retrieval, modification, and management of design assets within a localized, sandbox environment
               </p>
               <div className="flex justify-center">
                 <button 
@@ -261,7 +261,7 @@ const App: React.FC = () => {
       </footer>
 
       {/* Floating Entry Button */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 md:hidden lg:block">
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 md:hidden lg:block mb-24">
          <button 
            onClick={scrollToCreativeHub}
            className="px-6 py-3 bg-gray-900/90 backdrop-blur-md text-white rounded-full shadow-2xl border-2 border-blue-500/50 hover:border-blue-400 flex items-center gap-2 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-blue-500/50"
