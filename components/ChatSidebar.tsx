@@ -179,7 +179,7 @@ const ChatSidebar: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Ask me anything about the portfolio or projects
+              Ask me anything about system designs!
             </p>
             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
               <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">

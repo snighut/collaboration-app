@@ -466,7 +466,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
         </div>
       )}
       {/* Save icon for mobile/iPhone view */}
-      <div className="fixed top-20 right-4 z-[2000] flex items-center md:hidden">
+      <div className="fixed top-20 right-4 z-[2000] flex items-center md:hidden mr-12">
         <button
           onClick={handleSave}
           className="p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors"
