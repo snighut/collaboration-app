@@ -2,10 +2,10 @@
 import AuthProviders from "@/components/AuthProviders";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function LoginPage() {
+function LoginPageInner() {
   const { session } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -84,5 +84,13 @@ export default function LoginPage() {
         {/* <AuthProviders redirect={redirect} /> */}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }
