@@ -159,8 +159,8 @@ const ChatSidebar: React.FC = () => {
     <>
       {/* Expandable Sidebar */}
       <div
-        className={`fixed top-16 right-0 h-[calc(100vh-64px)] bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 shadow-2xl transition-all duration-300 ease-in-out z-40 flex flex-col ${
-          isExpanded ? 'w-full md:w-96' : 'w-0'
+        className={`fixed top-16 right-0 h-[calc(100vh-64px)] bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 shadow-2xl transition-all duration-300 ease-in-out flex flex-col ${
+          isExpanded ? 'w-full md:w-96 z-50' : 'w-0 z-40'
         }`}
       >
         {/* Chat Header - Fixed at top */}
@@ -301,7 +301,7 @@ const ChatSidebar: React.FC = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="fixed top-1/2 right-0 -translate-y-1/2 z-50 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
+          className="fixed top-1/2 right-0 -translate-y-1/2 z-[2000] bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
           aria-label="Open AI chat"
           title="Open AI Assistant"
         >

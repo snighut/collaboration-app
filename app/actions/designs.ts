@@ -1,4 +1,6 @@
 "use server";
+import { createServer } from "@/lib/supabaseServer";
+
 // Types for saving a design
 export interface SaveDesignPayload {
   id?: string;
@@ -16,6 +18,13 @@ export interface SaveDesignResponse {
  * Server Action: Save a design via the Node.js API
  */
 export async function saveDesign(payload: SaveDesignPayload, id: string): Promise<SaveDesignResponse> {
+  const supabase = createServer();
+  const { data: { session }} = await supabase.auth.getSession();
+
+  if (!session) {
+    return { success: false, error: 'Unauthorized: You must be logged in to save a design.' };
+  }
+
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
 
   if (!id) {
@@ -68,6 +77,13 @@ interface DesignsResponse {
  * Real endpoint: http://www.nighutlabs.com/api/v1/designs
  */
 export async function getDesigns(): Promise<DesignsResponse> {
+  // const supabase = createServer();
+  // const { data: { session }} = await supabase.auth.getSession();
+
+  // if (!session) {
+  //   return { success: false, data:[], total: 0, error: 'User not authenticated' };
+  // }
+
   try {
     // Use the Node.js service URL for fetching designs
     const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://localhost:3000';
