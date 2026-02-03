@@ -57,10 +57,9 @@ function MyDesigns() {
 
   const handleDeleteDesign = async (designId: string) => {
     if (!confirm('Are you sure you want to delete this design?')) return;
-    
     setDeletingId(designId);
     startTransition(async () => {
-      const result = await deleteDesign(designId);
+      const result = await deleteDesign(designId, session?.access_token);
       if (result.success) {
         // Optimistically remove from UI
         setDesigns(prev => prev.filter(p => p.id !== designId));

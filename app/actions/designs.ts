@@ -121,18 +121,19 @@ export async function getDesign(id: string, accessToken?: string): Promise<{ suc
 }
 
 /**
- * Delete a design by ID
- * 
- * TODO: Replace with real API call when deployed
- * Real endpoint: DELETE http://www.nighutlabs.com/api/v1/designs/{id}
+ * Delete a design by ID with accessToken for authorization
  */
-export async function deleteDesign(designId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteDesign(designId: string, accessToken?: string): Promise<{ success: boolean; error?: string }> {
+  if (!accessToken) {
+    return { success: false, error: 'Unauthorized: No access token provided.' };
+  }
   try {
     const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
     const response = await fetch(`${apiUrl}/api/v1/designs/${designId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
     });
 
