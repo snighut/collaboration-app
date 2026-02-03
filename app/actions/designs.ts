@@ -23,6 +23,7 @@ export async function saveDesign(payload: SaveDesignPayload, id: string, accessT
   }
 
   try {
+    console.log('Saving design ' + id + ' with payload:', payload.data);
     const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
       method: 'PUT',
       headers: {
@@ -37,6 +38,7 @@ export async function saveDesign(payload: SaveDesignPayload, id: string, accessT
     }
 
     const data = await response.json();
+    console.log('Design saved successfully:', data);
     return { success: true, id: data.id };
   } catch (error: any) {
     return { success: false, error: error?.message || 'Unknown error' };
@@ -76,6 +78,7 @@ export async function getDesigns(accessToken?: string): Promise<DesignsResponse>
 
     const data = await response.json();
 
+    console.log('Fetched designs:', data);
     return {
       success: true,
       data: data.designs || data,
@@ -110,6 +113,7 @@ export async function getDesign(id: string, accessToken?: string): Promise<{ suc
       return { success: false, error: `API error on getDesign: ${response.status} ${response.statusText}` };
     }
     const data = await response.json();
+    console.log('Fetched design:', data);
     return { success: true, data };
   } catch (error: any) {
     return { success: false, error: error?.message || 'Unknown error' };
