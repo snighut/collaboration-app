@@ -24,12 +24,13 @@ function MyDesigns() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
 
   // Fetch designs on mount
   useEffect(() => {
+    if(authLoading) return;
     loadDesigns();
-  }, [session]);
+  }, [authLoading, session?.access_token]);
 
   const loadDesigns = async () => {
     setIsLoading(true);
