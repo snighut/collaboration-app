@@ -128,27 +128,19 @@ export async function getDesign(id: string, accessToken?: string): Promise<{ suc
  */
 export async function deleteDesign(designId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    // TODO: Uncomment when real API is ready
-    // const apiUrl = process.env.NIGHUTLABS_API_URL || 'http://www.nighutlabs.com/api/v1';
-    // const response = await fetch(`${apiUrl}/designs/${designId}`, {
-    //   method: 'DELETE',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
-    // 
-    // if (!response.ok) {
-    //   throw new Error(`Failed to delete design: ${response.statusText}`);
-    // }
-    // 
-    // return { success: true };
+    const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
+    const response = await fetch(`${apiUrl}/api/v1/designs/${designId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    // MOCK: Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    if (!response.ok) {
+      throw new Error(`Failed to delete design: ${response.status} ${response.statusText}`);
+    }
 
-    // MOCK: Simulate successful deletion
     return { success: true };
-
   } catch (error) {
     console.error('Error deleting design:', error);
     return {
