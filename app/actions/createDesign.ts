@@ -31,6 +31,6 @@ export async function createDesign(payload: SaveDesignPayload, accessToken?: str
     console.log('Design created successfully:', data);
     return { success: true, id: data.id };
   } catch (error: any) {
-    return { success: false, error: error?.message || 'Unknown error' };
+    return { success: false, error: `${error?.message || 'Unknown error'} : POST /api/v1/designs`   };
   }
 }

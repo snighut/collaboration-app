@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '../components/AuthProvider'
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'Creative Labs',
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

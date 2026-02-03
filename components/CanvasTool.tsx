@@ -5,6 +5,7 @@ import { COLORS, SVG_ASSETS } from '../constants';
 import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import AuthProviders from './AuthProviders';
+import { toast } from 'sonner';
 
 import DraggableObject from './DraggableObject';
 import { Save } from 'lucide-react';
@@ -146,6 +147,10 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
         }
       } else {
         result = await saveDesign({ ...payload }, id, accessToken);
+      }
+      if (!result.success){
+        // console.error('Failed to create/save design: ' + (result.error || 'Unknown error'));
+        toast.error(result.error || 'Failed to create/save design');
       }
       setSaving(false);
       setSaveSuccess(result.success);
