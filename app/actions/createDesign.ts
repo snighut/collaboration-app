@@ -13,6 +13,7 @@ export async function createDesign(payload: SaveDesignPayload, accessToken?: str
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
 
   try {
+    console.log('Creating new design with payload:', payload.data);
     const response = await fetch(`${apiUrl}/api/v1/designs`, {
       method: 'POST',
       headers: {
@@ -27,6 +28,7 @@ export async function createDesign(payload: SaveDesignPayload, accessToken?: str
     }
 
     const data = await response.json();
+    console.log('Design created successfully:', data);
     return { success: true, id: data.id };
   } catch (error: any) {
     return { success: false, error: error?.message || 'Unknown error' };
