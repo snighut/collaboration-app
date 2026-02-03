@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { getDesigns, deleteDesign, type Design } from '../actions/designs';
+import { getDesigns, deleteDesign } from '../actions/designs';
 import { ThemeToggleButton } from '@/components/ThemeToggleButton';
 import { useTheme } from '../../components/ThemeProvider';
 import MenuIcon from '../../components/MenuIcon';
@@ -13,6 +13,7 @@ import ChatSidebar from '@/components/ChatSidebar';
 import { toast } from 'sonner';
 import { Home, Grid3x3, List, Plus, Loader2, ImageIcon, Edit, Trash2, Calendar, Clock, Eye } from 'lucide-react';
 import { useAuth } from '../../components/AuthProvider';
+import { Design } from '@/types';
 
 function MyDesigns() {
   const [menuOpen, setMenuOpen] = useState(false);
