@@ -33,7 +33,7 @@ export async function saveDesign(payload: SaveDesignPayload, id: string, accessT
     });
 
     if (!response.ok) {
-      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+      return { success: false, error: `API error on saveDesign: ${response.status} ${response.statusText}` };
     }
 
     const data = await response.json();
@@ -50,7 +50,7 @@ export async function saveDesign(payload: SaveDesignPayload, id: string, accessT
  * TODO: Replace with real API call when deployed
  * Real endpoint: http://www.nighutlabs.com/api/v1/designs
  */
-export async function getDesigns(): Promise<DesignsResponse> {
+export async function getDesigns(accessToken?: string): Promise<DesignsResponse> {
   // const supabase = createServer();
   // const { data: { session }} = await supabase.auth.getSession();
 
@@ -65,6 +65,7 @@ export async function getDesigns(): Promise<DesignsResponse> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
       },
       cache: 'no-store',
     });
@@ -94,16 +95,19 @@ export async function getDesigns(): Promise<DesignsResponse> {
 /**
  * Server Action: Fetch a single design by ID from the Node.js API
  */
-export async function getDesign(id: string): Promise<{ success: boolean; data?: Design; error?: string }> {
+export async function getDesign(id: string, accessToken?: string): Promise<{ success: boolean; data?: Design; error?: string }> {
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
   try {
     const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+      },
       cache: 'no-store',
     });
     if (!response.ok) {
-      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+      return { success: false, error: `API error on getDesign: ${response.status} ${response.statusText}` };
     }
     const data = await response.json();
     return { success: true, data };

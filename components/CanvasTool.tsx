@@ -28,7 +28,7 @@ interface CanvasDesign {
 }
 
 const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [resetInteraction, setResetInteraction] = useState(0);
     // PATCH CANVAS panel state
@@ -54,10 +54,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
 
   // Fetch design data if designId is provided
   useEffect(() => {
+    if(authLoading) return;
     if (designId && designId !== 'new') {
       setLoading(true);
       setLoadError(null);
-      getDesign(designId)
+      getDesign(designId, session?.access_token)
         .then((result) => {
           if (result.success && result.data) {
             // Safely coerce types for objects and connections
@@ -92,7 +93,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
         .catch((e) => setLoadError(e?.message || 'Unknown error'))
         .finally(() => setLoading(false));
     }
-  }, [designId]);
+  }, [designId, authLoading, session?.access_token]);
 
   // Local state for objects and connections, derived from designData
   const [objects, setObjects] = useState<CanvasObject[]>([]);

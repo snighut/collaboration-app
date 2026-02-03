@@ -12,6 +12,7 @@ import ProfileSignInMenu from '@/components/ProfileSignInMenu';
 import ChatSidebar from '@/components/ChatSidebar';
 import { toast } from 'sonner';
 import { Home, Grid3x3, List, Plus, Loader2, ImageIcon, Edit, Trash2, Calendar, Clock, Eye } from 'lucide-react';
+import { useAuth } from '../../components/AuthProvider';
 
 function MyDesigns() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,17 +24,18 @@ function MyDesigns() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { session } = useAuth();
 
   // Fetch designs on mount
   useEffect(() => {
     loadDesigns();
-  }, []);
+  }, [session]);
 
   const loadDesigns = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getDesigns();
+      const response = await getDesigns(session?.access_token);
       if (response.success) {
         setDesigns(response.data);
       } else {

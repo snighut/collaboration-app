@@ -23,7 +23,7 @@ export async function createDesign(payload: SaveDesignPayload, accessToken?: str
     });
 
     if (!response.ok) {
-      return { success: false, error: `API error: ${response.status} ${response.statusText}` };
+      return { success: false, error: `API error on createDesign: ${response.status} ${response.statusText}` };
     }
 
     const data = await response.json();
