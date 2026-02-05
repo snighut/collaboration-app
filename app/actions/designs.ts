@@ -121,8 +121,40 @@ export async function getDesign(id: string, accessToken?: string): Promise<{ suc
 }
 
 /**
- * Delete a design by ID with accessToken for authorization
+ * Update a design by ID with accessToken for authorization
  */
+export async function updateDesignTitle(designId: string, payload: Partial<Design>, accessToken?: string): Promise<{ success: boolean; data?: Design; error?: string }> {
+  if (!accessToken) {
+    return { success: false, error: 'Unauthorized: No access token provided.' };
+  }
+  try {
+    const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
+    const response = await fetch(`${apiUrl}/api/v1/designs/${designId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { success: false, error: `API error on updateDesignTitle: ${response.status} ${response.statusText} - ${errorText}` };
+    }
+
+    const data = await response.json();
+    console.log('Design title updated successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error updating design title:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update design title'
+    };
+  }
+}
+
 export async function deleteDesign(designId: string, accessToken?: string): Promise<{ success: boolean; error?: string }> {
   if (!accessToken) {
     return { success: false, error: 'Unauthorized: No access token provided.' };
