@@ -80,6 +80,8 @@ const ChatSidebar: React.FC = () => {
 
             for (const part of parts) {
               const line = part.trim();
+                // DEBUG: Log every received line for diagnosis
+                console.debug('[SSE Stream Line]', line);
               if (line.startsWith('data: ')) {
                 const content = line.replace('data: ', '');
                 
