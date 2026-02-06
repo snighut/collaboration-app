@@ -16,6 +16,7 @@ import { createDesign } from '@/app/actions/createDesign';
 
 interface CanvasToolProps {
   designId?: string | null;
+  onTitleChange?: (title: string) => void;
 }
 
 // Define a type for the design data used in CanvasTool
@@ -28,7 +29,7 @@ interface CanvasDesign {
   connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
 }
 
-const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
+const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
   const { session, loading: authLoading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [resetInteraction, setResetInteraction] = useState(0);
@@ -62,7 +63,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
       getDesign(designId, session?.access_token)
         .then((result) => {
           if (result.success && result.data) {
-            // Safely coerce types for objects and connections
             const objects: CanvasObject[] = Array.isArray(result.data.items)
               ? result.data.items as unknown as CanvasObject[]
               : [];
@@ -70,23 +70,16 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
               Array.isArray(result.data.connections)
                 ? result.data.connections as unknown as Array<{ from: string; to: string; fromPoint: string; toPoint: string }>
                 : [];
-            console.log('Setting design data:', {
+            const newDesignData = {
               id: result.data.id,
               name: result.data.name || '',
               description: result.data.description || '',
               thumbnail: result.data.thumbnail || null,
               objects,
               connections,
-            });
-            console.log('result:', result);
-            setDesignData({
-              id: result.data.id,
-              name: result.data.name || '',
-              description: result.data.description || '',
-              thumbnail: result.data.thumbnail || null,
-              objects,
-              connections,
-            });
+            };
+            setDesignData(newDesignData);
+            if (onTitleChange) onTitleChange(newDesignData.name);
           } else {
             setLoadError(result.error || 'Failed to load design');
           }
@@ -94,7 +87,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
         .catch((e) => setLoadError(e?.message || 'Unknown error'))
         .finally(() => setLoading(false));
     }
-  }, [designId, authLoading, session?.access_token]);
+  }, [designId, authLoading, session?.access_token, onTitleChange]);
 
   // Local state for objects and connections, derived from designData
   const [objects, setObjects] = useState<CanvasObject[]>([]);
@@ -104,7 +97,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId }) => {
   useEffect(() => {
     setObjects(designData.objects);
     setConnections(designData.connections);
-  }, [designData]);
+    if (onTitleChange) onTitleChange(designData.name);
+  }, [designData, onTitleChange]);
 
   // Save handler      
   const handleSave = async () => {

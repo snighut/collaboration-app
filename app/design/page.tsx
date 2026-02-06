@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { useTheme } from '../../components/ThemeProvider';
 import { getDesign, updateDesignTitle } from '../actions/designs';
 import { Design } from '@/types';
+import InlineEditText from '@/components/InlineEditText';
+
 
 function DesignPageContent() {
   const router = useRouter();
@@ -24,28 +26,13 @@ function DesignPageContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useAuth();
   const { toggleTheme } = useTheme();
-  const [design, setDesign] = useState<Design | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [titleInput, setTitleInput] = useState('');
-  const [showEditIcon, setShowEditIcon] = useState(false);
+  const [title, setTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (designId && designId !== 'new') {
-      const fetchDesign = async () => {
-        if (session?.access_token) {
-          const { data, error } = await getDesign(designId, session.access_token);
-          if (error) {
-            toast.error('Failed to load design.');
-            console.error(error);
-          } else {
-            setDesign(data || null);
-          }
-        }
-      };
-      fetchDesign();
-    }
-  }, [designId, session]);
+  // Handler for title change from CanvasTool
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+  };
 
   return (
     <>
@@ -61,81 +48,37 @@ function DesignPageContent() {
               <List size={22} />
               <span className="font-medium hidden xs:inline">My Creations</span>
             </button>
-            <div
-              className="relative group"
-              onMouseEnter={() => setShowEditIcon(true)}
-              onMouseLeave={() => setShowEditIcon(false)}
-              onTouchStart={() => setShowEditIcon(true)}
-            >
-              <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100 truncate">
-                <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
-                {isEditing ? (
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!design || !session?.access_token) return;
+            <div className="flex items-center gap-2">
+              <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
+              {designId === 'new' ? (
+                <span className="text-lg font-bold">New Creation</span>
+              ) : (
+                <>
+                  <InlineEditText
+                    value={title || 'Loading...'}
+                    editable={!!session?.access_token}
+                    loading={isSaving}
+                    onSave={async (newTitle) => {
+                      if (!designId || !session?.access_token) return;
                       setIsSaving(true);
-                      const newTitle = titleInput.trim();
                       if (!newTitle) {
                         toast.error('Title cannot be empty');
                         setIsSaving(false);
                         return;
                       }
-                      const result = await updateDesignTitle(design.id, { name: newTitle }, session.access_token);
+                      const result = await updateDesignTitle(designId, { name: newTitle }, session.access_token);
                       setIsSaving(false);
                       if (result.success && result.data) {
-                        setDesign(result.data);
+                        setTitle(result.data.name || newTitle);
                         toast.success('Title updated!');
-                        setIsEditing(false);
                       } else {
                         toast.error(result.error || 'Failed to update title');
                       }
                     }}
-                    className="flex items-center gap-2"
-                  >
-                    <input
-                      type="text"
-                      value={titleInput}
-                      onChange={e => setTitleInput(e.target.value)}
-                      autoFocus
-                      disabled={isSaving}
-                      className="bg-transparent border-b border-blue-400 text-lg font-bold px-1 outline-none w-40"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800"
-                      title="Save title"
-                    >
-                      {isSaving ? <Loader2 className="animate-spin" size={18} /> : 'Save'}
-                    </button>
-                    <button
-                      type="button"
-                      className="ml-1 text-gray-500 hover:text-gray-700"
-                      onClick={() => setIsEditing(false)}
-                      title="Cancel"
-                    >
-                      Cancel
-                    </button>
-                  </form>
-                ) : (
-                  <span className="truncate">
-                    {designId === 'new' ? 'New Creation' : design?.name || 'Loading...'}
-                  </span>
-                )}
-                {designId !== 'new' && !isEditing && showEditIcon && (
-                  <button
-                    className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
-                    onClick={() => {
-                      setIsEditing(true);
-                      setTitleInput(design?.name || '');
-                    }}
-                    title="Edit title"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                )}
-              </h2>
+                    className="text-gray-900 dark:text-gray-100"
+                  />
+                </>
+              )}
             </div>
           </div>
           {/* Desktop actions */}
@@ -174,7 +117,7 @@ function DesignPageContent() {
           }}
         />
         <div className="flex-1 overflow-hidden">
-          <CanvasTool designId={designId} />
+          <CanvasTool designId={designId} onTitleChange={handleTitleChange} />
         </div>
       </div>
     </>
