@@ -78,16 +78,16 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
             // Prefer data.objects if present, else fallback to items
             let objects: CanvasObject[] = [];
             if (result.data.data && Array.isArray(result.data.data.objects)) {
-              objects = result.data.data.objects as CanvasObject[];
+              objects = result.data.data.objects;
             } else if (Array.isArray(result.data.items)) {
-              objects = result.data.items as CanvasObject[];
+              objects = result.data.items;
             }
             // Prefer data.connections if present, else fallback to connections
             let connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }> = [];
             if (result.data.data && Array.isArray(result.data.data.connections)) {
-              connections = result.data.data.connections as any;
+              connections = result.data.data.connections;
             } else if (Array.isArray(result.data.connections)) {
-              connections = result.data.connections as any;
+              connections = result.data.connections;
             }
             const newDesignData = {
               id: result.data.id,
