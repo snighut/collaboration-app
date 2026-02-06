@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
@@ -12,6 +12,8 @@ import { Save } from 'lucide-react';
 import { saveDesign, getDesign } from '../app/actions/designs';
 
 import { useEffect } from 'react';
+import { getDesignCache, setDesignCache, clearDesignCache } from '../lib/localCache';
+import { canvasReducer, CanvasState } from '../lib/canvasReducer';
 import { createDesign } from '@/app/actions/createDesign';
 
 interface CanvasToolProps {
@@ -42,8 +44,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Use the new CanvasDesign type for designData
-  const [designData, setDesignData] = useState<CanvasDesign>({
+  // Centralized canvas state using reducer
+  const [canvasState, dispatch] = useReducer(canvasReducer, {
     name: '',
     description: '',
     thumbnail: null,
@@ -51,25 +53,42 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
     connections: [],
   });
 
+  // Key for localStorage cache
+  const localCacheKey = designId ? `design-cache-${designId}` : 'design-cache-new';
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
 
-  // Fetch design data if designId is provided
+  // Fetch design data if designId is provided, with localStorage cache restore
   useEffect(() => {
-    if(authLoading) return;
+    if (authLoading) return;
+    // Try to restore from localCache utility first
+    const cached = getDesignCache<CanvasState>(localCacheKey);
+    if (cached) {
+      dispatch({ type: 'SET_STATE', payload: cached });
+      if (onTitleChange) onTitleChange(cached.name);
+      return; // Skip fetching from server if cache exists
+    }
     if (designId && designId !== 'new') {
       setLoading(true);
       setLoadError(null);
       getDesign(designId, session?.access_token)
         .then((result) => {
           if (result.success && result.data) {
-            const objects: CanvasObject[] = Array.isArray(result.data.items)
-              ? result.data.items as unknown as CanvasObject[]
-              : [];
-            const connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }> =
-              Array.isArray(result.data.connections)
-                ? result.data.connections as unknown as Array<{ from: string; to: string; fromPoint: string; toPoint: string }>
-                : [];
+            // Prefer data.objects if present, else fallback to items
+            let objects: CanvasObject[] = [];
+            if (result.data.data && Array.isArray(result.data.data.objects)) {
+              objects = result.data.data.objects as CanvasObject[];
+            } else if (Array.isArray(result.data.items)) {
+              objects = result.data.items as CanvasObject[];
+            }
+            // Prefer data.connections if present, else fallback to connections
+            let connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }> = [];
+            if (result.data.data && Array.isArray(result.data.data.connections)) {
+              connections = result.data.data.connections as any;
+            } else if (Array.isArray(result.data.connections)) {
+              connections = result.data.connections as any;
+            }
             const newDesignData = {
               id: result.data.id,
               name: result.data.name || '',
@@ -78,7 +97,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
               objects,
               connections,
             };
-            setDesignData(newDesignData);
+            dispatch({ type: 'SET_STATE', payload: newDesignData });
             if (onTitleChange) onTitleChange(newDesignData.name);
           } else {
             setLoadError(result.error || 'Failed to load design');
@@ -89,16 +108,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
     }
   }, [designId, authLoading, session?.access_token, onTitleChange]);
 
-  // Local state for objects and connections, derived from designData
-  const [objects, setObjects] = useState<CanvasObject[]>([]);
-  const [connections, setConnections] = useState<Array<{ from: string; to: string; fromPoint: string; toPoint: string }>>([]);
-
-  // Sync objects/connections from designData when loaded
+  // Sync cache and onTitleChange on every canvasState change
   useEffect(() => {
-    setObjects(designData.objects);
-    setConnections(designData.connections);
-    if (onTitleChange) onTitleChange(designData.name);
-  }, [designData, onTitleChange]);
+    if (onTitleChange) onTitleChange(canvasState.name);
+    // Only cache if canvas has objects or connections
+    if ((canvasState.objects && canvasState.objects.length > 0) || (canvasState.connections && canvasState.connections.length > 0)) {
+      setDesignCache(localCacheKey, canvasState);
+    }
+  }, [canvasState, onTitleChange]);
 
   // Save handler      
   const handleSave = async () => {
@@ -114,14 +131,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
 
     setSaving(true);
     setSaveSuccess(false);
-    const id = designId || designData.id;
+    const id = designId || canvasState.id;
     const payload = {
-      name: designData.name || 'Untitled Design',
-      description: designData.description || '',
-      thumbnail: designData.thumbnail,
+      name: canvasState.name || 'Untitled Design',
+      description: canvasState.description || '',
+      thumbnail: canvasState.thumbnail,
       data: {
-        objects,
-        connections,
+        objects: canvasState.objects,
+        connections: canvasState.connections,
       },
     };
     const accessToken = session?.access_token;
@@ -143,7 +160,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         result = await saveDesign({ ...payload }, id, accessToken);
       }
       if (!result.success){
-        // console.error('Failed to create/save design: ' + (result.error || 'Unknown error'));
         toast.error(result.error || 'Failed to create/save design');
       }
       setSaving(false);
@@ -151,8 +167,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
       setTimeout(() => setSaveSuccess(false), 1200);
       // After creation, always use saveDesign for future saves
       if (!id || id === 'new') {
-        // Optionally update local state to reflect newId
-        setDesignData(prev => ({ ...prev, id: newId }));
+        dispatch({ type: 'SET_STATE', payload: { id: newId } });
+      }
+      // Clear localStorage cache after successful save
+      if (result.success) {
+        clearDesignCache(localCacheKey);
       }
     } catch (e) {
       setSaving(false);
@@ -174,15 +193,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
     const baseObj = {
       id,
       type,
-      x: 100 + (objects.length * 20) % 300,
-      y: 100 + (objects.length * 20) % 200,
+      x: 100 + (canvasState.objects.length * 20) % 300,
+      y: 100 + (canvasState.objects.length * 20) % 200,
       content: content || (type === 'text' ? 'New Text Idea' : ''),
-      zIndex: objects.length + 1,
+      zIndex: canvasState.objects.length + 1,
     };
-    
     let newObj: CanvasObject;
-    
-    // Configure properties based on type
     switch (type) {
       case 'text':
         newObj = { ...baseObj, width: 200, height: 60, color: '#000000' };
@@ -228,28 +244,23 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
           color: selectedColor 
         };
     }
-    
-    setObjects([...objects, newObj]);
+    dispatch({ type: 'ADD_OBJECT', payload: newObj });
     setActiveId(id);
   };
 
   const updateObject = (id: string, updates: Partial<CanvasObject>) => {
-    setObjects(prev => prev.map(obj => obj.id === id ? { ...obj, ...updates } : obj));
+    dispatch({ type: 'UPDATE_OBJECT', id, updates });
   };
 
   const removeObject = (id: string) => {
-    setObjects(prev => prev.filter(obj => obj.id !== id));
-    // Remove all connections involving this object
-    setConnections(prev => prev.filter(conn => conn.from !== id && conn.to !== id));
+    dispatch({ type: 'REMOVE_OBJECT', id });
     setActiveId(null);
   };
 
   const isOverlappedByHigher = useCallback((id: string, self: CanvasObject) => {
-    return objects.some(other => {
+    return canvasState.objects.some(other => {
       if (other.id === id) return false;
       if (other.zIndex <= self.zIndex) return false;
-
-      // Simple AABB collision detection
       const buffer = 0;
       return (
         self.x < other.x + other.width + buffer &&
@@ -258,16 +269,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         self.y + self.height > other.y - buffer
       );
     });
-  }, [objects]);
+  }, [canvasState.objects]);
 
   // Helper to get anchor point position in absolute coordinates
   const getAnchorPosition = (objId: string, position: string) => {
-    const obj = objects.find(o => o.id === objId);
+    const obj = canvasState.objects.find(o => o.id === objId);
     if (!obj) return { x: 0, y: 0 };
-
     let x = obj.x;
     let y = obj.y;
-
     if (obj.type === 'line' || obj.type === 'arrow') {
       const points = obj.points || [0, 0, obj.width, 0];
       if (position === 'start') {
@@ -295,7 +304,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
           break;
       }
     }
-
     return { x, y };
   };
 
@@ -316,7 +324,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
   // Helper to get all anchor points for an object
   const getObjectAnchorPoints = (obj: CanvasObject) => {
     const points: { x: number; y: number; position: string }[] = [];
-    
     if (obj.type === 'line' || obj.type === 'arrow') {
       const linePoints = obj.points || [0, 0, obj.width, 0];
       points.push(
@@ -331,7 +338,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         { x: obj.x, y: obj.y + obj.height / 2, position: 'left' }
       );
     }
-    
     return points;
   };
 
@@ -340,7 +346,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
     const anchors = getObjectAnchorPoints(targetObj);
     let nearestAnchor = anchors[0];
     let minDistance = Infinity;
-    
     anchors.forEach(anchor => {
       const distance = Math.sqrt(
         Math.pow(anchor.x - x, 2) + Math.pow(anchor.y - y, 2)
@@ -350,15 +355,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         nearestAnchor = anchor;
       }
     });
-    
     return nearestAnchor.position;
   };
 
   // Handler for ending a connection drag
   const handleAnchorDragEnd = (x: number, y: number) => {
     if (!isDraggingConnection || !connectionDragStart) return;
-
-    // Find if there's an object under the cursor
     const stage = stageRef.current;
     if (!stage) {
       setIsDraggingConnection(false);
@@ -367,8 +369,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
       setResetInteraction((v) => v + 1);
       return;
     }
-
-    // Get all shapes at the pointer position
     const pointerPos = stage.getPointerPosition();
     if (!pointerPos) {
       setIsDraggingConnection(false);
@@ -377,11 +377,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
       setResetInteraction((v) => v + 1);
       return;
     }
-
-    // Find object under cursor (excluding the source object)
-    const targetObj = objects.find(obj => {
+    const targetObj = canvasState.objects.find(obj => {
       if (obj.id === connectionDragStart.objId) return false;
-      
       return (
         pointerPos.x >= obj.x &&
         pointerPos.x <= obj.x + obj.width &&
@@ -389,27 +386,23 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         pointerPos.y <= obj.y + obj.height
       );
     });
-
     if (targetObj) {
       // Create connection between existing objects
       const nearestAnchor = findNearestAnchor(targetObj, pointerPos.x, pointerPos.y);
-      
-      setConnections([
-        ...connections,
-        {
+      dispatch({
+        type: 'ADD_CONNECTION',
+        payload: {
           from: connectionDragStart.objId,
           to: targetObj.id,
           fromPoint: connectionDragStart.anchorPosition,
           toPoint: nearestAnchor
         }
-      ]);
-      
-      // Highlight the destination object
+      });
       setActiveId(targetObj.id);
       setResetInteraction((v) => v + 1);
     } else {
       // No target found - duplicate the source object at cursor position
-      const sourceObj = objects.find(o => o.id === connectionDragStart.objId);
+      const sourceObj = canvasState.objects.find(o => o.id === connectionDragStart.objId);
       if (sourceObj) {
         const newId = Math.random().toString(36).substr(2, 9);
         const newObj: CanvasObject = {
@@ -417,29 +410,23 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
           id: newId,
           x: pointerPos.x - sourceObj.width / 2,
           y: pointerPos.y - sourceObj.height / 2,
-          zIndex: objects.length + 1,
+          zIndex: canvasState.objects.length + 1,
         };
-        
-        // Find nearest anchor on the new object
         const nearestAnchor = findNearestAnchor(newObj, pointerPos.x, pointerPos.y);
-        
-        // Update objects and connections together
-        setObjects([...objects, newObj]);
-        setConnections([
-          ...connections,
-          {
+        dispatch({ type: 'ADD_OBJECT', payload: newObj });
+        dispatch({
+          type: 'ADD_CONNECTION',
+          payload: {
             from: connectionDragStart.objId,
             to: newId,
             fromPoint: connectionDragStart.anchorPosition,
             toPoint: nearestAnchor
           }
-        ]);
-        setActiveId(newId); // Select the new object
+        });
+        setActiveId(newId);
         setResetInteraction((v) => v + 1);
       }
     }
-
-    // Reset connection drag state
     setIsDraggingConnection(false);
     setConnectionDragStart(null);
     setConnectionDragEnd(null);
@@ -561,19 +548,21 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
             <button 
               onClick={() => {
                 const id = Math.random().toString(36).substr(2, 9);
-                setObjects([...objects, {
+                const newObj: CanvasObject = {
                   id,
-                  type: 'line',
-                  x: 100 + (objects.length * 20) % 300,
-                  y: 100 + (objects.length * 20) % 200,
+                  type: 'line' as AssetType,
+                  x: 100 + (canvasState.objects.length * 20) % 300,
+                  y: 100 + (canvasState.objects.length * 20) % 200,
                   width: 150,
                   height: 2,
                   content: '',
                   color: selectedColor,
                   strokeDashArray: [10, 5],
                   points: [0, 0, 150, 0],
-                  zIndex: objects.length + 1,
-                }]);
+                  zIndex: canvasState.objects.length + 1,
+                };
+                // Only define pageObj where x, y, width, height are in scope
+                dispatch({ type: 'ADD_OBJECT', payload: newObj });
                 setActiveId(id);
               }}
               className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
@@ -651,7 +640,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
                   setSelectedColor(color);
                   // If there's an active object, apply color based on type
                   if (activeId) {
-                    const activeObj = objects.find(obj => obj.id === activeId);
+                    const activeObj = canvasState.objects.find(obj => obj.id === activeId);
                     if (activeObj) {
                       if (activeObj.type === 'text') {
                         // Change text background color
@@ -709,9 +698,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
                   color: 'transparent',
                   borderColor: '#3B82F6',
                   borderWidth: 3,
-                  zIndex: objects.length + 1,
+                  zIndex: canvasState.objects.length + 1,
                 };
-                setObjects([...objects, pageObj]);
+                dispatch({ type: 'ADD_OBJECT', payload: pageObj });
                 setActiveId(id);
               }}
               className="flex items-center justify-center p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-all"
@@ -758,11 +747,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
           </h4>
           <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
           {(() => {
-            const activeObj = objects.find(obj => obj.id === activeId);
+            const activeObj = canvasState.objects.find(obj => obj.id === activeId);
             if (!activeObj) {
               return JSON.stringify({
                 canvas: {
-                  objectCount: objects.length,
+                  objectCount: canvasState.objects.length,
                   activeObject: null
                 },
                 message: "No object selected"
@@ -771,7 +760,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
             
             const debugInfo: any = {
               canvas: {
-                objectCount: objects.length
+                objectCount: canvasState.objects.length
               },
               type: activeObj.type,
               id: activeObj.id,
@@ -842,8 +831,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
                   setPatchError('JSON must have "objects" and "connections" arrays.');
                   return;
                 }
-                setObjects(obj.objects);
-                setConnections(obj.connections);
+                dispatch({ type: 'SET_STATE', payload: { objects: obj.objects, connections: obj.connections } });
                 setPatchError('');
               } catch (e) {
                 setPatchError('Invalid JSON: ' + (e.message || e));
@@ -934,7 +922,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         >
           <Layer>
             {/* Render connection lines between objects */}
-            {connections.map((conn, index) => {
+            {canvasState.connections.map((conn, index) => {
               const fromPos = getAnchorPosition(conn.from, conn.fromPoint);
               const toPos = getAnchorPosition(conn.to, conn.toPoint);
               return (
@@ -966,7 +954,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
             )}
             
             {/* Render all objects */}
-            {objects.map((obj) => (
+            {canvasState.objects.map((obj) => (
               <DraggableObject 
                 key={obj.id} 
                 obj={obj} 
@@ -1002,7 +990,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
 
         {/* Text editing overlay - completely outside Konva */}
         {editingTextId && textInputPosition && typeof document !== 'undefined' && (() => {
-          const editingObj = objects.find(o => o.id === editingTextId);
+          const editingObj = canvasState.objects.find(o => o.id === editingTextId);
           if (!editingObj || editingObj.type !== 'text') return null;
           
           return (
