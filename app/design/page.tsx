@@ -13,6 +13,7 @@ import AppMobileMenu from '../../components/AppMobileMenu';
 import { toast } from 'sonner';
 import { useTheme } from '../../components/ThemeProvider';
 import { getDesign, updateDesignTitle } from '../actions/designs';
+import { clearDesignCache } from '../../lib/localCache';
 import { Design } from '@/types';
 import InlineEditText from '@/components/InlineEditText';
 
@@ -28,11 +29,15 @@ function DesignPageContent() {
   const { toggleTheme } = useTheme();
   const [title, setTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshCanvas, setRefreshCanvas] = useState(0);
 
   // Handler for title change from CanvasTool
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
   };
+
+  // Key for localStorage cache
+  const localCacheKey = designId ? `design-cache-${designId}` : 'design-cache-new';
 
   return (
     <>
@@ -71,6 +76,9 @@ function DesignPageContent() {
                       if (result.success && result.data) {
                         setTitle(result.data.name || newTitle);
                         toast.success('Title updated!');
+                        // Clear the cache and trigger a refresh in CanvasTool
+                        clearDesignCache(localCacheKey);
+                        setRefreshCanvas(prev => prev + 1);
                       } else {
                         toast.error(result.error || 'Failed to update title');
                       }
@@ -101,8 +109,8 @@ function DesignPageContent() {
         <AppMobileMenu
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
-          onThemeToggle={() => { 
-            toggleTheme(); 
+          onThemeToggle={() => {
+            toggleTheme();
             setMenuOpen(false); }}
           onHome={() => { setMenuOpen(false); router.push('/mydesigns'); }}
           onSignOut={async () => {
@@ -117,7 +125,7 @@ function DesignPageContent() {
           }}
         />
         <div className="flex-1 overflow-hidden">
-          <CanvasTool designId={designId} onTitleChange={handleTitleChange} />
+          <CanvasTool designId={designId} onTitleChange={handleTitleChange} refreshCanvas={refreshCanvas} />
         </div>
       </div>
     </>
