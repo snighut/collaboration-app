@@ -1,8 +1,8 @@
 // Design entity and response contracts
 export interface Design {
-  connections(connections: any): unknown;
+  connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
   description: string;
-  items(items: any): unknown;
+  items: CanvasObject[];
   id: string;
   name: string;
   thumbnail?: string;
