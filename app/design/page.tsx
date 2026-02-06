@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, Suspense, useState, useTransition } from 'react';
+import React, { useEffect, Suspense, useState, useTransition, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { List, Sparkles, Loader2, Pencil } from 'lucide-react';
 import CanvasTool from '../../components/CanvasTool';
@@ -32,9 +32,9 @@ function DesignPageContent() {
   const [refreshCanvas, setRefreshCanvas] = useState(0);
 
   // Handler for title change from CanvasTool
-  const handleTitleChange = (newTitle: string) => {
+  const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
-  };
+  }, []);
 
   // Key for localStorage cache
   const localCacheKey = designId ? `design-cache-${designId}` : 'design-cache-new';
