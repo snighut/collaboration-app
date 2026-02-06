@@ -19,6 +19,7 @@ import { createDesign } from '@/app/actions/createDesign';
 interface CanvasToolProps {
   designId?: string | null;
   onTitleChange?: (title: string) => void;
+  refreshCanvas?: number;
 }
 
 // Define a type for the design data used in CanvasTool
@@ -31,7 +32,7 @@ interface CanvasDesign {
   connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
 }
 
-const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
+const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refreshCanvas }) => {
   const { session, loading: authLoading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [resetInteraction, setResetInteraction] = useState(0);
@@ -62,12 +63,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
   // Fetch design data if designId is provided, with localStorage cache restore
   useEffect(() => {
     if (authLoading) return;
-    // Try to restore from localCache utility first
-    const cached = getDesignCache<CanvasState>(localCacheKey);
-    if (cached) {
-      dispatch({ type: 'SET_STATE', payload: cached });
-      if (onTitleChange) onTitleChange(cached.name);
-      return; // Skip fetching from server if cache exists
+    // Try to restore from localCache utility first, but skip if refresh is needed
+    if (!refreshCanvas || refreshCanvas === 0) {
+      const cached = getDesignCache<CanvasState>(localCacheKey);
+      if (cached) {
+        dispatch({ type: 'SET_STATE', payload: cached });
+        if (onTitleChange) onTitleChange(cached.name);
+        return; // Skip fetching from server if cache exists and no refresh is needed
+      }
     }
     if (designId && designId !== 'new') {
       setLoading(true);
@@ -106,7 +109,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange }) => {
         .catch((e) => setLoadError(e?.message || 'Unknown error'))
         .finally(() => setLoading(false));
     }
-  }, [designId, authLoading, session?.access_token, onTitleChange]);
+  }, [designId, authLoading, session?.access_token, onTitleChange, refreshCanvas]);
 
   // Sync cache and onTitleChange on every canvasState change
   useEffect(() => {
