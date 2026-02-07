@@ -63,6 +63,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
+  const [isDraggingObject, setIsDraggingObject] = useState(false);
 
   // Fetch design data if designId is provided, with localStorage cache restore
   useEffect(() => {
@@ -885,10 +886,13 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           x={canvasState.x}
           y={canvasState.y}
           onDragEnd={(e) => {
-            dispatch({
-              type: 'UPDATE_STAGE',
-              payload: { x: e.target.x(), y: e.target.y() },
-            });
+            // Only update canvas position if not dragging an object
+            if (!isDraggingObject) {
+              dispatch({
+                type: 'UPDATE_STAGE',
+                payload: { x: e.target.x(), y: e.target.y() },
+              });
+            }
           }}
           onMouseDown={(e) => {
             // Don't deselect if dragging connection
@@ -1007,6 +1011,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 }}
                 onAnchorDragStart={(anchorPosition, x, y) => {
                   handleAnchorDragStart(obj.id, anchorPosition, x, y);
+                }}
+                onDragStartObject={() => { 
+                  setIsDraggingObject(true);
+                  console.log('Started dragging object', obj.id);
+                }}
+                onDragEndObject={() => { 
+                  setIsDraggingObject(false);
+                  console.log('Ended dragging object', obj.id);
                 }}
                 resetInteraction={resetInteraction}
               />
