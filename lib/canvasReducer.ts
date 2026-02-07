@@ -9,10 +9,13 @@ export interface CanvasState {
   thumbnail: string | null;
   objects: CanvasObject[];
   connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
+  x: number;
+  y: number;
 }
 
 export type CanvasAction =
   | { type: 'SET_STATE'; payload: Partial<CanvasState> }
+  | { type: 'UPDATE_STAGE'; payload: { x: number; y: number } }
   | { type: 'ADD_OBJECT'; payload: CanvasObject }
   | { type: 'UPDATE_OBJECT'; id: string; updates: Partial<CanvasObject> }
   | { type: 'REMOVE_OBJECT'; id: string }
@@ -24,6 +27,8 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
   switch (action.type) {
     case 'SET_STATE':
       return { ...state, ...action.payload };
+    case 'UPDATE_STAGE':
+      return { ...state, x: action.payload.x, y: action.payload.y };
     case 'ADD_OBJECT':
       return { ...state, objects: [...state.objects, action.payload] };
     case 'UPDATE_OBJECT':
@@ -48,6 +53,8 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
         thumbnail: null,
         objects: [],
         connections: [],
+        x: 0,
+        y: 0,
       };
     default:
       return state;
