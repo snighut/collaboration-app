@@ -30,6 +30,8 @@ interface CanvasDesign {
   thumbnail: string | null;
   objects: CanvasObject[];
   connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
+  x?: number;
+  y?: number;
 }
 
 const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refreshCanvas }) => {
@@ -52,6 +54,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     thumbnail: null,
     objects: [],
     connections: [],
+    x: 0,
+    y: 0,
   });
 
   // Key for localStorage cache
@@ -98,13 +102,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 to: typeof conn.to === 'object' && conn.to !== null ? conn.to.id : conn.to,
               }));
             }
-            const newDesignData = {
+            const newDesignData: CanvasDesign = {
               id: result.data.id,
               name: result.data.name || '',
               description: result.data.description || '',
               thumbnail: result.data.thumbnail || null,
               objects,
               connections,
+              x: result.data.data?.x || 0,
+              y: result.data.data?.y || 0,
             };
             dispatch({ type: 'SET_STATE', payload: newDesignData });
             if (onTitleChange) onTitleChange(newDesignData.name);
@@ -148,6 +154,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       data: {
         objects: canvasState.objects,
         connections: canvasState.connections,
+        x: canvasState.x,
+        y: canvasState.y,
       },
     };
     const accessToken = session?.access_token;
@@ -874,6 +882,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           width={stageDimensions.width}
           height={stageDimensions.height}
           draggable={true}
+          x={canvasState.x}
+          y={canvasState.y}
+          onDragEnd={(e) => {
+            dispatch({
+              type: 'UPDATE_STAGE',
+              payload: { x: e.target.x(), y: e.target.y() },
+            });
+          }}
           onMouseDown={(e) => {
             // Don't deselect if dragging connection
             if (isDraggingConnection) return;
