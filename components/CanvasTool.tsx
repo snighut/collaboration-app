@@ -873,6 +873,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           ref={stageRef}
           width={stageDimensions.width}
           height={stageDimensions.height}
+          draggable={true}
           onMouseDown={(e) => {
             // Don't deselect if dragging connection
             if (isDraggingConnection) return;
