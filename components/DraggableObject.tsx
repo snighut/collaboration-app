@@ -13,6 +13,8 @@ interface DraggableObjectProps {
   onStartTextEdit?: (position: { x: number; y: number }) => void;
   onAnchorDragStart?: (anchorPosition: string, x: number, y: number) => void;
   resetInteraction?: number;
+  onDragStartObject?: () => void;
+  onDragEndObject?: () => void;
 }
 
 // Component to handle image loading
@@ -46,7 +48,7 @@ const ImageShape: React.FC<{ obj: CanvasObject; active: boolean; isGrayedOut: bo
 };
 
 const DraggableObject: React.FC<DraggableObjectProps> = ({
-  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart, resetInteraction
+  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart, resetInteraction, onDragStartObject, onDragEndObject
 }) => {
   // Cancel hold timer and set drag state on any drag move
   const handleDragMove = () => {
@@ -214,7 +216,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       x: node.x(),
       y: node.y(),
     });
-    
+    if (typeof onDragEndObject === 'function') onDragEndObject();
     // Reset position tracking
     initialPosition.current = null;
   };
@@ -228,6 +230,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     isDraggingRef.current = true;
     setIsHoldingForConnection(false);
     setDraggable(true); // Always re-enable dragging on drag start
+    if (typeof onDragStartObject === 'function') onDragStartObject();
   };
 
   const renderShape = () => {
@@ -457,9 +460,15 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       x={obj.x}
       y={obj.y}
       draggable={draggable}
-      onDragStart={handleDragStart}
+      onDragStart={(e) => {
+        handleDragStart();
+        if (typeof onDragStartObject === 'function') onDragStartObject();
+      }}
       onDragMove={handleDragMove}
-      onDragEnd={handleDragEnd}
+      onDragEnd={(e) => {
+        handleDragEnd(e);
+        if (typeof onDragEndObject === 'function') onDragEndObject();
+      }}
       onClick={onSelect}
       onTap={onSelect}
       onTouchStart={handleTouchStart}
