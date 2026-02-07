@@ -303,7 +303,7 @@ const ChatSidebar: React.FC = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="fixed top-1/2 right-0 -translate-y-1/2 z-[2000] bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
+          className="fixed top-[calc(50%-100px)] right-0 -translate-y-1/2 z-[2000] bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
           aria-label="Open AI chat"
           title="Open AI Assistant"
         >
