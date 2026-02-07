@@ -293,8 +293,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const getAnchorPosition = (objId: string, position: string) => {
     const obj = canvasState.objects.find(o => o.id === objId);
     if (!obj) return { x: 0, y: 0 };
-    let x = obj.x;
-    let y = obj.y;
+    let x = obj.x + canvasState.x;
+    let y = obj.y + canvasState.y;
     if (obj.type === 'line' || obj.type === 'arrow') {
       const points = obj.points || [0, 0, obj.width, 0];
       if (position === 'start') {
@@ -328,8 +328,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   // Handler for starting a connection drag from an anchor
   const handleAnchorDragStart = (objId: string, anchorPosition: string, x: number, y: number) => {
     setIsDraggingConnection(true);
-    setConnectionDragStart({ objId, anchorPosition, x, y });
-    setConnectionDragEnd({ x, y });
+    // Adjust for canvas offset
+    setConnectionDragStart({ objId, anchorPosition, x: x + canvasState.x, y: y + canvasState.y });
+    setConnectionDragEnd({ x: x + canvasState.x, y: y + canvasState.y });
   };
 
   // Handler for dragging the connection line
@@ -766,20 +767,20 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
           {(() => {
             const activeObj = canvasState.objects.find(obj => obj.id === activeId);
+            const canvasDebug = {
+              objectCount: canvasState.objects.length,
+              x: Math.round(canvasState.x),
+              y: Math.round(canvasState.y)
+            };
             if (!activeObj) {
               return JSON.stringify({
-                canvas: {
-                  objectCount: canvasState.objects.length,
-                  activeObject: null
-                },
+                canvas: canvasDebug,
+                activeObject: null,
                 message: "No object selected"
               }, null, 2);
             }
-            
             const debugInfo: any = {
-              canvas: {
-                objectCount: canvasState.objects.length
-              },
+              canvas: canvasDebug,
               type: activeObj.type,
               id: activeObj.id,
               position: {
@@ -792,7 +793,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               },
               zIndex: activeObj.zIndex
             };
-            
             if (activeObj.type === 'text') {
               debugInfo.text = {
                 content: activeObj.content,
@@ -819,7 +819,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 borderWidth: activeObj.borderWidth
               };
             }
-            
             return JSON.stringify(debugInfo, null, 2);
           })()}
           </pre>
