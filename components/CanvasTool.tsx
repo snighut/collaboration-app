@@ -293,8 +293,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const getAnchorPosition = (objId: string, position: string) => {
     const obj = canvasState.objects.find(o => o.id === objId);
     if (!obj) return { x: 0, y: 0 };
-    let x = obj.x + canvasState.x;
-    let y = obj.y + canvasState.y;
+    let x = obj.x;
+    let y = obj.y;
     if (obj.type === 'line' || obj.type === 'arrow') {
       const points = obj.points || [0, 0, obj.width, 0];
       if (position === 'start') {
@@ -328,9 +328,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   // Handler for starting a connection drag from an anchor
   const handleAnchorDragStart = (objId: string, anchorPosition: string, x: number, y: number) => {
     setIsDraggingConnection(true);
-    // Adjust for canvas offset
-    setConnectionDragStart({ objId, anchorPosition, x: x + canvasState.x, y: y + canvasState.y });
-    setConnectionDragEnd({ x: x + canvasState.x, y: y + canvasState.y });
+    setConnectionDragStart({ objId, anchorPosition, x, y });
+    setConnectionDragEnd({ x, y });
   };
 
   // Handler for dragging the connection line
@@ -380,34 +379,20 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   // Handler for ending a connection drag
   const handleAnchorDragEnd = (x: number, y: number) => {
     if (!isDraggingConnection || !connectionDragStart) return;
-    const stage = stageRef.current;
-    if (!stage) {
-      setIsDraggingConnection(false);
-      setConnectionDragStart(null);
-      setConnectionDragEnd(null);
-      setResetInteraction((v) => v + 1);
-      return;
-    }
-    const pointerPos = stage.getPointerPosition();
-    if (!pointerPos) {
-      setIsDraggingConnection(false);
-      setConnectionDragStart(null);
-      setConnectionDragEnd(null);
-      setResetInteraction((v) => v + 1);
-      return;
-    }
+
     const targetObj = canvasState.objects.find(obj => {
       if (obj.id === connectionDragStart.objId) return false;
       return (
-        pointerPos.x >= obj.x &&
-        pointerPos.x <= obj.x + obj.width &&
-        pointerPos.y >= obj.y &&
-        pointerPos.y <= obj.y + obj.height
+        x >= obj.x &&
+        x <= obj.x + obj.width &&
+        y >= obj.y &&
+        y <= obj.y + obj.height
       );
     });
+
     if (targetObj) {
       // Create connection between existing objects
-      const nearestAnchor = findNearestAnchor(targetObj, pointerPos.x, pointerPos.y);
+      const nearestAnchor = findNearestAnchor(targetObj, x, y);
       dispatch({
         type: 'ADD_CONNECTION',
         payload: {
@@ -418,7 +403,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         }
       });
       setActiveId(targetObj.id);
-      setResetInteraction((v) => v + 1);
     } else {
       // No target found - duplicate the source object at cursor position
       const sourceObj = canvasState.objects.find(o => o.id === connectionDragStart.objId);
@@ -427,11 +411,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         const newObj: CanvasObject = {
           ...sourceObj,
           id: newId,
-          x: pointerPos.x - sourceObj.width / 2,
-          y: pointerPos.y - sourceObj.height / 2,
+          x: x - sourceObj.width / 2,
+          y: y - sourceObj.height / 2,
           zIndex: canvasState.objects.length + 1,
         };
-        const nearestAnchor = findNearestAnchor(newObj, pointerPos.x, pointerPos.y);
+        const nearestAnchor = findNearestAnchor(newObj, x, y);
         dispatch({ type: 'ADD_OBJECT', payload: newObj });
         dispatch({
           type: 'ADD_CONNECTION',
@@ -443,9 +427,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           }
         });
         setActiveId(newId);
-        setResetInteraction((v) => v + 1);
       }
     }
+
     setIsDraggingConnection(false);
     setConnectionDragStart(null);
     setConnectionDragEnd(null);
