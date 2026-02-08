@@ -891,17 +891,19 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           }}
           onMouseMove={(e) => {
             if (isDraggingConnection) {
-              const pos = e.target.getStage()?.getPointerPosition();
-              if (pos) {
-                handleConnectionDrag(pos.x, pos.y);
+              const stage = e.target.getStage();
+              const pos = stage?.getPointerPosition();
+              if (pos && stage) {
+                handleConnectionDrag(pos.x - stage.x(), pos.y - stage.y());
               }
             }
           }}
           onMouseUp={(e) => {
             if (isDraggingConnection) {
-              const pos = e.target.getStage()?.getPointerPosition();
-              if (pos) {
-                handleAnchorDragEnd(pos.x, pos.y);
+              const stage = e.target.getStage();
+              const pos = stage?.getPointerPosition();
+              if (pos && stage) {
+                handleAnchorDragEnd(pos.x - stage.x(), pos.y - stage.y());
               }
             }
           }}
@@ -918,17 +920,19 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           }}
           onTouchMove={(e) => {
             if (isDraggingConnection) {
-              const pos = e.target.getStage()?.getPointerPosition();
-              if (pos) {
-                handleConnectionDrag(pos.x, pos.y);
+              const stage = e.target.getStage();
+              const pos = stage?.getPointerPosition();
+              if (pos && stage) {
+                handleConnectionDrag(pos.x - stage.x(), pos.y - stage.y());
               }
             }
           }}
           onTouchEnd={(e) => {
             if (isDraggingConnection) {
-              const pos = e.target.getStage()?.getPointerPosition();
-              if (pos) {
-                handleAnchorDragEnd(pos.x, pos.y);
+              const stage = e.target.getStage();
+              const pos = stage?.getPointerPosition();
+              if (pos && stage) {
+                handleAnchorDragEnd(pos.x - stage.x(), pos.y - stage.y());
               }
             }
           }}
