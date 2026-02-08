@@ -139,14 +139,15 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
           const pointerPos = stage.getPointerPosition();
           if (pointerPos) {
             // Find nearest anchor to the tap position
+            const anchors = getAnchorPoints();
             const pointerAbsX = pointerPos.x;
             const pointerAbsY = pointerPos.y;
             let nearestAnchor = anchors[0];
             let minDistance = Infinity;
             
             anchors.forEach(anchor => {
-              const anchorAbsX = absPos.x + anchor.x;
-              const anchorAbsY = absPos.y + anchor.y;
+              const anchorAbsX = obj.x + anchor.x;
+              const anchorAbsY = obj.y + anchor.y;
               const distance = Math.sqrt(
                 Math.pow(pointerAbsX - anchorAbsX, 2) + 
                 Math.pow(pointerAbsY - anchorAbsY, 2)
@@ -156,10 +157,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
                 nearestAnchor = anchor;
               }
             });
-            // Start connection drag from nearest anchor
-            const anchorAbsX = absPos.x + nearestAnchor.x;
-            const anchorAbsY = absPos.y + nearestAnchor.y;
-            onAnchorDragStart(nearestAnchor.position, anchorAbsX, anchorAbsY);
+
+            onAnchorDragStart(nearestAnchor.position, obj.x + nearestAnchor.x, obj.y + nearestAnchor.y);
           }
         }
       }
@@ -507,11 +506,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
                 const stage = groupRef.current.getStage();
                 if (stage) {
                   // Get absolute position of the anchor
-                  const absPos = groupRef.current.absolutePosition();
-                  const anchorAbsX = absPos.x + anchor.x;
-                  const anchorAbsY = absPos.y + anchor.y;
-                  
-                  onAnchorDragStart(anchor.position, anchorAbsX, anchorAbsY);
+                  onAnchorDragStart(anchor.position, obj.x + anchor.x, obj.y + anchor.y);
                 }
               }
             }}
