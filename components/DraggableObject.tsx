@@ -139,16 +139,17 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
           const pointerPos = stage.getPointerPosition();
           if (pointerPos) {
             // Find nearest anchor to the tap position
-            const anchors = getAnchorPoints();
-            const absPos = groupRef.current.absolutePosition();
+            const pointerAbsX = pointerPos.x;
+            const pointerAbsY = pointerPos.y;
             let nearestAnchor = anchors[0];
             let minDistance = Infinity;
+            
             anchors.forEach(anchor => {
               const anchorAbsX = absPos.x + anchor.x;
               const anchorAbsY = absPos.y + anchor.y;
               const distance = Math.sqrt(
-                Math.pow(pointerPos.x - anchorAbsX, 2) + 
-                Math.pow(pointerPos.y - anchorAbsY, 2)
+                Math.pow(pointerAbsX - anchorAbsX, 2) + 
+                Math.pow(pointerAbsY - anchorAbsY, 2)
               );
               if (distance < minDistance) {
                 minDistance = distance;
