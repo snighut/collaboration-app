@@ -13,7 +13,7 @@ export async function createDesign(payload: SaveDesignPayload, accessToken?: str
   const apiUrl = process.env.DESIGN_SERVICE_URL || 'http://design-service:3000';
 
   try {
-    console.log('Creating new design with payload:', payload.data);
+    console.log('Creating new design with payload:', payload);
     const response = await fetch(`${apiUrl}/api/v1/designs`, {
       method: 'POST',
       headers: {
