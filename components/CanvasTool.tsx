@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
-import { AssetType, CanvasObject } from '../types';
+import { AssetType, CanvasObject, Connection } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
 import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle } from 'lucide-react';
 import { useAuth } from './AuthProvider';
@@ -8,6 +8,8 @@ import AuthProviders from './AuthProviders';
 import { toast } from 'sonner';
 
 import DraggableObject from './DraggableObject';
+import ConnectionRenderer from './ConnectionRenderer';
+import DesignGroupRenderer from './DesignGroupRenderer';
 import { Save } from 'lucide-react';
 import { saveDesign, getDesign } from '../app/actions/designs';
 
@@ -15,6 +17,7 @@ import { useEffect } from 'react';
 import { getDesignCache, setDesignCache, clearDesignCache } from '../lib/localCache';
 import { canvasReducer, CanvasState } from '../lib/canvasReducer';
 import { createDesign } from '@/app/actions/createDesign';
+import { transformFromBackendSchema, transformToBackendSchema } from '../lib/schemaTransform';
 
 interface CanvasToolProps {
   designId?: string | null;
@@ -29,7 +32,8 @@ interface CanvasDesign {
   description: string;
   thumbnail: string | null;
   objects: CanvasObject[];
-  connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
+  connections: Connection[];
+  designGroups?: any[];
   x?: number;
   y?: number;
 }
@@ -54,6 +58,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     thumbnail: null,
     objects: [],
     connections: [],
+    designGroups: [],
     x: 0,
     y: 0,
   });
@@ -61,7 +66,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   // Key for localStorage cache
   const localCacheKey = designId ? `design-cache-${designId}` : 'design-cache-new';
 
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeName, setActiveName] = useState<string | null>(null);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
   const [isDraggingObject, setIsDraggingObject] = useState(false);
 
@@ -83,26 +89,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       getDesign(designId, session?.access_token)
         .then((result) => {
           if (result.success && result.data) {
-            // Prefer data.objects if present, else fallback to items
-            let objects: CanvasObject[] = [];
-            if (result.data.data && Array.isArray(result.data.data.objects)) {
-              objects = result.data.data.objects;
-            } else if (Array.isArray(result.data.items)) {
-              objects = result.data.items;
-            }
-            // Prefer data.connections if present, else fallback to connections
-            let connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }> = [];
-            const rawConnections = (result.data.data && Array.isArray(result.data.data.connections))
-              ? result.data.data.connections
-              : (Array.isArray(result.data.connections) ? result.data.connections : []);
-
-            if (rawConnections.length > 0) {
-              connections = rawConnections.map(conn => ({
-                ...conn,
-                from: typeof conn.from === 'object' && conn.from !== null ? conn.from.id : conn.from,
-                to: typeof conn.to === 'object' && conn.to !== null ? conn.to.id : conn.to,
-              }));
-            }
+            // Use schema transformation utility
+            const { objects, connections, designGroups } = transformFromBackendSchema(result.data);
+            
             const newDesignData: CanvasDesign = {
               id: result.data.id,
               name: result.data.name || '',
@@ -110,6 +99,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               thumbnail: result.data.thumbnail || null,
               objects,
               connections,
+              designGroups,
               x: result.data.data?.x || 0,
               y: result.data.data?.y || 0,
             };
@@ -148,17 +138,19 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     setSaving(true);
     setSaveSuccess(false);
     const id = designId || canvasState.id;
-    const payload = {
+    
+    // Transform to new backend schema
+    const backendSchema = transformToBackendSchema({
       name: canvasState.name || 'Untitled Design',
       description: canvasState.description || '',
       thumbnail: canvasState.thumbnail,
-      data: {
-        objects: canvasState.objects,
-        connections: canvasState.connections,
-        x: canvasState.x,
-        y: canvasState.y,
-      },
-    };
+      objects: canvasState.objects,
+      connections: canvasState.connections,
+      designGroups: canvasState.designGroups,
+    });
+    
+    // Send the flattened backend schema directly (no nested 'data' field)
+    const payload = backendSchema;
     const accessToken = session?.access_token;
     try {
       let result;
@@ -196,10 +188,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       setSaveSuccess(false);
     }
   };
-  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [editingTextName, setEditingTextName] = useState<string | null>(null);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDraggingConnection, setIsDraggingConnection] = useState(false);
-  const [connectionDragStart, setConnectionDragStart] = useState<{ objId: string; anchorPosition: string; x: number; y: number } | null>(null);
+  const [connectionDragStart, setConnectionDragStart] = useState<{
+    objName: string; anchorPosition: string; x: number; y: number;
+  } | null>(null);
   const [connectionDragEnd, setConnectionDragEnd] = useState<{ x: number; y: number } | null>(null);
   const textInputRef = useRef<HTMLTextAreaElement>(null);
   const stageRef = useRef<any>(null);
@@ -207,9 +201,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
 
   const addObject = (type: AssetType, content: string = '') => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const name = Math.random().toString(36).substr(2, 9);
     const baseObj = {
-      id,
+      name,
       type,
       x: 100 + (canvasState.objects.length * 20) % 300,
       y: 100 + (canvasState.objects.length * 20) % 200,
@@ -263,21 +257,21 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         };
     }
     dispatch({ type: 'ADD_OBJECT', payload: newObj });
-    setActiveId(id);
+    setActiveName(name);
   };
 
-  const updateObject = (id: string, updates: Partial<CanvasObject>) => {
-    dispatch({ type: 'UPDATE_OBJECT', id, updates });
+  const updateObject = (name: string, updates: Partial<CanvasObject>) => {
+    dispatch({ type: 'UPDATE_OBJECT', name, updates });
   };
 
-  const removeObject = (id: string) => {
-    dispatch({ type: 'REMOVE_OBJECT', id });
-    setActiveId(null);
+  const removeObject = (name: string) => {
+    dispatch({ type: 'REMOVE_OBJECT', name });
+    setActiveName(null);
   };
 
   const isOverlappedByHigher = useCallback((id: string, self: CanvasObject) => {
     return canvasState.objects.some(other => {
-      if (other.id === id) return false;
+      if (other.name === id) return false;
       if (other.zIndex <= self.zIndex) return false;
       const buffer = 0;
       return (
@@ -290,8 +284,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   }, [canvasState.objects]);
 
   // Helper to get anchor point position in absolute coordinates
-  const getAnchorPosition = (objId: string, position: string) => {
-    const obj = canvasState.objects.find(o => o.id === objId);
+  const getAnchorPosition = (objName: string, position: string) => {
+    const obj = canvasState.objects.find(o => o.name === objName);
     if (!obj) return { x: 0, y: 0 };
     let x = obj.x;
     let y = obj.y;
@@ -326,9 +320,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   };
 
   // Handler for starting a connection drag from an anchor
-  const handleAnchorDragStart = (objId: string, anchorPosition: string, x: number, y: number) => {
+  const handleAnchorDragStart = (objName: string, anchorPosition: string, x: number, y: number) => {
     setIsDraggingConnection(true);
-    setConnectionDragStart({ objId, anchorPosition, x, y });
+    setConnectionDragStart({ objName, anchorPosition, x, y });
     setConnectionDragEnd({ x, y });
   };
 
@@ -381,7 +375,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     if (!isDraggingConnection || !connectionDragStart) return;
 
     const targetObj = canvasState.objects.find(obj => {
-      if (obj.id === connectionDragStart.objId) return false;
+      if (obj.name === connectionDragStart.objName) return false;
       return (
         x >= obj.x &&
         x <= obj.x + obj.width &&
@@ -396,21 +390,27 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       dispatch({
         type: 'ADD_CONNECTION',
         payload: {
-          from: connectionDragStart.objId,
-          to: targetObj.id,
+          name: `${connectionDragStart.objName} → ${targetObj.name}`,
+          from: connectionDragStart.objName,
+          to: targetObj.name,
           fromPoint: connectionDragStart.anchorPosition,
-          toPoint: nearestAnchor
+          toPoint: nearestAnchor,
+          uidata: {
+            borderColor: '#3B82F6',
+            borderThickness: 2,
+            borderStyle: 'solid',
+          },
         }
       });
-      setActiveId(targetObj.id);
+      setActiveName(targetObj.name);
     } else {
       // No target found - duplicate the source object at cursor position
-      const sourceObj = canvasState.objects.find(o => o.id === connectionDragStart.objId);
+      const sourceObj = canvasState.objects.find(o => o.name === connectionDragStart.objName);
       if (sourceObj) {
-        const newId = Math.random().toString(36).substr(2, 9);
+        const newName = sourceObj.name + '-' + Math.random().toString(36).substr(2, 5);
         const newObj: CanvasObject = {
           ...sourceObj,
-          id: newId,
+          name: newName,
           x: x - sourceObj.width / 2,
           y: y - sourceObj.height / 2,
           zIndex: canvasState.objects.length + 1,
@@ -420,13 +420,19 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         dispatch({
           type: 'ADD_CONNECTION',
           payload: {
-            from: connectionDragStart.objId,
-            to: newId,
+            name: `${connectionDragStart.objName} → ${newName}`,
+            from: connectionDragStart.objName,
+            to: newName,
             fromPoint: connectionDragStart.anchorPosition,
-            toPoint: nearestAnchor
+            toPoint: nearestAnchor,
+            uidata: {
+              borderColor: '#3B82F6',
+              borderThickness: 2,
+              borderStyle: 'solid',
+            },
           }
         });
-        setActiveId(newId);
+        setActiveName(newName);
       }
     }
 
@@ -550,9 +556,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => {
-                const id = Math.random().toString(36).substr(2, 9);
+                const name = Math.random().toString(36).substr(2, 9);
                 const newObj: CanvasObject = {
-                  id,
+                  name,
                   type: 'line' as AssetType,
                   x: 100 + (canvasState.objects.length * 20) % 300,
                   y: 100 + (canvasState.objects.length * 20) % 200,
@@ -564,9 +570,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                   points: [0, 0, 150, 0],
                   zIndex: canvasState.objects.length + 1,
                 };
-                // Only define pageObj where x, y, width, height are in scope
                 dispatch({ type: 'ADD_OBJECT', payload: newObj });
-                setActiveId(id);
+                setActiveName(name);
               }}
               className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
             >
@@ -642,17 +647,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onClick={() => {
                   setSelectedColor(color);
                   // If there's an active object, apply color based on type
-                  if (activeId) {
-                    const activeObj = canvasState.objects.find(obj => obj.id === activeId);
+                  if (activeName) {
+                    const activeObj = canvasState.objects.find(obj => obj.name === activeName);
                     if (activeObj) {
                       if (activeObj.type === 'text') {
-                        // Change text background color
-                        updateObject(activeId, { backgroundColor: color });
+                        updateObject(activeName, { backgroundColor: color });
                       } else if (activeObj.type === 'svg') {
-                        // Change SVG icon color
-                        updateObject(activeId, { color });
+                        updateObject(activeName, { color });
                       }
-                      // Do nothing for image assets
                     }
                   }
                 }}
@@ -689,9 +691,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 const y = (canvasHeight - height) / 2;
                 
                 // Add a single page layout (8.5 x 11 rectangle)
-                const id = Math.random().toString(36).substr(2, 9);
+                const name = Math.random().toString(36).substr(2, 9);
                 const pageObj: CanvasObject = {
-                  id,
+                  name,
                   type: 'color',
                   x,
                   y,
@@ -704,7 +706,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                   zIndex: canvasState.objects.length + 1,
                 };
                 dispatch({ type: 'ADD_OBJECT', payload: pageObj });
-                setActiveId(id);
+                setActiveName(name);
               }}
               className="flex items-center justify-center p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-all"
               title="Single Page (8.5x11)"
@@ -750,7 +752,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </h4>
           <pre className="text-[9px] bg-gray-900 dark:bg-black text-green-400 p-3 rounded-lg overflow-auto max-h-48 font-mono">
           {(() => {
-            const activeObj = canvasState.objects.find(obj => obj.id === activeId);
+            const activeObj = canvasState.objects.find(obj => obj.name === activeName);
             const canvasDebug = {
               objectCount: canvasState.objects.length,
               x: Math.round(canvasState.x),
@@ -766,7 +768,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             const debugInfo: any = {
               canvas: canvasDebug,
               type: activeObj.type,
-              id: activeObj.id,
+              name: activeObj.name,
               position: {
                 x: Math.round(activeObj.x),
                 y: Math.round(activeObj.y)
@@ -827,14 +829,22 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             onClick={() => {
               try {
                 const obj = JSON.parse(patchJson);
-                // Validate structure
-                if (!obj.objects || !Array.isArray(obj.objects) || !obj.connections || !Array.isArray(obj.connections)) {
-                  setPatchError('JSON must have "objects" and "connections" arrays.');
-                  return;
+                
+                // Support both new schema (items) and old schema (objects)
+                if (obj.items && Array.isArray(obj.items)) {
+                  // New schema format - transform it
+                  const { objects, connections, designGroups } = transformFromBackendSchema(obj);
+                  dispatch({ type: 'SET_STATE', payload: { objects, connections, designGroups } });
+                  setPatchError('');
+                } else if (obj.objects && Array.isArray(obj.objects) && obj.connections && Array.isArray(obj.connections)) {
+                  // Old schema format
+                  const designGroups = obj.designGroups || [];
+                  dispatch({ type: 'SET_STATE', payload: { objects: obj.objects, connections: obj.connections, designGroups } });
+                  setPatchError('');
+                } else {
+                  setPatchError('JSON must have "items" (new schema) or "objects" and "connections" (old schema) arrays.');
                 }
-                dispatch({ type: 'SET_STATE', payload: { objects: obj.objects, connections: obj.connections } });
-                setPatchError('');
-              } catch (e) {
+              } catch (e: any) {
                 setPatchError('Invalid JSON: ' + (e.message || e));
               }
             }}
@@ -848,11 +858,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         className="w-full md:w-4/5 h-[60%] md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
       >
         <div className="absolute top-4 right-4 flex gap-2 z-[1001]">
-           {activeId && (
+           {activeName && (
               <button 
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  removeObject(activeId); 
+                  removeObject(activeName); 
                 }}
                 className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors shadow-lg"
               >
@@ -884,8 +894,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             // Deselect when clicking on empty canvas
             const clickedOnEmpty = e.target === e.target.getStage();
             if (clickedOnEmpty) {
-              setActiveId(null);
-              setEditingTextId(null);
+              setActiveName(null);
+              setEditingTextName(null);
               setTextInputPosition(null);
             }
           }}
@@ -913,8 +923,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             
             const clickedOnEmpty = e.target === e.target.getStage();
             if (clickedOnEmpty) {
-              setActiveId(null);
-              setEditingTextId(null);
+              setActiveName(null);
+              setEditingTextName(null);
               setTextInputPosition(null);
             }
           }}
@@ -938,21 +948,19 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           }}
         >
           <Layer>
-            {/* Render connection lines between objects */}
-            {canvasState.connections.map((conn, index) => {
-              const fromPos = getAnchorPosition(conn.from, conn.fromPoint);
-              const toPos = getAnchorPosition(conn.to, conn.toPoint);
-              return (
-                <Line
-                  key={`connection-${index}`}
-                  points={[fromPos.x, fromPos.y, toPos.x, toPos.y]}
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  dash={[10, 5]}
-                  opacity={0.7}
-                />
-              );
-            })}
+            {/* Render design groups (behind everything) */}
+            <DesignGroupRenderer
+              designGroups={canvasState.designGroups || []}
+              objects={canvasState.objects}
+              onSelect={(groupId) => setActiveGroupId(groupId)}
+              activeGroupId={activeGroupId}
+            />
+            
+            {/* Render connection lines between objects using new ConnectionRenderer */}
+            <ConnectionRenderer
+              connections={canvasState.connections}
+              objects={canvasState.objects}
+            />
             
             {/* Render dragging connection line */}
             {isDraggingConnection && connectionDragStart && connectionDragEnd && (
@@ -973,21 +981,21 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             {/* Render all objects */}
             {canvasState.objects.map((obj) => (
               <DraggableObject 
-                key={obj.id} 
+                key={obj.name} 
                 obj={obj} 
-                active={activeId === obj.id}
-                isGrayedOut={isOverlappedByHigher(obj.id, obj)}
+                active={activeName === obj.name}
+                isGrayedOut={isOverlappedByHigher(obj.name, obj)}
                 onSelect={() => {
                   // Close any open text editing when selecting a different object
-                  if (activeId !== obj.id) {
-                    setEditingTextId(null);
+                  if (activeName !== obj.name) {
+                    setEditingTextName(null);
                     setTextInputPosition(null);
                   }
-                  setActiveId(obj.id);
+                  setActiveName(obj.name);
                 }}
-                onUpdate={(updates) => updateObject(obj.id, updates)}
+                onUpdate={(updates) => updateObject(obj.name, updates)}
                 onStartTextEdit={(position) => {
-                  setEditingTextId(obj.id);
+                  setEditingTextName(obj.name);
                   setTextInputPosition(position);
                   setTimeout(() => {
                     if (textInputRef.current) {
@@ -997,15 +1005,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                   }, 0);
                 }}
                 onAnchorDragStart={(anchorPosition, x, y) => {
-                  handleAnchorDragStart(obj.id, anchorPosition, x, y);
+                  handleAnchorDragStart(obj.name, anchorPosition, x, y);
                 }}
                 onDragStartObject={() => { 
                   setIsDraggingObject(true);
-                  console.log('Started dragging object', obj.id);
+                  console.log('Started dragging object', obj.name);
                 }}
                 onDragEndObject={() => { 
                   setIsDraggingObject(false);
-                  console.log('Ended dragging object', obj.id);
+                  console.log('Ended dragging object', obj.name);
                 }}
                 resetInteraction={resetInteraction}
               />
@@ -1014,22 +1022,22 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         </Stage>
 
         {/* Text editing overlay - completely outside Konva */}
-        {editingTextId && textInputPosition && typeof document !== 'undefined' && (() => {
-          const editingObj = canvasState.objects.find(o => o.id === editingTextId);
+        {editingTextName && textInputPosition && typeof document !== 'undefined' && (() => {
+          const editingObj = canvasState.objects.find(o => o.name === editingTextName);
           if (!editingObj || editingObj.type !== 'text') return null;
           
           return (
             <textarea
               ref={textInputRef}
               value={editingObj.content}
-              onChange={(e) => updateObject(editingTextId, { content: e.target.value })}
+              onChange={(e) => updateObject(editingTextName!, { content: e.target.value })}
               onBlur={() => {
-                setEditingTextId(null);
+                setEditingTextName(null);
                 setTextInputPosition(null);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') {
-                  setEditingTextId(null);
+                  setEditingTextName(null);
                   setTextInputPosition(null);
                 }
               }}
