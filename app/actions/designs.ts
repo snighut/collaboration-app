@@ -23,7 +23,7 @@ export async function saveDesign(payload: SaveDesignPayload, id: string, accessT
   }
 
   try {
-    console.log('Saving design ' + id + ' with payload:', payload.data);
+    console.log('Saving design ' + id + ' with payload:', payload);
     const response = await fetch(`${apiUrl}/api/v1/designs/${id}`, {
       method: 'PUT',
       headers: {
