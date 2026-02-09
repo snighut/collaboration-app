@@ -1,14 +1,16 @@
 // Design entity and response contracts
 export interface Design {
-  connections: Array<{ from: string; to: string; fromPoint: string; toPoint: string }>;
+  connections: Connection[];
   description: string;
-  items: CanvasObject[];
+  items: DesignItem[];
   id: string;
   name: string;
   thumbnail?: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   data: any; // JSON context
+  context?: DesignContext;
+  designGroups?: DesignGroup[];
 }
 
 export interface DesignsResponse {
@@ -17,11 +19,17 @@ export interface DesignsResponse {
   total: number;
   error?: string;
 }
+
 // Design API contracts
 export interface SaveDesignPayload {
   id?: string;
   name: string;
-  data: any;
+  description?: string;
+  thumbnail?: string;
+  context?: DesignContext;
+  items: DesignItem[];
+  connections: Connection[];
+  designGroups?: DesignGroup[];
 }
 
 export interface SaveDesignResponse {
@@ -41,8 +49,71 @@ export interface Achievement {
   logoUrl?: string;
 }
 
-export interface CanvasObject {
+// New schema types for updated design structure
+
+export interface DesignContext {
+  category?: string;
+  tags?: string[];
+}
+
+export interface UIData {
+  type?: AssetType;
+  x?: number;
+  y?: number;
+  content?: string;
+  zIndex?: number;
+  width?: number;
+  height?: number;
+  color?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  borderThickness?: number;
+  borderStyle?: 'solid' | 'dashed' | 'dotted';
+  fontSize?: number;
+  fontStyle?: string;
+}
+
+export interface DesignItem {
   id: string;
+  name: string;
+  uidata: UIData;
+}
+
+export interface ConnectionReference {
+  name: string;
+  type: 'DesignItem' | 'DesignGroup';
+}
+
+export interface Connection {
+  name?: string;
+  from: string | ConnectionReference;
+  to: string | ConnectionReference;
+  fromPoint: string;
+  toPoint: string;
+  uidata?: {
+    borderColor?: string;
+    borderThickness?: number;
+    borderStyle?: 'solid' | 'dashed' | 'dotted';
+  };
+}
+
+export interface DesignGroup {
+  id: string;
+  name: string;
+  description?: string;
+  uidata?: {
+    x?: number;
+    y?: number;
+    borderColor?: string;
+    borderThickness?: number;
+    borderStyle?: 'solid' | 'dashed' | 'dotted';
+  };
+  designs?: any[];
+}
+
+// Legacy CanvasObject interface for backward compatibility
+export interface CanvasObject {
+  name: string;
   type: AssetType;
   x: number;
   y: number;
@@ -59,8 +130,8 @@ export interface CanvasObject {
   fontStyle?: string;
   strokeDashArray?: number[]; // For dotted/dashed lines
   points?: number[]; // For lines and arrows [x1, y1, x2, y2]
-  connectedTo?: string; // ID of object this is connected to
-  connectionPoints?: { id: string; x: number; y: number }[]; // Connection anchor points
+  connectedTo?: string; // name of object this is connected to
+  connectionPoints?: { name: string; x: number; y: number }[]; // Connection anchor points
 }
 
 export interface YearRange {
