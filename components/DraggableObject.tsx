@@ -178,7 +178,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   
   // Cleanup timer on unmount
   useEffect(() => {
-    // Cleanup timer and drag state on unmount or when obj.id changes
+    // Cleanup timer and drag state on unmount or when obj.name changes
     return () => {
       if (holdTimer.current) {
         clearTimeout(holdTimer.current);
@@ -188,7 +188,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
       setIsHoldingForConnection(false);
       setDraggable(true);
     };
-  }, [obj.id]);
+  }, [obj.name]);
 
   // Reset drag/connection state when resetInteraction changes
   useEffect(() => {
