@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Bot, X, Sparkles, ExternalLink } from 'lucide-react';
 import { sendChatMessage, askMistral, generateDesign } from '../app/actions/chat';
 import { useRouter } from 'next/navigation';
+import { useAuth } from './AuthProvider';
 
 interface Message {
   id: string;
@@ -21,6 +22,7 @@ interface Message {
 
 const ChatSidebar: React.FC = () => {
   const router = useRouter();
+  const { session } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -176,7 +178,8 @@ const ChatSidebar: React.FC = () => {
     setIsGeneratingDesign(true);
 
     try {
-      const result = await generateDesign(userMessage.content);
+      const accessToken = session?.access_token;
+      const result = await generateDesign(userMessage.content, accessToken);
 
       if (result.success && result.data) {
         const assistantMessage: Message = {

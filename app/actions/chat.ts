@@ -67,14 +67,22 @@ export async function sendChatMessage(messages: Message[]) {
 }
 
 // Generate design using LLM agent
-export async function generateDesign(query: string) {
+export async function generateDesign(query: string, accessToken?: string) {
   try {
+    if (!accessToken) {
+      return {
+        success: false,
+        error: 'Unauthorized: No access token provided.',
+      };
+    }
+
     const LLM_SERVICE_URL = process.env.LLM_SERVICE_URL || 'http://localhost:3002';
     
     const response = await fetch(`${LLM_SERVICE_URL}/api/v1/agent/generate-design`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ query }),
       cache: 'no-store',
@@ -83,6 +91,11 @@ export async function generateDesign(query: string) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`LLM Agent Error: ${response.status} ${response.statusText}`, errorText);
+      
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Invalid or expired authentication token');
+      }
+      
       throw new Error(`Failed to generate design: ${response.statusText}`);
     }
 
