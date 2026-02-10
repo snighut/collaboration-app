@@ -65,3 +65,42 @@ export async function sendChatMessage(messages: Message[]) {
     };
   }
 }
+
+// Generate design using LLM agent
+export async function generateDesign(query: string) {
+  try {
+    const LLM_SERVICE_URL = process.env.LLM_SERVICE_URL || 'http://localhost:3002';
+    
+    const response = await fetch(`${LLM_SERVICE_URL}/api/v1/agent/generate-design`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`LLM Agent Error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Failed to generate design: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      data: {
+        designId: data.designId,
+        name: data.name,
+        reasoning: data.reasoning || [],
+        metadata: data.metadata || {},
+      },
+    };
+  } catch (error) {
+    console.error('Error generating design:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to generate design',
+    };
+  }
+}
