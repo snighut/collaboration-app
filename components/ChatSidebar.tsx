@@ -1,21 +1,31 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, X } from 'lucide-react';
-import { sendChatMessage, askMistral } from '../app/actions/chat';
+import { Send, Loader2, Bot, X, Sparkles, ExternalLink } from 'lucide-react';
+import { sendChatMessage, askMistral, generateDesign } from '../app/actions/chat';
+import { useRouter } from 'next/navigation';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  designId?: string;
+  reasoning?: string[];
+  metadata?: {
+    componentsCount?: number;
+    connectionsCount?: number;
+    processingTimeMs?: number;
+  };
 }
 
 const ChatSidebar: React.FC = () => {
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingDesign, setIsGeneratingDesign] = useState(false);
   // For streaming completion
   const [streamingCompletion, setStreamingCompletion] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -150,6 +160,58 @@ const ChatSidebar: React.FC = () => {
     }
   };
 
+  // Handle design generation with AI agent
+  const handleGenerateDesign = async () => {
+    if (!inputValue.trim() || isLoading || isGeneratingDesign) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputValue.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsGeneratingDesign(true);
+
+    try {
+      const result = await generateDesign(userMessage.content);
+
+      if (result.success && result.data) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `🎨 Design generated successfully!\n\n**Design ID:** ${result.data.designId}\n**Name:** ${result.data.name}\n\n**Reasoning Steps:**\n${result.data.reasoning.map((step: string, idx: number) => `${idx + 1}. ${step}`).join('\n')}\n\n**Metadata:**\n- Components: ${result.data.metadata.componentsCount || 0}\n- Connections: ${result.data.metadata.connectionsCount || 0}\n- Processing time: ${result.data.metadata.processingTimeMs || 0}ms`,
+          timestamp: new Date(),
+          designId: result.data.designId,
+          reasoning: result.data.reasoning,
+          metadata: result.data.metadata,
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `❌ Failed to generate design: ${result.error || 'Unknown error'}`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Error generating design:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '❌ An error occurred while generating the design. Please try again.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsGeneratingDesign(false);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -181,7 +243,7 @@ const ChatSidebar: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Ask me anything about system designs!
+              Ask me anything about system designs or generate visual architectures!
             </p>
             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
               <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -200,10 +262,13 @@ const ChatSidebar: React.FC = () => {
               <div className="flex items-center justify-center h-full text-center px-4">
                 <div>
                   <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Send className="text-blue-600 dark:text-blue-400" size={24} />
+                    <Sparkles className="text-blue-600 dark:text-blue-400" size={24} />
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Start a conversation by asking a question below
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+                    Start a conversation or generate a system design
+                  </p>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs">
+                    Try: "Design a microservices architecture for an e-commerce platform"
                   </p>
                 </div>
               </div>
@@ -228,6 +293,17 @@ const ChatSidebar: React.FC = () => {
                           <span>{streamingCompletion}</span>
                         )}
                       </p>
+                      {/* Show "View Design" button if message has a designId */}
+                      {message.designId && (
+                        <button
+                          onClick={() => router.push(`/design?id=${message.designId}`)}
+                          className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          <Sparkles size={16} />
+                          <span>View Design</span>
+                          <ExternalLink size={16} />
+                        </button>
+                      )}
                       <p
                         className={`text-xs mt-1 ${
                           message.role === 'user'
@@ -251,10 +327,15 @@ const ChatSidebar: React.FC = () => {
                     </div>
                   </div>
                 )}
-                {isLoading && (
+                {(isLoading || isGeneratingDesign) && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-4 py-3">
+                    <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-4 py-3 flex items-center gap-2">
                       <Loader2 className="text-gray-500 dark:text-gray-400 animate-spin" size={20} />
+                      {isGeneratingDesign && (
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          Generating design...
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -267,33 +348,46 @@ const ChatSidebar: React.FC = () => {
         {/* Input Area - Fixed at bottom */}
         {isExpanded && (
           <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-10 shrink-0">
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask a question..."
-                rows={2}
-                className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                disabled={isLoading}
-                style={{ 
-                  fontSize: '16px',
-                  WebkitTextSizeAdjust: '100%',
-                  touchAction: 'manipulation'
-                }}
-              />
-              <button
-                type="submit"
-                disabled={!inputValue.trim() || isLoading}
-                className="flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end"
-              >
-                <Send size={18} />
-                <span className="hidden md:inline">Send</span>
-              </button>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <textarea
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask a question or describe a system design..."
+                  rows={2}
+                  className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                  disabled={isLoading || isGeneratingDesign}
+                  style={{ 
+                    fontSize: '16px',
+                    WebkitTextSizeAdjust: '100%',
+                    touchAction: 'manipulation'
+                  }}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={!inputValue.trim() || isLoading || isGeneratingDesign}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send size={18} />
+                  <span>Chat</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerateDesign}
+                  disabled={!inputValue.trim() || isLoading || isGeneratingDesign}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 dark:from-purple-500 dark:to-pink-500 dark:hover:from-purple-600 dark:hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Sparkles size={18} />
+                  <span>Generate Design</span>
+                </button>
+              </div>
             </form>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 hidden md:block">
-              Press Enter to send, Shift+Enter for new line
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              Press Enter for chat • Use "Generate Design" to create visual architecture
             </p>
           </div>
         )}
