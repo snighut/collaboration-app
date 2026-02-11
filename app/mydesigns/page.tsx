@@ -235,10 +235,14 @@ function MyDesigns() {
                     ) : (
                       <>
                         <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/design?id=${design.id}`);
+                          }}
                           className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                           disabled={isPending}
                         >
-                          <Eye size={14} className="text-gray-900" />
+                          <Eye size={18} className="text-gray-900" />
                         </button>
                         <button 
                           onClick={(e) => {
@@ -248,7 +252,7 @@ function MyDesigns() {
                           className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                           disabled={isPending}
                         >
-                          <Edit size={14} className="text-gray-900" />
+                          <Edit size={18} className="text-gray-900" />
                         </button>
                         <button 
                           onClick={(e) => {
@@ -258,7 +262,7 @@ function MyDesigns() {
                           className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                           disabled={isPending}
                         >
-                          <Trash2 size={14} className="text-red-600" />
+                          <Trash2 size={18} className="text-red-600" />
                         </button>
                       </>
                     )}
@@ -361,6 +365,10 @@ function MyDesigns() {
                       ) : (
                         <>
                           <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/design?id=${design.id}`);
+                            }}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
