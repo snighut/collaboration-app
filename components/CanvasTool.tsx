@@ -12,6 +12,8 @@ import ConnectionRenderer from './ConnectionRenderer';
 import DesignGroupRenderer from './DesignGroupRenderer';
 import { Save } from 'lucide-react';
 import { saveDesign, getDesign } from '../app/actions/designs';
+import { uploadThumbnail } from '../app/actions/uploadThumbnail';
+import { generateThumbnailFromStage } from '../lib/thumbnailGenerator';
 
 import { useEffect } from 'react';
 import { getDesignCache, setDesignCache, clearDesignCache } from '../lib/localCache';
@@ -138,47 +140,94 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     setSaving(true);
     setSaveSuccess(false);
     const id = designId || canvasState.id;
-    
-    // Transform to new backend schema
-    const backendSchema = transformToBackendSchema({
-      name: canvasState.name || 'Untitled Design',
-      description: canvasState.description || '',
-      thumbnail: canvasState.thumbnail,
-      objects: canvasState.objects,
-      connections: canvasState.connections,
-      designGroups: canvasState.designGroups,
-    });
-    
-    // Send the flattened backend schema directly (no nested 'data' field)
-    const payload = backendSchema;
     const accessToken = session?.access_token;
+    
     try {
+      // Step 1: First, create or update the design to get an ID (if needed)
       let result;
       let newId = id;
+      
+      // Transform to new backend schema
+      const backendSchema = transformToBackendSchema({
+        name: canvasState.name || 'Untitled Design',
+        description: canvasState.description || '',
+        thumbnail: canvasState.thumbnail, // Will be updated after thumbnail upload
+        objects: canvasState.objects,
+        connections: canvasState.connections,
+        designGroups: canvasState.designGroups,
+      });
+      
+      // Send the flattened backend schema directly (no nested 'data' field)
+      const payload = backendSchema;
+      
       if (!id || id === 'new') {
         result = await createDesign({ ...payload }, accessToken);
         if (result.success && result.id) {
+          newId = result.id;
           // Update the URL to use the new id
           if (typeof window !== 'undefined') {
             const url = new URL(window.location.href);
             url.searchParams.set('id', result.id);
             window.history.replaceState({}, '', url.toString());
           }
-          newId = result.id;
+          // Update state with the new ID
+          dispatch({ type: 'SET_STATE', payload: { id: newId } });
         }
       } else {
         result = await saveDesign({ ...payload }, id, accessToken);
       }
+      
       if (!result.success){
         toast.error(result.error || 'Failed to create/save design');
+        setSaving(false);
+        return;
       }
+
+      // Step 2: Generate and upload thumbnail if we have a stage ref and design ID
+      if (stageRef.current && newId && newId !== 'new') {
+        try {
+          // Generate thumbnail from Konva stage
+          const thumbnailBlob = await generateThumbnailFromStage(stageRef.current, {
+            width: 400,
+            height: 300,
+            quality: 0.8,
+          });
+          
+          // Convert blob to base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(thumbnailBlob);
+          });
+          
+          const base64Data = await base64Promise;
+          
+          // Upload thumbnail to backend
+          const uploadResult = await uploadThumbnail(newId, base64Data, accessToken);
+          
+          if (uploadResult.success && uploadResult.url) {
+            // Update local state with new thumbnail URL
+            dispatch({ type: 'SET_STATE', payload: { thumbnail: uploadResult.url } });
+            toast.success('Design and thumbnail saved successfully!');
+          } else {
+            // Design saved but thumbnail upload failed - still consider it a success
+            toast.success('Design saved! (Thumbnail upload failed)');
+            console.error('Thumbnail upload failed:', uploadResult.error);
+          }
+        } catch (thumbnailError) {
+          // Design saved but thumbnail generation failed - still consider it a success
+          console.error('Failed to generate/upload thumbnail:', thumbnailError);
+          toast.success('Design saved! (Thumbnail generation failed)');
+        }
+      } else {
+        toast.success('Design saved successfully!');
+      }
+      
       setSaving(false);
       setSaveSuccess(result.success);
       setTimeout(() => setSaveSuccess(false), 1200);
-      // After creation, always use saveDesign for future saves
-      if (!id || id === 'new') {
-        dispatch({ type: 'SET_STATE', payload: { id: newId } });
-      }
+      
       // Clear localStorage cache after successful save
       if (result.success) {
         clearDesignCache(localCacheKey);
@@ -186,6 +235,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     } catch (e) {
       setSaving(false);
       setSaveSuccess(false);
+      toast.error('Failed to save design');
+      console.error('Save error:', e);
     }
   };
   const [editingTextName, setEditingTextName] = useState<string | null>(null);
