@@ -350,7 +350,7 @@ const ChatSidebar: React.FC = () => {
 
         {/* Input Area - Fixed at bottom */}
         {isExpanded && (
-          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-10 shrink-0">
+          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <textarea
