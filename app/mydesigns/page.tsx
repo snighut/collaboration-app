@@ -430,7 +430,7 @@ function MyDesigns() {
             <div className="mt-12 pt-8 border-t border-gray-200 dark:border-slate-700">
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
                 <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
-                  <strong>Note:</strong> These designs are experimental prototypes generated with AI assistance and do not represent 100% production-grade reality. They're works in progress created for learning and demonstration purposes as part of a personal portfolio project.
+                  <strong>Note:</strong> These designs are experimental prototypes generated with AI assistance and do not represent 100% production-grade reality. They're works in progress created for learning and demonstration purposes as part of my personal portfolio project.
                 </p>
               </div>
             </div>
