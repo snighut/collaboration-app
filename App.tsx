@@ -157,7 +157,7 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Creations</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
-                Explore full lifecycle management for generated diagrams. This interface demonstrates persistent state handling—allowing for the retrieval, modification, and management of design assets within a localized, sandbox environment
+                Full CRUD Control for System Design Blueprints. Manage the entire lifecycle of your architecture diagrams. Use AI to iterate on designs or take the wheel with manual orchestration to refine the details. Every change is tracked and stored, giving a persistent workspace for professional-grade system design.
               </p>
               <div className="flex justify-center">
                 <button 
