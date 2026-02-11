@@ -56,7 +56,7 @@ function DesignPageContent() {
             <div className="flex items-center gap-2">
               <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
               {designId === 'new' ? (
-                <span className="text-lg font-bold">New Creation</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">New Creation</span>
               ) : (
                 <>
                   <InlineEditText
