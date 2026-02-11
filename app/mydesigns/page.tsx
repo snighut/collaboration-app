@@ -424,6 +424,17 @@ function MyDesigns() {
               </button>
             </div>
           )}
+
+          {/* Disclaimer Section */}
+          {!isLoading && designs.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-gray-200 dark:border-slate-700">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
+                  <strong>Note:</strong> The designs shown here are experimental proofs-of-concept generated via a hybrid Gemini and local Ollama AI inference stack. They are for illustrative purposes and do not represent final production-grade reality; active development is ongoing to refine AI agent feedback loops. This is a non-commercial portfolio project created for personal skill-building and architectural research.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
