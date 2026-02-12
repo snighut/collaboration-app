@@ -86,6 +86,44 @@ export interface ConnectionReference {
 
 export interface Connection {
   name?: string;
+  connectionType?: string; // ConnectionType enum value
+  connectionData?: {
+    // API/HTTP specific
+    protocol?: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
+    endpoint?: string;
+    headers?: Record<string, string>;
+    port?: number;
+    
+    // Communication patterns
+    pattern?: 'request-reply' | 'fire-and-forget' | 'publish-subscribe' | 'streaming';
+    synchronous?: boolean;
+    
+    // Quality of Service
+    qos?: 'at-most-once' | 'at-least-once' | 'exactly-once';
+    timeout?: number;
+    retryPolicy?: {
+      attempts?: number;
+      backoff?: 'linear' | 'exponential';
+      maxDelay?: number;
+    };
+    
+    // Data characteristics
+    dataFormat?: 'JSON' | 'XML' | 'Protobuf' | 'Avro' | 'MessagePack' | 'Plain Text';
+    compression?: 'gzip' | 'brotli' | 'none';
+    encryption?: string;
+    
+    // Performance
+    bandwidth?: string;
+    latency?: string;
+    throughput?: string;
+    
+    // Relationship cardinality
+    cardinality?: '1:1' | '1:N' | 'N:1' | 'N:M';
+    
+    // Custom fields
+    [key: string]: any;
+  };
   from: string | ConnectionReference;
   to: string | ConnectionReference;
   fromPoint: string;
@@ -94,6 +132,8 @@ export interface Connection {
     borderColor?: string;
     borderThickness?: number;
     borderStyle?: 'solid' | 'dashed' | 'dotted';
+    arrowType?: 'filled' | 'open' | 'diamond' | 'hollow-diamond' | 'triangle' | 'hollow-triangle' | 'double';
+    linePattern?: 'straight' | 'curved' | 'stepped';
   };
 }
 

@@ -65,6 +65,8 @@ export function normalizeConnection(conn: Connection): Connection {
     ...conn,
     from: fromName,
     to: toName,
+    connectionType: conn.connectionType, // Preserve connection type
+    connectionData: conn.connectionData, // Preserve connection metadata
   };
 }
 
@@ -77,6 +79,8 @@ export function connectionToNewSchema(conn: Connection): Connection {
 
   return {
     name: conn.name || `${fromName} → ${toName}`,
+    connectionType: conn.connectionType, // Preserve connection type
+    connectionData: conn.connectionData, // Preserve connection metadata
     from: { name: fromName, type: 'DesignItem' },
     to: { name: toName, type: 'DesignItem' },
     fromPoint: conn.fromPoint,
