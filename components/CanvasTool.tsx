@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject, Connection } from '../types';
 import { COLORS, SVG_ASSETS } from '../constants';
-import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle } from 'lucide-react';
+import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle, Network } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import AuthProviders from './AuthProviders';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ import { getDesignCache, setDesignCache, clearDesignCache } from '../lib/localCa
 import { canvasReducer, CanvasState } from '../lib/canvasReducer';
 import { createDesign } from '@/app/actions/createDesign';
 import { transformFromBackendSchema, transformToBackendSchema } from '../lib/schemaTransform';
+import { ConnectionType, getConnectionTypesByCategory, getConnectionTypeDefinition, getDefaultConnectionData } from '../lib/connectionTypes';
 
 interface CanvasToolProps {
   designId?: string | null;
@@ -71,6 +72,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const [activeName, setActiveName] = useState<string | null>(null);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
+  const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType>(ConnectionType.DEFAULT);
   const [isDraggingObject, setIsDraggingObject] = useState(false);
 
   // Fetch design data if designId is provided, with localStorage cache restore
@@ -438,18 +440,26 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     if (targetObj) {
       // Create connection between existing objects
       const nearestAnchor = findNearestAnchor(targetObj, x, y);
+      const typeDef = getConnectionTypeDefinition(selectedConnectionType);
+      const defaultStyle = typeDef?.defaultStyle;
+      const defaultData = getDefaultConnectionData(selectedConnectionType);
+      
       dispatch({
         type: 'ADD_CONNECTION',
         payload: {
           name: `${connectionDragStart.objName} → ${targetObj.name}`,
+          connectionType: selectedConnectionType,
+          connectionData: defaultData,
           from: connectionDragStart.objName,
           to: targetObj.name,
           fromPoint: connectionDragStart.anchorPosition,
           toPoint: nearestAnchor,
           uidata: {
-            borderColor: '#3B82F6',
-            borderThickness: 2,
-            borderStyle: 'solid',
+            borderColor: defaultStyle?.borderColor || '#3B82F6',
+            borderThickness: defaultStyle?.borderThickness || 2,
+            borderStyle: defaultStyle?.borderStyle || 'solid',
+            arrowType: defaultStyle?.arrowType,
+            linePattern: defaultStyle?.linePattern,
           },
         }
       });
@@ -467,19 +477,27 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           zIndex: canvasState.objects.length + 1,
         };
         const nearestAnchor = findNearestAnchor(newObj, x, y);
+        const typeDef = getConnectionTypeDefinition(selectedConnectionType);
+        const defaultStyle = typeDef?.defaultStyle;
+        const defaultData = getDefaultConnectionData(selectedConnectionType);
+        
         dispatch({ type: 'ADD_OBJECT', payload: newObj });
         dispatch({
           type: 'ADD_CONNECTION',
           payload: {
             name: `${connectionDragStart.objName} → ${newName}`,
+            connectionType: selectedConnectionType,
+            connectionData: defaultData,
             from: connectionDragStart.objName,
             to: newName,
             fromPoint: connectionDragStart.anchorPosition,
             toPoint: nearestAnchor,
             uidata: {
-              borderColor: '#3B82F6',
-              borderThickness: 2,
-              borderStyle: 'solid',
+              borderColor: defaultStyle?.borderColor || '#3B82F6',
+              borderThickness: defaultStyle?.borderThickness || 2,
+              borderStyle: defaultStyle?.borderStyle || 'solid',
+              arrowType: defaultStyle?.arrowType,
+              linePattern: defaultStyle?.linePattern,
             },
           }
         });
@@ -670,6 +688,67 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
         <div>
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            <Network size={14} /> CONNECTION TYPES
+          </h4>
+          <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
+            {Object.entries(getConnectionTypesByCategory()).map(([category, types]) => (
+              <div key={category} className="space-y-1">
+                <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">
+                  {category}
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  {types.map((typeDef) => (
+                    <button
+                      key={typeDef.type}
+                      onClick={() => setSelectedConnectionType(typeDef.type)}
+                      className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
+                        selectedConnectionType === typeDef.type
+                          ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 dark:border-blue-600 text-blue-700 dark:text-blue-400'
+                          : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300'
+                      }`}
+                      title={typeDef.description}
+                    >
+                      <span 
+                        className="text-sm font-mono mb-1"
+                        style={{ color: typeDef.defaultStyle.borderColor }}
+                      >
+                        {typeDef.icon}
+                      </span>
+                      <span className="text-[8px] font-semibold text-center leading-tight">
+                        {typeDef.label.toUpperCase()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-[9px] text-gray-600 dark:text-gray-400 leading-relaxed">
+              <span className="font-semibold text-blue-600 dark:text-blue-400">Selected: {getConnectionTypeDefinition(selectedConnectionType)?.label || 'Default'}</span>
+              <br />
+              {getConnectionTypeDefinition(selectedConnectionType)?.description}
+            </p>
+          </div>
+          <div className="mt-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-300 dark:border-green-700">
+            <div className="flex items-start gap-2 mb-2">
+              <span className="text-lg">👆</span>
+              <div>
+                <p className="text-[10px] font-bold text-green-800 dark:text-green-300 mb-1">HOW TO CREATE CONNECTIONS:</p>
+                <ol className="text-[9px] text-gray-700 dark:text-gray-300 leading-relaxed list-decimal list-inside space-y-1">
+                  <li><strong>Select</strong> a connection type above</li>
+                  <li><strong>Click</strong> any object on canvas to select it</li>
+                  <li><strong>Blue circles</strong> will appear at edges</li>
+                  <li><strong>Click & drag</strong> from a blue circle</li>
+                  <li><strong>Drop</strong> on another object or empty space</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Star size={14} /> ICONS
           </h4>
           <div className="grid grid-cols-4 gap-2">
@@ -780,13 +859,29 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         </div>
 
         <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h4 className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-2">
-              💡 Connection Points
-            </h4>
-            <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-relaxed">
-              Select any object to see small blue circles at its boundaries. Click these circles to create connections between objects.
-            </p>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">🔗</span>
+              <h4 className="text-xs font-bold text-blue-700 dark:text-blue-300">
+                Creating Connections
+              </h4>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-relaxed">
+                <strong className="text-blue-600 dark:text-blue-400">Step 1:</strong> Select any object on the canvas
+              </p>
+              <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-relaxed">
+                <strong className="text-blue-600 dark:text-blue-400">Step 2:</strong> Blue circles appear at the object's edges
+              </p>
+              <p className="text-[10px] text-gray-700 dark:text-gray-300 leading-relaxed">
+                <strong className="text-blue-600 dark:text-blue-400">Step 3:</strong> Click & drag from a blue circle to another object
+              </p>
+              <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-800">
+                <p className="text-[9px] text-gray-600 dark:text-gray-400 italic">
+                  💡 Tip: Choose a connection type from the panel above before creating the connection!
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
