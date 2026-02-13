@@ -16,6 +16,7 @@ interface DraggableObjectProps {
   resetInteraction?: number;
   onDragStartObject?: () => void;
   onDragEndObject?: () => void;
+  groupDragOffset?: { x: number; y: number } | null;
 }
 
 // Component to handle image loading
@@ -49,7 +50,7 @@ const ImageShape: React.FC<{ obj: CanvasObject; active: boolean; isGrayedOut: bo
 };
 
 const DraggableObject: React.FC<DraggableObjectProps> = ({
-  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart, resetInteraction, onDragStartObject, onDragEndObject
+  obj, active, isGrayedOut, onSelect, onUpdate, onStartTextEdit, onAnchorDragStart, resetInteraction, onDragStartObject, onDragEndObject, groupDragOffset
 }) => {
   // Cancel hold timer and set drag state on any drag move
   const handleDragMove = () => {
@@ -89,9 +90,17 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
     return points;
   };
 
+  // Architectural component types that support displayName editing
+  const architecturalTypes = [
+    'api-gateway', 'microservice', 'database', 'cache', 'message-queue', 
+    'load-balancer', 'storage', 'cdn', 'lambda', 'container', 'kubernetes', 
+    'cloud', 'server', 'user', 'mobile-app', 'web-app', 'firewall', 'monitor', 'text-box'
+  ];
+  const isEditableType = obj.type === 'text' || architecturalTypes.includes(obj.type);
+
   // Handle text editing
   const handleTextDblClick = () => {
-    if ((obj.type === 'text' || obj.type === 'text-box') && onStartTextEdit) {
+    if (isEditableType && onStartTextEdit) {
       onSelect();
       
       // Calculate position for HTML textarea overlay
@@ -477,10 +486,9 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
         const isTextBox = obj.type === 'text-box';
         const hasCustomContent = isTextBox && obj.content && obj.content.trim() !== '';
         
-        // Determine display text: use obj.content if available, otherwise use default label
-        const displayText = obj.content && obj.content.trim() !== '' 
-          ? obj.content 
-          : (isTextBox ? 'Double-click to edit' : componentDef.label);
+        // Determine display text: use displayName > content > name > default label
+        // This supports the displayName field for UI customization
+        const displayText = obj.displayName || obj.content || (isTextBox ? 'Double-click to edit' : componentDef.label);
         
         return (
           <>
@@ -557,8 +565,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   return (
     <Group
       ref={groupRef}
-      x={obj.x}
-      y={obj.y}
+      x={obj.x + (groupDragOffset?.x || 0)}
+      y={obj.y + (groupDragOffset?.y || 0)}
       draggable={draggable}
       onDragStart={(e) => {
         handleDragStart();

@@ -14,6 +14,34 @@ export interface CanvasState {
   y: number;
 }
 
+/**
+ * Helper to determine which objects are within a design group's bounds
+ * An object is considered "in" a group if its center point falls within the group's boundaries
+ */
+export function getObjectsInGroup(
+  group: DesignGroup,
+  objects: CanvasObject[],
+  groupWidth: number = 200,
+  groupHeight: number = 150
+): CanvasObject[] {
+  const groupX = group.uidata?.x || 0;
+  const groupY = group.uidata?.y || 0;
+  
+  return objects.filter(obj => {
+    // Calculate object center
+    const objCenterX = obj.x + obj.width / 2;
+    const objCenterY = obj.y + obj.height / 2;
+    
+    // Check if center is within group bounds
+    return (
+      objCenterX >= groupX &&
+      objCenterX <= groupX + groupWidth &&
+      objCenterY >= groupY &&
+      objCenterY <= groupY + groupHeight
+    );
+  });
+}
+
 export type CanvasAction =
   | { type: 'SET_STATE'; payload: Partial<CanvasState> }
   | { type: 'UPDATE_STAGE'; payload: { x: number; y: number } }
@@ -26,6 +54,7 @@ export type CanvasAction =
   | { type: 'ADD_DESIGN_GROUP'; payload: DesignGroup }
   | { type: 'UPDATE_DESIGN_GROUP'; id: string; updates: Partial<DesignGroup> }
   | { type: 'REMOVE_DESIGN_GROUP'; id: string }
+  | { type: 'DRAG_DESIGN_GROUP'; id: string; deltaX: number; deltaY: number; objectNames: string[] }
   | { type: 'RESET'; };
 
 export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
@@ -76,6 +105,35 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
         ...state,
         designGroups: state.designGroups.filter(group => group.id !== action.id)
       };
+    case 'DRAG_DESIGN_GROUP': {
+      // Move the design group and all objects within it by the delta amount
+      const { id, deltaX, deltaY, objectNames } = action;
+      
+      return {
+        ...state,
+        // Update design group position
+        designGroups: state.designGroups.map(group => {
+          if (group.id !== id) return group;
+          return {
+            ...group,
+            uidata: {
+              ...group.uidata,
+              x: (group.uidata?.x || 0) + deltaX,
+              y: (group.uidata?.y || 0) + deltaY,
+            }
+          };
+        }),
+        // Update positions of all objects that belong to this group
+        objects: state.objects.map(obj => {
+          if (!objectNames.includes(obj.name)) return obj;
+          return {
+            ...obj,
+            x: obj.x + deltaX,
+            y: obj.y + deltaY,
+          };
+        }),
+      };
+    }
     case 'RESET':
       return {
         name: '',

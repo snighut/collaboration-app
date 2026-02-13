@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject, Connection } from '../types';
 import { COLORS, SVG_ASSETS, ARCHITECTURE_COMPONENTS } from '../constants';
-import { Star, Palette, Trash2, Layers, LayoutTemplate, Network, Server, Database, Cloud, Cpu, HardDrive, Globe, Smartphone, Monitor, Shield, Activity } from 'lucide-react';
+import { Star, Palette, Trash2, Layers, Network, Server, Database, Cloud, Cpu, HardDrive, Globe, Smartphone, Monitor, Shield, Activity, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import AuthProviders from './AuthProviders';
 import { toast } from 'sonner';
@@ -74,6 +74,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
   const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType>(ConnectionType.DEFAULT);
   const [isDraggingObject, setIsDraggingObject] = useState(false);
+  const [designGroupsExpanded, setDesignGroupsExpanded] = useState(false);
+  
+  // Track group drag state for real-time visual updates
+  const [groupDragState, setGroupDragState] = useState<{
+    groupId: string;
+    objectNames: string[];
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
 
   // Fetch design data if designId is provided, with localStorage cache restore
   useEffect(() => {
@@ -243,6 +252,10 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   };
   const [editingTextName, setEditingTextName] = useState<string | null>(null);
   const [textInputPosition, setTextInputPosition] = useState<{ x: number; y: number } | null>(null);
+  // Group name editing state
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [groupNameInputPosition, setGroupNameInputPosition] = useState<{ x: number; y: number } | null>(null);
+  const groupNameInputRef = useRef<HTMLInputElement>(null);
   const [isDraggingConnection, setIsDraggingConnection] = useState(false);
   const [connectionDragStart, setConnectionDragStart] = useState<{
     objName: string; anchorPosition: string; x: number; y: number;
@@ -351,6 +364,31 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const removeObject = (name: string) => {
     dispatch({ type: 'REMOVE_OBJECT', name });
     setActiveName(null);
+  };
+
+  // Add a new design group to the canvas
+  const addDesignGroup = () => {
+    const id = `group-${Math.random().toString(36).substr(2, 9)}`;
+    const groupIndex = canvasState.designGroups.length;
+    const groupColors = ['#607D8B', '#FF9800', '#2196F3', '#4CAF50', '#9C27B0', '#F44336', '#00BCD4', '#795548'];
+    const newGroup = {
+      id,
+      name: `Group ${groupIndex + 1}`,
+      displayName: `Group ${groupIndex + 1}`,
+      description: '',
+      uidata: {
+        x: 100 + (groupIndex * 50) % 200,
+        y: 100 + (groupIndex * 50) % 150,
+        width: 200,
+        height: 150,
+        borderColor: groupColors[groupIndex % groupColors.length],
+        borderThickness: 2,
+        borderStyle: 'dashed' as const,
+      },
+      designs: [],
+    };
+    dispatch({ type: 'ADD_DESIGN_GROUP', payload: newGroup });
+    setActiveGroupId(id);
   };
 
   const isOverlappedByHigher = useCallback((id: string, self: CanvasObject) => {
@@ -619,6 +657,64 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     setResetInteraction((v) => v + 1);
   };
 
+  // Handler for when a design group drag starts
+  const handleGroupDragStart = (groupId: string, objectNames: string[]) => {
+    setActiveGroupId(groupId);
+    setActiveName(null); // Deselect any selected object
+    setGroupDragState({
+      groupId,
+      objectNames,
+      offsetX: 0,
+      offsetY: 0,
+    });
+  };
+
+  // Handler for when a design group is being dragged (real-time)
+  const handleGroupDragMove = (groupId: string, deltaX: number, deltaY: number) => {
+    setGroupDragState(prev => {
+      if (!prev || prev.groupId !== groupId) return prev;
+      return {
+        ...prev,
+        offsetX: deltaX,
+        offsetY: deltaY,
+      };
+    });
+  };
+
+  // Handler for when a design group drag ends
+  const handleGroupDragEnd = (groupId: string, deltaX: number, deltaY: number, objectNames: string[]) => {
+    // Clear the visual drag state first
+    setGroupDragState(null);
+    
+    if (deltaX === 0 && deltaY === 0) return; // No movement, skip
+    
+    dispatch({
+      type: 'DRAG_DESIGN_GROUP',
+      id: groupId,
+      deltaX,
+      deltaY,
+      objectNames,
+    });
+  };
+
+  // Handler for when a design group is resized
+  const handleGroupResize = (groupId: string, newWidth: number, newHeight: number) => {
+    const group = canvasState.designGroups.find(g => g.id === groupId);
+    if (!group) return;
+    
+    dispatch({
+      type: 'UPDATE_DESIGN_GROUP',
+      id: groupId,
+      updates: {
+        uidata: {
+          ...group.uidata,
+          width: newWidth,
+          height: newHeight,
+        },
+      },
+    });
+  };
+
 // Update stage dimensions on container resize
   React.useEffect(() => {
     const updateDimensions = () => {
@@ -700,9 +796,66 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       </div>
       {/* Left Panel: Architecture Components */}
       <aside className="w-full md:w-1/5 md:min-w-[300px] h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+        
+        {/* DESIGN GROUPS Section */}
         <div>
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-            <Server size={14} /> ARCHITECTURE
+            <Layers size={14} /> DESIGN GROUPS
+          </h4>
+          <div className="space-y-2">
+            <button 
+              onClick={addDesignGroup}
+              className="w-full flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-700 border-2 border-dashed border-gray-300 dark:border-slate-500 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 dark:hover:border-green-500 transition-all text-gray-700 dark:text-gray-200"
+            >
+              <Plus size={16} className="text-green-500" />
+              <span className="text-xs font-semibold">Add Design Group</span>
+            </button>
+            {canvasState.designGroups.length > 0 && (
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
+                <button
+                  onClick={() => setDesignGroupsExpanded(!designGroupsExpanded)}
+                  className="w-full flex items-center justify-between text-[9px] text-gray-500 dark:text-gray-400 mb-0 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  <span>
+                    Existing {canvasState.designGroups.length} group{canvasState.designGroups.length !== 1 ? 's' : ''} on canvas
+                  </span>
+                  {designGroupsExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </button>
+                {designGroupsExpanded && (
+                  <div className="space-y-1 max-h-32 overflow-y-auto mt-2">
+                    {canvasState.designGroups.map((group) => (
+                      <div 
+                        key={group.id}
+                        onClick={() => setActiveGroupId(group.id)}
+                        className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition-all ${
+                          activeGroupId === group.id 
+                            ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
+                            : 'hover:bg-gray-100 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        <div 
+                          className="w-3 h-3 rounded-sm border-2" 
+                          style={{ 
+                            borderColor: group.uidata?.borderColor || '#4CAF50',
+                            borderStyle: 'dashed'
+                          }} 
+                        />
+                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 truncate">
+                          {group.displayName || group.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        
+        <div>
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            <Server size={14} /> ARCHITECTURE ITEMS
           </h4>
           <div className="grid grid-cols-3 gap-2">
             <button 
@@ -883,18 +1036,18 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Network size={14} /> CONNECTION TYPES
           </h4>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Object.entries(getConnectionTypesByCategory()).map(([category, types]) => (
               <div key={category} className="space-y-1">
-                <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">
+                <div className="text-[9px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">
                   {category}
                 </div>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-3 gap-1">
                   {types.map((typeDef) => (
                     <button
                       key={typeDef.type}
                       onClick={() => setSelectedConnectionType(typeDef.type)}
-                      className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
+                      className={`flex flex-col items-center justify-center py-2 px-1 rounded border transition-all ${
                         selectedConnectionType === typeDef.type
                           ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 dark:border-blue-600 text-blue-700 dark:text-blue-400'
                           : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300'
@@ -902,12 +1055,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                       title={typeDef.description}
                     >
                       <span 
-                        className="text-sm font-mono mb-1"
+                        className="text-base font-mono"
                         style={{ color: typeDef.defaultStyle.borderColor }}
                       >
                         {typeDef.icon}
                       </span>
-                      <span className="text-[8px] font-semibold text-center leading-tight">
+                      <span className="text-[7px] font-semibold text-center leading-tight truncate w-full">
                         {typeDef.label.toUpperCase()}
                       </span>
                     </button>
@@ -916,10 +1069,10 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               </div>
             ))}
           </div>
-          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-[9px] text-gray-600 dark:text-gray-400 leading-relaxed">
-              <span className="font-semibold text-blue-600 dark:text-blue-400">Selected: {getConnectionTypeDefinition(selectedConnectionType)?.label || 'Default'}</span>
-              <br />
+          <div className="mt-2 p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+            <p className="text-[8px] text-gray-600 dark:text-gray-400 leading-tight">
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{getConnectionTypeDefinition(selectedConnectionType)?.label || 'Default'}</span>
+              {' - '}
               {getConnectionTypeDefinition(selectedConnectionType)?.description}
             </p>
           </div>
@@ -994,63 +1147,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </button>
         </div>
 
-        <div>
-          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-            <LayoutTemplate size={14} /> LAYOUTS
-          </h4>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => {
-                // Get canvas dimensions
-                const canvasHeight = stageDimensions.height;
-                const canvasWidth = stageDimensions.width;
-                
-                // Calculate dimensions for 80% vertical height with 8.5:11 aspect ratio
-                const height = canvasHeight * 0.8;
-                const width = height * (8.5 / 11);
-                
-                // Center the layout
-                const x = (canvasWidth - width) / 2;
-                const y = (canvasHeight - height) / 2;
-                
-                // Add a single page layout (8.5 x 11 rectangle)
-                const name = Math.random().toString(36).substr(2, 9);
-                const pageObj: CanvasObject = {
-                  name,
-                  type: 'color',
-                  x,
-                  y,
-                  width,
-                  height,
-                  content: '',
-                  color: 'transparent',
-                  borderColor: '#3B82F6',
-                  borderWidth: 3,
-                  zIndex: canvasState.objects.length + 1,
-                };
-                dispatch({ type: 'ADD_OBJECT', payload: pageObj });
-                setActiveName(name);
-              }}
-              className="flex items-center justify-center p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-all"
-              title="Single Page (8.5x11)"
-            >
-              <svg width="50" height="50" viewBox="0 0 50 50" className="w-full h-full">
-                <rect
-                  x="6"
-                  y="0"
-                  width="38"
-                  height="50"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-gray-400 dark:text-gray-500"
-                  rx="2"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
         {/* <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -1080,7 +1176,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
         <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-             <span className="text-xs text-gray-400 dark:text-gray-500">Everything below is for development environment</span>
+             <span className="text-xs text-gray-400 dark:text-gray-500">Everything below is for development purpose</span>
              <Layers size={14} className="text-gray-400 dark:text-gray-500" />
           </div>
         </div>
@@ -1293,12 +1389,27 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               objects={canvasState.objects}
               onSelect={(groupId) => setActiveGroupId(groupId)}
               activeGroupId={activeGroupId}
+              onGroupDragStart={handleGroupDragStart}
+              onGroupDragMove={handleGroupDragMove}
+              onGroupDragEnd={handleGroupDragEnd}
+              onGroupResize={handleGroupResize}
+              onStartGroupNameEdit={(groupId, position) => {
+                setEditingGroupId(groupId);
+                setGroupNameInputPosition(position);
+                setTimeout(() => {
+                  if (groupNameInputRef.current) {
+                    groupNameInputRef.current.focus();
+                    groupNameInputRef.current.select();
+                  }
+                }, 0);
+              }}
             />
             
             {/* Render connection lines between objects using new ConnectionRenderer */}
             <ConnectionRenderer
               connections={canvasState.connections}
               objects={canvasState.objects}
+              groupDragState={groupDragState}
             />
             
             {/* Render dragging connection line */}
@@ -1318,7 +1429,13 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             )}
             
             {/* Render all objects */}
-            {canvasState.objects.map((obj) => (
+            {canvasState.objects.map((obj) => {
+              // Calculate group drag offset for this object if it's being dragged as part of a group
+              const objGroupDragOffset = groupDragState && groupDragState.objectNames.includes(obj.name)
+                ? { x: groupDragState.offsetX, y: groupDragState.offsetY }
+                : null;
+              
+              return (
               <DraggableObject 
                 key={obj.name} 
                 obj={obj} 
@@ -1357,21 +1474,43 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                   updateConnectionAnchors(obj.name);
                 }}
                 resetInteraction={resetInteraction}
+                groupDragOffset={objGroupDragOffset}
               />
-            ))}
+            );
+            })}
           </Layer>
         </Stage>
 
         {/* Text editing overlay - completely outside Konva */}
         {editingTextName && textInputPosition && typeof document !== 'undefined' && (() => {
           const editingObj = canvasState.objects.find(o => o.name === editingTextName);
-          if (!editingObj || (editingObj.type !== 'text' && editingObj.type !== 'text-box')) return null;
+          // Allow editing for text, text-box, and all architectural component types
+          const architecturalTypes = [
+            'api-gateway', 'microservice', 'database', 'cache', 'message-queue', 
+            'load-balancer', 'storage', 'cdn', 'lambda', 'container', 'kubernetes', 
+            'cloud', 'server', 'user', 'mobile-app', 'web-app', 'firewall', 'monitor'
+          ];
+          const isEditableType = editingObj && (
+            editingObj.type === 'text' || 
+            editingObj.type === 'text-box' || 
+            architecturalTypes.includes(editingObj.type)
+          );
+          if (!editingObj || !isEditableType) return null;
+          
+          // Determine the current display text - use content if available, otherwise displayName or name
+          const currentText = editingObj.content || editingObj.displayName || editingObj.name || '';
           
           return (
             <textarea
               ref={textInputRef}
-              value={editingObj.content || ''}
-              onChange={(e) => updateObject(editingTextName!, { content: e.target.value })}
+              value={currentText}
+              onChange={(e) => {
+                // Update both content and displayName when editing
+                updateObject(editingTextName!, { 
+                  content: e.target.value,
+                  displayName: e.target.value
+                });
+              }}
               onBlur={() => {
                 setEditingTextName(null);
                 setTextInputPosition(null);
@@ -1396,6 +1535,58 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 border: '2px solid #3B82F6',
                 outline: 'none',
                 resize: 'none',
+                zIndex: 10000,
+                fontFamily: 'inherit',
+              }}
+            />
+          );
+        })()}
+
+        {/* Group name editing overlay */}
+        {editingGroupId && groupNameInputPosition && typeof document !== 'undefined' && (() => {
+          const editingGroup = canvasState.designGroups.find(g => g.id === editingGroupId);
+          if (!editingGroup) return null;
+          
+          // Use displayName if available, otherwise fall back to name
+          const currentDisplayName = editingGroup.displayName || editingGroup.name || '';
+          
+          return (
+            <input
+              ref={groupNameInputRef}
+              type="text"
+              value={currentDisplayName}
+              onChange={(e) => {
+                // Update the group's displayName
+                dispatch({
+                  type: 'UPDATE_DESIGN_GROUP',
+                  id: editingGroupId!,
+                  updates: { displayName: e.target.value }
+                });
+              }}
+              onBlur={() => {
+                setEditingGroupId(null);
+                setGroupNameInputPosition(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                  setEditingGroupId(null);
+                  setGroupNameInputPosition(null);
+                }
+              }}
+              style={{
+                position: 'fixed',
+                left: `${groupNameInputPosition.x}px`,
+                top: `${groupNameInputPosition.y}px`,
+                minWidth: '120px',
+                height: '20px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                color: 'white',
+                backgroundColor: editingGroup.uidata?.borderColor || '#4CAF50',
+                padding: '0 8px',
+                border: '2px solid #3B82F6',
+                borderRadius: '4px',
+                outline: 'none',
                 zIndex: 10000,
                 fontFamily: 'inherit',
               }}
