@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject, Connection } from '../types';
 import { COLORS, SVG_ASSETS, ARCHITECTURE_COMPONENTS } from '../constants';
-import { Star, Palette, Trash2, Layers, Network, Server, Database, Cloud, Cpu, HardDrive, Globe, Smartphone, Monitor, Shield, Activity, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, Palette, Trash2, Layers, Network, Server, Database, Cloud, Cpu, HardDrive, Globe, Smartphone, Monitor, Shield, Activity, Plus, ChevronDown, ChevronUp, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import AuthProviders from './AuthProviders';
 import { toast } from 'sonner';
@@ -265,6 +265,16 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const stageRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
+  
+  // Zoom/scale state for pinch and wheel zoom
+  const [scale, setScale] = useState(1);
+  const SCALE_MIN = 0.25;
+  const SCALE_MAX = 3;
+  const SCALE_STEP = 0.1;
+  
+  // Refs for pinch zoom gesture tracking
+  const lastCenter = useRef<{ x: number; y: number } | null>(null);
+  const lastDist = useRef<number>(0);
 
   const addObject = (type: AssetType, content: string = '') => {
     const name = Math.random().toString(36).substr(2, 9);
@@ -735,6 +745,130 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  // Get distance between two touch points
+  const getDistance = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
+    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+  };
+
+  // Get center point between two touch points
+  const getCenter = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
+    return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+  };
+
+  // Handle wheel zoom (for desktop)
+  const handleWheel = (e: any) => {
+    e.evt.preventDefault();
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const oldScale = scale;
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    };
+
+    // Zoom in or out based on wheel direction
+    const direction = e.evt.deltaY > 0 ? -1 : 1;
+    const newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, oldScale + direction * SCALE_STEP));
+
+    setScale(newScale);
+
+    // Adjust position to zoom towards pointer
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+    dispatch({ type: 'UPDATE_STAGE', payload: newPos });
+  };
+
+  // Handle pinch zoom touch start
+  const handlePinchTouchStart = (e: any) => {
+    const touch1 = e.evt.touches[0];
+    const touch2 = e.evt.touches[1];
+
+    if (touch1 && touch2) {
+      // Two fingers detected - start pinch tracking
+      const p1 = { x: touch1.clientX, y: touch1.clientY };
+      const p2 = { x: touch2.clientX, y: touch2.clientY };
+      lastCenter.current = getCenter(p1, p2);
+      lastDist.current = getDistance(p1, p2);
+    }
+  };
+
+  // Handle pinch zoom touch move
+  const handlePinchTouchMove = (e: any) => {
+    const touch1 = e.evt.touches[0];
+    const touch2 = e.evt.touches[1];
+
+    if (touch1 && touch2 && lastCenter.current && lastDist.current > 0) {
+      e.evt.preventDefault();
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const p1 = { x: touch1.clientX, y: touch1.clientY };
+      const p2 = { x: touch2.clientX, y: touch2.clientY };
+      const newCenter = getCenter(p1, p2);
+      const newDist = getDistance(p1, p2);
+
+      // Calculate scale change
+      const scaleFactor = newDist / lastDist.current;
+      const oldScale = scale;
+      const newScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, oldScale * scaleFactor));
+
+      // Get the stage container position
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      // Calculate the point to zoom towards (center of pinch relative to stage)
+      const pointTo = {
+        x: (newCenter.x - rect.left - stage.x()) / oldScale,
+        y: (newCenter.y - rect.top - stage.y()) / oldScale,
+      };
+
+      // Calculate pan offset
+      const dx = newCenter.x - lastCenter.current.x;
+      const dy = newCenter.y - lastCenter.current.y;
+
+      // Update position to zoom towards center and apply pan
+      const newPos = {
+        x: newCenter.x - rect.left - pointTo.x * newScale + dx,
+        y: newCenter.y - rect.top - pointTo.y * newScale + dy,
+      };
+
+      setScale(newScale);
+      dispatch({ type: 'UPDATE_STAGE', payload: newPos });
+
+      // Update tracking values
+      lastCenter.current = newCenter;
+      lastDist.current = newDist;
+    }
+  };
+
+  // Handle pinch zoom touch end
+  const handlePinchTouchEnd = () => {
+    lastCenter.current = null;
+    lastDist.current = 0;
+  };
+
+  // Zoom control functions
+  const zoomIn = () => {
+    const newScale = Math.min(SCALE_MAX, scale + SCALE_STEP * 2);
+    setScale(newScale);
+  };
+
+  const zoomOut = () => {
+    const newScale = Math.max(SCALE_MIN, scale - SCALE_STEP * 2);
+    setScale(newScale);
+  };
+
+  const resetZoom = () => {
+    setScale(1);
+    dispatch({ type: 'UPDATE_STAGE', payload: { x: 0, y: 0 } });
+  };
 
   if (loading) {
     return (
@@ -1314,6 +1448,34 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               </button>
            )}
         </div>
+        
+        {/* Zoom controls */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-[1001]">
+          <button
+            onClick={zoomIn}
+            className="p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-lg border border-gray-200 dark:border-gray-600"
+            title="Zoom In"
+          >
+            <ZoomIn size={18} />
+          </button>
+          <button
+            onClick={zoomOut}
+            className="p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-lg border border-gray-200 dark:border-gray-600"
+            title="Zoom Out"
+          >
+            <ZoomOut size={18} />
+          </button>
+          <button
+            onClick={resetZoom}
+            className="p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-lg border border-gray-200 dark:border-gray-600"
+            title="Reset Zoom"
+          >
+            <RotateCcw size={18} />
+          </button>
+          <div className="text-xs text-center text-gray-500 dark:text-gray-400 mt-1 font-mono">
+            {Math.round(scale * 100)}%
+          </div>
+        </div>
 
         <Stage
           ref={stageRef}
@@ -1322,6 +1484,9 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           draggable={true}
           x={canvasState.x}
           y={canvasState.y}
+          scaleX={scale}
+          scaleY={scale}
+          onWheel={handleWheel}
           onDragEnd={(e) => {
             // Only update canvas position if not dragging an object
             if (!isDraggingObject) {
@@ -1349,7 +1514,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               const stage = e.target.getStage();
               const pos = stage?.getPointerPosition();
               if (pos && stage) {
-                handleConnectionDrag(pos.x - stage.x(), pos.y - stage.y());
+                handleConnectionDrag((pos.x - stage.x()) / scale, (pos.y - stage.y()) / scale);
               }
             }
           }}
@@ -1358,11 +1523,17 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               const stage = e.target.getStage();
               const pos = stage?.getPointerPosition();
               if (pos && stage) {
-                handleAnchorDragEnd(pos.x - stage.x(), pos.y - stage.y());
+                handleAnchorDragEnd((pos.x - stage.x()) / scale, (pos.y - stage.y()) / scale);
               }
             }
           }}
           onTouchStart={(e) => {
+            // Handle pinch zoom with 2 fingers
+            if (e.evt.touches.length === 2) {
+              handlePinchTouchStart(e);
+              return;
+            }
+            
             // Don't deselect if dragging connection
             if (isDraggingConnection) return;
             
@@ -1374,20 +1545,29 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             }
           }}
           onTouchMove={(e) => {
+            // Handle pinch zoom with 2 fingers
+            if (e.evt.touches.length === 2) {
+              handlePinchTouchMove(e);
+              return;
+            }
+            
             if (isDraggingConnection) {
               const stage = e.target.getStage();
               const pos = stage?.getPointerPosition();
               if (pos && stage) {
-                handleConnectionDrag(pos.x - stage.x(), pos.y - stage.y());
+                handleConnectionDrag((pos.x - stage.x()) / scale, (pos.y - stage.y()) / scale);
               }
             }
           }}
           onTouchEnd={(e) => {
+            // Reset pinch tracking
+            handlePinchTouchEnd();
+            
             if (isDraggingConnection) {
               const stage = e.target.getStage();
               const pos = stage?.getPointerPosition();
               if (pos && stage) {
-                handleAnchorDragEnd(pos.x - stage.x(), pos.y - stage.y());
+                handleAnchorDragEnd((pos.x - stage.x()) / scale, (pos.y - stage.y()) / scale);
               }
             }
           }}
