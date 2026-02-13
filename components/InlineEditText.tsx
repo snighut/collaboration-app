@@ -29,7 +29,7 @@ const InlineEditText: React.FC<InlineEditTextProps> = ({
 
   return (
     <div
-      className={`relative group ${className}`}
+      className={`relative group min-w-0 max-w-full ${className}`}
       onMouseEnter={() => setShowEditIcon(true)}
       onMouseLeave={() => setShowEditIcon(false)}
       onTouchStart={() => setShowEditIcon(true)}
@@ -62,11 +62,11 @@ const InlineEditText: React.FC<InlineEditTextProps> = ({
           </button>
         </form>
       ) : (
-        <span className="truncate text-lg font-bold flex items-center gap-2">
-          {value}
+        <span className="text-lg font-bold flex items-center gap-2 min-w-0">
+          <span className="truncate">{value}</span>
           {editable && showEditIcon && (
             <button
-              className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+              className="shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
               onClick={() => {
                 setIsEditing(true);
                 setInputValue(value);
