@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, useReducer } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 import { AssetType, CanvasObject, Connection } from '../types';
-import { COLORS, SVG_ASSETS } from '../constants';
-import { Type, Image, Star, Palette, Trash2, Layers, LayoutTemplate, Minus, ArrowRight, Circle, Square, Triangle, Network } from 'lucide-react';
+import { COLORS, SVG_ASSETS, ARCHITECTURE_COMPONENTS } from '../constants';
+import { Star, Palette, Trash2, Layers, LayoutTemplate, Network, Server, Database, Cloud, Cpu, HardDrive, Globe, Smartphone, Monitor, Shield, Activity } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import AuthProviders from './AuthProviders';
 import { toast } from 'sonner';
@@ -299,6 +299,37 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       case 'color':
         newObj = { ...baseObj, width: 100, height: 100, color: content || selectedColor };
         break;
+      // Architectural components
+      case 'api-gateway':
+      case 'microservice':
+      case 'database':
+      case 'cache':
+      case 'message-queue':
+      case 'load-balancer':
+      case 'storage':
+      case 'cdn':
+      case 'lambda':
+      case 'container':
+      case 'kubernetes':
+      case 'cloud':
+      case 'server':
+      case 'user':
+      case 'mobile-app':
+      case 'web-app':
+      case 'firewall':
+      case 'monitor':
+      case 'text-box':
+        const componentDef = ARCHITECTURE_COMPONENTS[type as keyof typeof ARCHITECTURE_COMPONENTS];
+        newObj = {
+          ...baseObj,
+          width: componentDef?.width || 100,
+          height: componentDef?.height || 100,
+          color: componentDef?.color || selectedColor,
+          // For text-box, start with empty content for user to add text
+          // For other components, use the component label
+          content: type === 'text-box' ? '' : (componentDef?.label || type)
+        };
+        break;
       case 'image':
       case 'svg':
       default:
@@ -423,6 +454,75 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     return nearestAnchor.position;
   };
 
+  // Helper to find optimal anchor points between two objects for minimal turns
+  const findOptimalAnchors = (fromObj: CanvasObject, toObj: CanvasObject): { fromPoint: string; toPoint: string } => {
+    // Calculate center points
+    const fromCenter = {
+      x: fromObj.x + fromObj.width / 2,
+      y: fromObj.y + fromObj.height / 2
+    };
+    const toCenter = {
+      x: toObj.x + toObj.width / 2,
+      y: toObj.y + toObj.height / 2
+    };
+    
+    const dx = toCenter.x - fromCenter.x;
+    const dy = toCenter.y - fromCenter.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    
+    // Determine primary direction (horizontal or vertical)
+    if (absDx > absDy) {
+      // Primarily horizontal layout
+      if (dx > 0) {
+        // Target is to the right
+        return { fromPoint: 'right', toPoint: 'left' };
+      } else {
+        // Target is to the left
+        return { fromPoint: 'left', toPoint: 'right' };
+      }
+    } else {
+      // Primarily vertical layout
+      if (dy > 0) {
+        // Target is below
+        return { fromPoint: 'bottom', toPoint: 'top' };
+      } else {
+        // Target is above
+        return { fromPoint: 'top', toPoint: 'bottom' };
+      }
+    }
+  };
+
+  // Helper to update all connections involving an object with optimal anchor points
+  const updateConnectionAnchors = (objName: string) => {
+    const obj = canvasState.objects.find(o => o.name === objName);
+    if (!obj) return;
+
+    // Find all connections involving this object
+    const connectionsToUpdate = canvasState.connections.filter(
+      conn => conn.from === objName || conn.to === objName
+    );
+
+    connectionsToUpdate.forEach(conn => {
+      const fromObj = canvasState.objects.find(o => o.name === conn.from);
+      const toObj = canvasState.objects.find(o => o.name === conn.to);
+      
+      if (fromObj && toObj) {
+        const optimalAnchors = findOptimalAnchors(fromObj, toObj);
+        
+        // Update the connection with optimal anchor points
+        dispatch({
+          type: 'UPDATE_CONNECTION',
+          name: conn.name,
+          updates: {
+            fromPoint: optimalAnchors.fromPoint,
+            toPoint: optimalAnchors.toPoint
+          }
+        });
+      }
+    });
+  };
+
   // Handler for ending a connection drag
   const handleAnchorDragEnd = (x: number, y: number) => {
     if (!isDraggingConnection || !connectionDragStart) return;
@@ -439,7 +539,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
     if (targetObj) {
       // Create connection between existing objects
-      const nearestAnchor = findNearestAnchor(targetObj, x, y);
+      const sourceObj = canvasState.objects.find(o => o.name === connectionDragStart.objName);
+      if (!sourceObj) return;
+      
+      // Use optimal anchors for minimal turns
+      const optimalAnchors = findOptimalAnchors(sourceObj, targetObj);
+      
       const typeDef = getConnectionTypeDefinition(selectedConnectionType);
       const defaultStyle = typeDef?.defaultStyle;
       const defaultData = getDefaultConnectionData(selectedConnectionType);
@@ -452,8 +557,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           connectionData: defaultData,
           from: connectionDragStart.objName,
           to: targetObj.name,
-          fromPoint: connectionDragStart.anchorPosition,
-          toPoint: nearestAnchor,
+          fromPoint: optimalAnchors.fromPoint,
+          toPoint: optimalAnchors.toPoint,
           uidata: {
             borderColor: defaultStyle?.borderColor || '#3B82F6',
             borderThickness: defaultStyle?.borderThickness || 2,
@@ -476,7 +581,10 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           y: y - sourceObj.height / 2,
           zIndex: canvasState.objects.length + 1,
         };
-        const nearestAnchor = findNearestAnchor(newObj, x, y);
+        
+        // Use optimal anchors for minimal turns
+        const optimalAnchors = findOptimalAnchors(sourceObj, newObj);
+        
         const typeDef = getConnectionTypeDefinition(selectedConnectionType);
         const defaultStyle = typeDef?.defaultStyle;
         const defaultData = getDefaultConnectionData(selectedConnectionType);
@@ -490,8 +598,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             connectionData: defaultData,
             from: connectionDragStart.objName,
             to: newName,
-            fromPoint: connectionDragStart.anchorPosition,
-            toPoint: nearestAnchor,
+            fromPoint: optimalAnchors.fromPoint,
+            toPoint: optimalAnchors.toPoint,
             uidata: {
               borderColor: defaultStyle?.borderColor || '#3B82F6',
               borderThickness: defaultStyle?.borderThickness || 2,
@@ -590,98 +698,183 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           {saving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save'}
         </button>
       </div>
-      {/* Left Panel: Assets (20%) */}
-      <aside className="w-full md:w-1/5 h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
-        <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Assets</h3>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <button 
-            onClick={() => addObject('text')}
-            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all shadow-sm text-gray-900 dark:text-gray-100"
-          >
-            <Type size={20} />
-            <span className="text-[10px] mt-2 font-semibold">TEXT</span>
-          </button>
-          <button 
-            onClick={() => addObject('image', 'https://picsum.photos/200/200')}
-            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all shadow-sm text-gray-900 dark:text-gray-100"
-          >
-            <Image size={20} />
-            <span className="text-[10px] mt-2 font-semibold">IMAGE</span>
-          </button>
-        </div>
-
+      {/* Left Panel: Architecture Components */}
+      <aside className="w-full md:w-1/5 md:min-w-[300px] h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
         <div>
-          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
-            LINES & ARROWS
-          </h4>
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              onClick={() => addObject('line')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
-            >
-              <Minus size={18} />
-              <span className="text-[9px] mt-1 font-semibold">LINE</span>
-            </button>
-            <button 
-              onClick={() => {
-                const name = Math.random().toString(36).substr(2, 9);
-                const newObj: CanvasObject = {
-                  name,
-                  type: 'line' as AssetType,
-                  x: 100 + (canvasState.objects.length * 20) % 300,
-                  y: 100 + (canvasState.objects.length * 20) % 200,
-                  width: 150,
-                  height: 2,
-                  content: '',
-                  color: selectedColor,
-                  strokeDashArray: [10, 5],
-                  points: [0, 0, 150, 0],
-                  zIndex: canvasState.objects.length + 1,
-                };
-                dispatch({ type: 'ADD_OBJECT', payload: newObj });
-                setActiveName(name);
-              }}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
-            >
-              <div className="border-t-2 border-dashed w-5 border-current" />
-              <span className="text-[9px] mt-1 font-semibold">DOTTED</span>
-            </button>
-            <button 
-              onClick={() => addObject('arrow')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
-            >
-              <ArrowRight size={18} />
-              <span className="text-[9px] mt-1 font-semibold">ARROW</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
-            SHAPES
+          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            <Server size={14} /> ARCHITECTURE
           </h4>
           <div className="grid grid-cols-3 gap-2">
             <button 
-              onClick={() => addObject('circle')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
+              onClick={() => addObject('api-gateway')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100 relative group"
             >
-              <Circle size={18} />
-              <span className="text-[9px] mt-1 font-semibold">CIRCLE</span>
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['api-gateway'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['api-gateway'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">API GATEWAY</span>
             </button>
             <button 
-              onClick={() => addObject('rectangle')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
+              onClick={() => addObject('microservice')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
             >
-              <Square size={18} />
-              <span className="text-[9px] mt-1 font-semibold">RECT</span>
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['microservice'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['microservice'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">SERVICE</span>
             </button>
             <button 
-              onClick={() => addObject('triangle')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100"
+              onClick={() => addObject('database')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
             >
-              <Triangle size={18} />
-              <span className="text-[9px] mt-1 font-semibold">TRIANGLE</span>
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['database'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['database'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">DATABASE</span>
+            </button>
+            <button 
+              onClick={() => addObject('cache')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:border-yellow-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cache'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['cache'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">CACHE</span>
+            </button>
+            <button 
+              onClick={() => addObject('message-queue')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['message-queue'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['message-queue'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">QUEUE</span>
+            </button>
+            <button 
+              onClick={() => addObject('load-balancer')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['load-balancer'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['load-balancer'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">LB</span>
+            </button>
+            <button 
+              onClick={() => addObject('storage')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:border-pink-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['storage'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['storage'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">STORAGE</span>
+            </button>
+            <button 
+              onClick={() => addObject('cdn')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cdn'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['cdn'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">CDN</span>
+            </button>
+            <button 
+              onClick={() => addObject('lambda')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['lambda'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['lambda'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">LAMBDA</span>
+            </button>
+            <button 
+              onClick={() => addObject('container')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['container'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['container'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">CONTAINER</span>
+            </button>
+            <button 
+              onClick={() => addObject('kubernetes')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['kubernetes'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['kubernetes'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">K8S</span>
+            </button>
+            <button 
+              onClick={() => addObject('cloud')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cloud'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['cloud'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">CLOUD</span>
+            </button>
+            <button 
+              onClick={() => addObject('server')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['server'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['server'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">SERVER</span>
+            </button>
+            <button 
+              onClick={() => addObject('user')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['user'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['user'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">USER</span>
+            </button>
+            <button 
+              onClick={() => addObject('mobile-app')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['mobile-app'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['mobile-app'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">MOBILE</span>
+            </button>
+            <button 
+              onClick={() => addObject('web-app')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['web-app'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['web-app'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">WEB APP</span>
+            </button>
+            <button 
+              onClick={() => addObject('firewall')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['firewall'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['firewall'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">FIREWALL</span>
+            </button>
+            <button 
+              onClick={() => addObject('monitor')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['monitor'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['monitor'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">MONITOR</span>
+            </button>
+            <button 
+              onClick={() => addObject('text-box')}
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/20 hover:border-gray-400 transition-all text-gray-900 dark:text-gray-100"
+            >
+              <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['text-box'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={ARCHITECTURE_COMPONENTS['text-box'].iconPath} />
+              </svg>
+              <span className="text-[8px] font-semibold text-center leading-tight">TEXT</span>
             </button>
           </div>
         </div>
@@ -690,7 +883,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Network size={14} /> CONNECTION TYPES
           </h4>
-          <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
+          <div className="space-y-3">
             {Object.entries(getConnectionTypesByCategory()).map(([category, types]) => (
               <div key={category} className="space-y-1">
                 <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">
@@ -730,7 +923,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               {getConnectionTypeDefinition(selectedConnectionType)?.description}
             </p>
           </div>
-          <div className="mt-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-300 dark:border-green-700">
+          {/* <div className="mt-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-300 dark:border-green-700">
             <div className="flex items-start gap-2 mb-2">
               <span className="text-lg">👆</span>
               <div>
@@ -744,7 +937,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 </ol>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div>
@@ -858,7 +1051,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
+        {/* <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-2xl">🔗</span>
@@ -883,7 +1076,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
@@ -1160,6 +1353,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onDragEndObject={() => { 
                   setIsDraggingObject(false);
                   console.log('Ended dragging object', obj.name);
+                  // Update connection anchor points for optimal routing
+                  updateConnectionAnchors(obj.name);
                 }}
                 resetInteraction={resetInteraction}
               />
@@ -1170,12 +1365,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         {/* Text editing overlay - completely outside Konva */}
         {editingTextName && textInputPosition && typeof document !== 'undefined' && (() => {
           const editingObj = canvasState.objects.find(o => o.name === editingTextName);
-          if (!editingObj || editingObj.type !== 'text') return null;
+          if (!editingObj || (editingObj.type !== 'text' && editingObj.type !== 'text-box')) return null;
           
           return (
             <textarea
               ref={textInputRef}
-              value={editingObj.content}
+              value={editingObj.content || ''}
               onChange={(e) => updateObject(editingTextName!, { content: e.target.value })}
               onBlur={() => {
                 setEditingTextName(null);

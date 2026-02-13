@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Rect, Text as KonvaText, Image as KonvaImage, Path, Group, Line, Arrow, Circle as KonvaCircle, RegularPolygon } from 'react-konva';
 import { CanvasObject } from '../types';
+import { ARCHITECTURE_COMPONENTS } from '../constants';
 // @ts-ignore
 import useImage from 'use-image';
 
@@ -90,7 +91,7 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
 
   // Handle text editing
   const handleTextDblClick = () => {
-    if (obj.type === 'text' && onStartTextEdit) {
+    if ((obj.type === 'text' || obj.type === 'text-box') && onStartTextEdit) {
       onSelect();
       
       // Calculate position for HTML textarea overlay
@@ -444,6 +445,105 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
                 height={obj.height}
                 stroke="#3B82F6"
                 strokeWidth={2}
+              />
+            )}
+          </>
+        );
+      
+      // Architectural components
+      case 'api-gateway':
+      case 'microservice':
+      case 'database':
+      case 'cache':
+      case 'message-queue':
+      case 'load-balancer':
+      case 'storage':
+      case 'cdn':
+      case 'lambda':
+      case 'container':
+      case 'kubernetes':
+      case 'cloud':
+      case 'server':
+      case 'user':
+      case 'mobile-app':
+      case 'web-app':
+      case 'firewall':
+      case 'monitor':
+      case 'text-box':
+        const componentDef = ARCHITECTURE_COMPONENTS[obj.type as keyof typeof ARCHITECTURE_COMPONENTS];
+        if (!componentDef) return null;
+        
+        // Check if this is a text-box and if it has custom content
+        const isTextBox = obj.type === 'text-box';
+        const hasCustomContent = isTextBox && obj.content && obj.content.trim() !== '';
+        
+        // Determine display text: use obj.content if available, otherwise use default label
+        const displayText = obj.content && obj.content.trim() !== '' 
+          ? obj.content 
+          : (isTextBox ? 'Double-click to edit' : componentDef.label);
+        
+        return (
+          <>
+            {/* Background with border - transparent fill */}
+            <Rect
+              x={0}
+              y={0}
+              width={obj.width}
+              height={obj.height}
+              fill="transparent"
+              stroke={obj.borderColor || componentDef.color}
+              strokeWidth={2}
+              cornerRadius={8}
+              shadowBlur={active ? 12 : 6}
+              shadowOpacity={0.3}
+              shadowColor="#000000"
+              opacity={isGrayedOut && !active ? 0.4 : 1}
+            />
+            
+            {/* Show icon only if NOT text-box with content */}
+            {!hasCustomContent && (
+              <Path
+                x={obj.width / 2}
+                y={obj.height / 2}
+                data={componentDef.iconPath}
+                stroke={obj.borderColor || componentDef.color}
+                strokeWidth={2}
+                fill="transparent"
+                scaleX={(obj.width * 0.6) / 24}
+                scaleY={(obj.height * 0.6) / 24}
+                offsetX={12}
+                offsetY={12}
+                opacity={1}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
+            
+            {/* Label - show custom content or default label */}
+            <KonvaText
+              x={hasCustomContent ? 8 : 4}
+              y={hasCustomContent ? 8 : obj.height - 18}
+              width={hasCustomContent ? obj.width - 16 : obj.width - 8}
+              height={hasCustomContent ? obj.height - 16 : undefined}
+              text={displayText}
+              fontSize={hasCustomContent ? (obj.fontSize || 12) : 9}
+              fontStyle={hasCustomContent ? (obj.fontStyle || 'normal') : '600'}
+              fill={obj.color || '#000000'}
+              align={hasCustomContent ? 'left' : 'center'}
+              verticalAlign={hasCustomContent ? 'top' : undefined}
+              wrap={hasCustomContent ? 'word' : undefined}
+            />
+            
+            {/* Border when active */}
+            {active && (
+              <Rect
+                x={0}
+                y={0}
+                width={obj.width}
+                height={obj.height}
+                stroke="#3B82F6"
+                strokeWidth={3}
+                cornerRadius={8}
               />
             )}
           </>
