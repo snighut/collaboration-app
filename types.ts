@@ -38,7 +38,11 @@ export interface SaveDesignResponse {
   error?: string;
 }
 
-export type AssetType = 'text' | 'image' | 'svg' | 'color' | 'line' | 'arrow' | 'circle' | 'rectangle' | 'triangle';
+export type AssetType = 'text' | 'image' | 'svg' | 'color' | 'line' | 'arrow' | 'circle' | 'rectangle' | 'triangle' | 
+  // Architectural components
+  'api-gateway' | 'microservice' | 'database' | 'cache' | 'message-queue' | 'load-balancer' | 
+  'storage' | 'cdn' | 'lambda' | 'container' | 'kubernetes' | 'cloud' | 'server' | 'user' | 
+  'mobile-app' | 'web-app' | 'firewall' | 'monitor' | 'text-box';
 
 export interface Achievement {
   id: string;
@@ -133,7 +137,7 @@ export interface Connection {
     borderThickness?: number;
     borderStyle?: 'solid' | 'dashed' | 'dotted';
     arrowType?: 'filled' | 'open' | 'diamond' | 'hollow-diamond' | 'triangle' | 'hollow-triangle' | 'double';
-    linePattern?: 'straight' | 'curved' | 'stepped';
+    linePattern?: 'orthogonal' | 'curved' | 'stepped' | 'straight';
   };
 }
 

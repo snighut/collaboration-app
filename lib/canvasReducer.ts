@@ -21,6 +21,7 @@ export type CanvasAction =
   | { type: 'UPDATE_OBJECT'; name: string; updates: Partial<CanvasObject> }
   | { type: 'REMOVE_OBJECT'; name: string }
   | { type: 'ADD_CONNECTION'; payload: Connection }
+  | { type: 'UPDATE_CONNECTION'; name: string; updates: Partial<Connection> }
   | { type: 'REMOVE_CONNECTION'; id: string }
   | { type: 'ADD_DESIGN_GROUP'; payload: DesignGroup }
   | { type: 'UPDATE_DESIGN_GROUP'; id: string; updates: Partial<DesignGroup> }
@@ -52,6 +53,13 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
       };
     case 'ADD_CONNECTION':
       return { ...state, connections: [...state.connections, action.payload] };
+    case 'UPDATE_CONNECTION':
+      return {
+        ...state,
+        connections: state.connections.map(conn => 
+          conn.name === action.name ? { ...conn, ...action.updates } : conn
+        )
+      };
     case 'REMOVE_CONNECTION':
       return { ...state, connections: state.connections.filter((_, idx) => idx !== Number(action.id)) };
     case 'ADD_DESIGN_GROUP':

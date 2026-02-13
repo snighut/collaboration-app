@@ -71,7 +71,7 @@ export interface ConnectionTypeDefinition {
     borderThickness: number;
     borderStyle: 'solid' | 'dashed' | 'dotted';
     arrowType?: 'filled' | 'open' | 'diamond' | 'hollow-diamond' | 'triangle' | 'hollow-triangle' | 'double';
-    linePattern?: 'straight' | 'curved' | 'stepped';
+    linePattern?: 'orthogonal' | 'curved' | 'stepped' | 'straight';
   };
 }
 
@@ -91,7 +91,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'open',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -105,7 +105,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'hollow-diamond',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -119,7 +119,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'diamond',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -133,7 +133,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 1,
       borderStyle: 'dashed',
       arrowType: 'open',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -149,7 +149,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'hollow-triangle',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -163,7 +163,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'hollow-triangle',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -177,7 +177,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'hollow-triangle',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -191,7 +191,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'hollow-triangle',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -207,7 +207,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 3,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -221,7 +221,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 3,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -235,7 +235,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dotted',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -249,7 +249,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -265,7 +265,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -279,7 +279,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'open',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -293,7 +293,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'double',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -323,7 +323,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 1,
       borderStyle: 'dashed',
       arrowType: 'open',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -337,7 +337,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 4,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -353,7 +353,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -367,7 +367,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'double',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -383,7 +383,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -397,7 +397,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -411,7 +411,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -425,7 +425,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -439,7 +439,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'double',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -455,7 +455,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 3,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -469,7 +469,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -515,7 +515,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'double',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -529,7 +529,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'dashed',
       arrowType: 'open',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -543,7 +543,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   
@@ -559,7 +559,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
   {
@@ -573,7 +573,7 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       borderThickness: 2,
       borderStyle: 'solid',
       arrowType: 'filled',
-      linePattern: 'straight',
+      linePattern: 'orthogonal',
     },
   },
 ];
