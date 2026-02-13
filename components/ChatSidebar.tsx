@@ -250,9 +250,14 @@ const ChatSidebar: React.FC = () => {
             </p>
             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
               <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                This chat interface is powered by a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span>, running on my custom, AI-native infrastructure for low-latency, private inference. Have fun and tell me more about your experiences via{' '}
+                <span className="font-semibold text-blue-600 dark:text-blue-400">Chat</span> uses a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span> running on my custom, AI-native infrastructure for low-latency, private inference. <span className="italic text-gray-500 dark:text-gray-400">(RAG pipeline integration coming soon for context-aware answers!)</span> Have fun and share your feedback via{' '}
                 <a href="mailto:swapnil.nighut@example.com" className="underline hover:text-blue-600 dark:hover:text-blue-400">email</a> or{' '}
                 <a href="https://linkedin.com/in/swapnilnighut" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600 dark:hover:text-blue-400">LinkedIn</a>!
+              </p>
+            </div>
+            <div className="mt-2 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg">
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                <span className="font-semibold text-purple-600 dark:text-purple-400">Generate Design</span> triggers a <span className="font-semibold">LangChain</span> call that leverages my design APIs and <span className="font-semibold">OpenAI LLM</span> to create meaningful, visual system architectures from your natural language descriptions. <span className="italic text-gray-500 dark:text-gray-400">(Requires login — this is a secure API.)</span>
               </p>
             </div>
           </div>
