@@ -47,14 +47,14 @@ function DesignPageContent() {
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => router.push('/mydesigns')}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors min-w-0"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors shrink-0"
               title="Click here to see your creations"
             >
-              <List size={22} />
+              <List size={22} className="shrink-0" />
               <span className="font-medium hidden xs:inline">My Creations</span>
             </button>
-            <div className="flex items-center gap-2">
-              <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+              <Sparkles size={20} className="text-blue-600 dark:text-blue-400 shrink-0" />
               {designId === 'new' ? (
                 <span className="text-lg font-bold text-gray-900 dark:text-gray-100">New Creation</span>
               ) : (
