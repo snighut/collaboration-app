@@ -6,21 +6,38 @@ import { ConnectionType, getConnectionTypeDefinition, getDefaultStyleForType } f
 interface ConnectionRendererProps {
   connections: Connection[];
   objects: CanvasObject[];
+  groupDragState?: {
+    groupId: string;
+    objectNames: string[];
+    offsetX: number;
+    offsetY: number;
+  } | null;
 }
 
 /**
  * Helper function to get anchor position based on object and anchor point
+ * Applies groupDragState offset for real-time visual updates during group drag
  */
 const getAnchorPosition = (
   objName: string,
   position: string,
-  objects: CanvasObject[]
+  objects: CanvasObject[],
+  groupDragState?: {
+    groupId: string;
+    objectNames: string[];
+    offsetX: number;
+    offsetY: number;
+  } | null
 ): { x: number; y: number } => {
   const obj = objects.find(o => o.name === objName);
   if (!obj) return { x: 0, y: 0 };
 
-  let x = obj.x;
-  let y = obj.y;
+  // Apply group drag offset if this object is being dragged as part of a group
+  const offsetX = groupDragState && groupDragState.objectNames.includes(objName) ? groupDragState.offsetX : 0;
+  const offsetY = groupDragState && groupDragState.objectNames.includes(objName) ? groupDragState.offsetY : 0;
+
+  let x = obj.x + offsetX;
+  let y = obj.y + offsetY;
 
   if (obj.type === 'line' || obj.type === 'arrow') {
     const points = obj.points || [0, 0, obj.width, 0];
@@ -349,7 +366,7 @@ const getOrthogonalPath = (
 /**
  * Main ConnectionRenderer component - renders styled connections between canvas objects
  */
-const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, objects }) => {
+const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, objects, groupDragState }) => {
   return (
     <>
       {connections.map((conn, index) => {
@@ -357,9 +374,9 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         const fromName = typeof conn.from === 'string' ? conn.from : conn.from.name;
         const toName = typeof conn.to === 'string' ? conn.to : conn.to.name;
 
-        // Get anchor positions
-        const fromPos = getAnchorPosition(fromName, conn.fromPoint, objects);
-        const toPos = getAnchorPosition(toName, conn.toPoint, objects);
+        // Get anchor positions (with group drag offset applied)
+        const fromPos = getAnchorPosition(fromName, conn.fromPoint, objects, groupDragState);
+        const toPos = getAnchorPosition(toName, conn.toPoint, objects, groupDragState);
 
         // Determine connection type and get default styles
         const connectionType = (conn.connectionType as ConnectionType) || ConnectionType.DEFAULT;

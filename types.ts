@@ -80,6 +80,7 @@ export interface UIData {
 export interface DesignItem {
   id: string;
   name: string;
+  displayName?: string;
   uidata: UIData;
 }
 
@@ -144,10 +145,13 @@ export interface Connection {
 export interface DesignGroup {
   id: string;
   name: string;
+  displayName?: string;
   description?: string;
   uidata?: {
     x?: number;
     y?: number;
+    width?: number;
+    height?: number;
     borderColor?: string;
     borderThickness?: number;
     borderStyle?: 'solid' | 'dashed' | 'dotted';
@@ -158,6 +162,7 @@ export interface DesignGroup {
 // Legacy CanvasObject interface for backward compatibility
 export interface CanvasObject {
   name: string;
+  displayName?: string;
   type: AssetType;
   x: number;
   y: number;

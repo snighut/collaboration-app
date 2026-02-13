@@ -7,18 +7,22 @@ import { CanvasObject, DesignItem, Connection, ConnectionReference, DesignGroup 
 
 /**
  * Convert DesignItem (new schema) to CanvasObject (legacy format)
+ * Uses displayName for content display, falling back to name if not set
  */
 export function designItemToCanvasObject(item: DesignItem): CanvasObject {
   const uidata = item.uidata;
+  // Use displayName if available, otherwise fall back to name
+  const displayText = item.displayName || item.name;
   
   return {
     name: item.name,
+    displayName: item.displayName,
     type: uidata.type || 'text',
     x: uidata.x || 0,
     y: uidata.y || 0,
     width: uidata.width || 100,
     height: uidata.height || 100,
-    content: uidata.content || '',
+    content: uidata.content || displayText || '',
     color: uidata.color,
     backgroundColor: uidata.backgroundColor,
     zIndex: uidata.zIndex || 1,
@@ -36,6 +40,7 @@ export function canvasObjectToDesignItem(obj: CanvasObject): DesignItem {
   return {
     id: `temp-${obj.name}`,
     name: obj.name,
+    displayName: obj.displayName,
     uidata: {
       type: obj.type,
       x: obj.x,
