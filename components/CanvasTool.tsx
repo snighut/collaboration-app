@@ -366,6 +366,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     setActiveName(null);
   };
 
+  const removeDesignGroup = (id: string) => {
+    dispatch({ type: 'REMOVE_DESIGN_GROUP', id });
+    setActiveGroupId(null);
+  };
+
   // Add a new design group to the canvas
   const addDesignGroup = () => {
     const id = `group-${Math.random().toString(36).substr(2, 9)}`;
@@ -1293,11 +1298,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         className="w-full md:w-4/5 h-[60%] md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
       >
         <div className="absolute top-4 right-4 flex gap-2 z-[1001]">
-           {activeName && (
+           {(activeName || activeGroupId) && (
               <button 
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  removeObject(activeName); 
+                  if (activeName) {
+                    removeObject(activeName);
+                  } else if (activeGroupId) {
+                    removeDesignGroup(activeGroupId);
+                  }
                 }}
                 className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors shadow-lg"
               >
@@ -1330,6 +1339,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             const clickedOnEmpty = e.target === e.target.getStage();
             if (clickedOnEmpty) {
               setActiveName(null);
+              setActiveGroupId(null);
               setEditingTextName(null);
               setTextInputPosition(null);
             }
@@ -1529,8 +1539,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 height: `${editingObj.height}px`,
                 fontSize: `${editingObj.fontSize || 14}px`,
                 fontStyle: editingObj.fontStyle || 'normal',
-                color: editingObj.color || '#000000',
-                backgroundColor: editingObj.backgroundColor || 'white',
+                color: '#1f2937',
+                backgroundColor: '#f9fafb',
                 padding: '8px',
                 border: '2px solid #3B82F6',
                 outline: 'none',
