@@ -5,9 +5,9 @@ import { Achievement } from './types';
 export const YEARS = Array.from({ length: 13 }, (_, i) => 2026 - i);
 
 const LOGOS = {
-  syracuse: 'https://media.licdn.com/dms/image/v2/C560BAQFAyZ5pXkHL9Q/company-logo_100_100/company-logo_100_100/0/1630671468743/syracuse_university_logo?e=1770854400&v=beta&t=V591N9kkb5U7GY6AAeciuNs51_9Bx3Na8a_o03DlgTY',
-  novartis: 'https://media.licdn.com/dms/image/v2/D4E0BAQGWbusHQsuskQ/company-logo_100_100/B4EZfFIthEHcAY-/0/1751359085267/novartis_logo?e=1770854400&v=beta&t=v11FgkL2EEr-x0CeJ5rAs3cLWwWn_x2GZ6zvqE7mVIw',
-  shutterfly: 'https://media.licdn.com/dms/image/v2/D560BAQGWpeFxfJSlcw/company-logo_100_100/company-logo_100_100/0/1688567580923/shutterfly_logo?e=1770854400&v=beta&t=v2Q6S_OY0wn_BWlTxxsI2NKVVnO2Uzah8SBWoNi-BJI'
+  syracuse: '/syracuse-logo.png',
+  novartis: '/novartis-logo.png',
+  shutterfly: '/shutterfly-logo.png'
 };
 
 export const INITIAL_ACHIEVEMENTS: Achievement[] = [
