@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line, Arrow, Circle, Group, Path } from 'react-konva';
+import { Line, Arrow, Circle, Group, Path, Text, Rect, Label, Tag } from 'react-konva';
 import { Connection, CanvasObject } from '../types';
 import { ConnectionType, getConnectionTypeDefinition, getDefaultStyleForType } from '../lib/connectionTypes';
 
@@ -750,6 +750,40 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         };
 
         return renderConnection();
+        // // Get connection label (use name field)
+        // const connectionLabel = conn.name || '';
+        // const labelWidth = connectionLabel.length * 5.5 + 8;
+        // const labelHeight = 16;
+
+        // return (
+        //   <Group key={`connection-group-${index}`}>
+        //     {renderConnection()}
+        //     {/* Render connection label at midpoint with background */}
+        //     {connectionLabel && (
+        //       <Group
+        //         x={midpoint.x - labelWidth / 2}
+        //         y={midpoint.y - labelHeight / 2 - 4}
+        //       >
+        //         <Rect
+        //           width={labelWidth}
+        //           height={labelHeight}
+        //           fill="rgba(255, 255, 255, 0.9)"
+        //           stroke="#e5e7eb"
+        //           strokeWidth={1}
+        //           cornerRadius={3}
+        //         />
+        //         <Text
+        //           x={4}
+        //           y={3}
+        //           text={connectionLabel}
+        //           fontSize={10}
+        //           fontFamily="Inter, system-ui, sans-serif"
+        //           fill="#374151"
+        //         />
+        //       </Group>
+        //     )}
+        //   </Group>
+        // );
       })}
     </>
   );
