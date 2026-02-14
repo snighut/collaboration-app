@@ -86,6 +86,31 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     offsetY: number;
   } | null>(null);
 
+  // Bind Delete key to delete active object, group, or connection
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger delete if editing text or group name
+      const activeEl = document.activeElement;
+      const isEditing = activeEl && (
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        (activeEl as HTMLElement).isContentEditable
+      );
+      if (isEditing) return;
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (activeName) {
+          removeObject(activeName);
+        } else if (activeGroupId) {
+          removeDesignGroup(activeGroupId);
+        } else if (activeConnectionIndex !== null) {
+          removeConnection(activeConnectionIndex);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeName, activeGroupId, activeConnectionIndex]);
+
   // Fetch design data if designId is provided, with localStorage cache restore
   useEffect(() => {
     if (authLoading) return;
