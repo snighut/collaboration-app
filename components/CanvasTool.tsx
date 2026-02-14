@@ -75,7 +75,6 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType>(ConnectionType.DEFAULT);
   const [isDraggingObject, setIsDraggingObject] = useState(false);
   const [designGroupsExpanded, setDesignGroupsExpanded] = useState(false);
-  const [mobilePanelExpanded, setMobilePanelExpanded] = useState(true);
   
   // Track group drag state for real-time visual updates
   const [groupDragState, setGroupDragState] = useState<{
@@ -735,12 +734,10 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   React.useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const width = containerRef.current.offsetWidth;
-        const height = containerRef.current.offsetHeight;
-        // Guard against 0 dimensions which cause Konva drawImage errors
-        if (width > 0 && height > 0) {
-          setStageDimensions({ width, height });
-        }
+        setStageDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        });
       }
     };
     
@@ -937,18 +934,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         </button>
       </div>
       {/* Left Panel: Architecture Components */}
-      <aside className={`w-full md:w-1/5 md:min-w-[300px] ${mobilePanelExpanded ? 'h-[40%]' : 'h-auto'} md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col transition-all duration-300`}>
-        {/* Mobile Toggle Header */}
-        <button
-          onClick={() => setMobilePanelExpanded(!mobilePanelExpanded)}
-          className="md:hidden flex items-center justify-between w-full p-3 border-b border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-700"
-        >
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">SELECTION PANEL</span>
-          {mobilePanelExpanded ? <ChevronUp size={18} className="text-gray-500 dark:text-gray-400" /> : <ChevronDown size={18} className="text-gray-500 dark:text-gray-400" />}
-        </button>
+      <aside className="w-full md:w-1/5 md:min-w-[300px] h-[40%] md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
         
-        {/* Collapsible Content */}
-        <div className={`${mobilePanelExpanded ? 'flex' : 'hidden'} md:flex flex-col gap-6 p-6 overflow-y-auto custom-scrollbar flex-1`}>
         {/* DESIGN GROUPS Section */}
         <div>
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
@@ -1437,13 +1424,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             }}
           >Apply</button>
         </div>
-        </div>
       </aside>
 
       {/* Right: Canvas (80%) */}
       <section 
         ref={containerRef}
-        className="w-full md:w-4/5 flex-1 md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
+        className="w-full md:w-4/5 h-[60%] md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
       >
         <div className="absolute top-4 right-4 flex gap-2 z-[1001]">
            {(activeName || activeGroupId) && (
@@ -1493,8 +1479,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
         <Stage
           ref={stageRef}
-          width={stageDimensions.width || 1}
-          height={stageDimensions.height || 1}
+          width={stageDimensions.width}
+          height={stageDimensions.height}
           draggable={true}
           x={canvasState.x}
           y={canvasState.y}
