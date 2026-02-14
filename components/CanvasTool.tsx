@@ -71,6 +71,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
 
   const [activeName, setActiveName] = useState<string | null>(null);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [activeConnectionIndex, setActiveConnectionIndex] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
   const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType>(ConnectionType.DEFAULT);
   const [isDraggingObject, setIsDraggingObject] = useState(false);
@@ -382,6 +383,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
     setActiveGroupId(null);
   };
 
+  const removeConnection = (index: number) => {
+    dispatch({ type: 'REMOVE_CONNECTION', id: String(index) });
+    setActiveConnectionIndex(null);
+  };
+
   // Add a new design group to the canvas
   const addDesignGroup = () => {
     const id = `group-${Math.random().toString(36).substr(2, 9)}`;
@@ -677,6 +683,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const handleGroupDragStart = (groupId: string, objectNames: string[]) => {
     setActiveGroupId(groupId);
     setActiveName(null); // Deselect any selected object
+    setActiveConnectionIndex(null); // Deselect any selected connection
     setGroupDragState({
       groupId,
       objectNames,
@@ -1451,7 +1458,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         className="w-full md:w-4/5 flex-1 md:h-full relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden"
       >
         <div className="absolute top-4 right-4 flex gap-2 z-[1001]">
-           {(activeName || activeGroupId) && (
+           {(activeName || activeGroupId || activeConnectionIndex !== null) && (
               <button 
                 onClick={(e) => { 
                   e.stopPropagation(); 
@@ -1459,6 +1466,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                     removeObject(activeName);
                   } else if (activeGroupId) {
                     removeDesignGroup(activeGroupId);
+                  } else if (activeConnectionIndex !== null) {
+                    removeConnection(activeConnectionIndex);
                   }
                 }}
                 className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors shadow-lg"
@@ -1524,6 +1533,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             if (clickedOnEmpty) {
               setActiveName(null);
               setActiveGroupId(null);
+              setActiveConnectionIndex(null);
               setEditingTextName(null);
               setTextInputPosition(null);
             }
@@ -1559,6 +1569,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             const clickedOnEmpty = e.target === e.target.getStage();
             if (clickedOnEmpty) {
               setActiveName(null);
+              setActiveConnectionIndex(null);
               setEditingTextName(null);
               setTextInputPosition(null);
             }
@@ -1596,7 +1607,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             <DesignGroupRenderer
               designGroups={canvasState.designGroups || []}
               objects={canvasState.objects}
-              onSelect={(groupId) => setActiveGroupId(groupId)}
+              onSelect={(groupId) => {
+                setActiveGroupId(groupId);
+                setActiveName(null);
+                setActiveConnectionIndex(null);
+              }}
               activeGroupId={activeGroupId}
               onGroupDragStart={handleGroupDragStart}
               onGroupDragMove={handleGroupDragMove}
@@ -1619,6 +1634,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               connections={canvasState.connections}
               objects={canvasState.objects}
               groupDragState={groupDragState}
+              activeConnectionIndex={activeConnectionIndex}
+              onConnectionClick={(index) => {
+                setActiveConnectionIndex(index);
+                setActiveName(null);
+                setActiveGroupId(null);
+              }}
             />
             
             {/* Render dragging connection line */}
@@ -1657,6 +1678,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                     setTextInputPosition(null);
                   }
                   setActiveName(obj.name);
+                  setActiveGroupId(null);
+                  setActiveConnectionIndex(null);
                 }}
                 onUpdate={(updates) => updateObject(obj.name, updates)}
                 onStartTextEdit={(position) => {

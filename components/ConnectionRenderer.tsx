@@ -12,6 +12,8 @@ interface ConnectionRendererProps {
     offsetX: number;
     offsetY: number;
   } | null;
+  activeConnectionIndex?: number | null;
+  onConnectionClick?: (index: number) => void;
 }
 
 /**
@@ -366,7 +368,7 @@ const getOrthogonalPath = (
 /**
  * Main ConnectionRenderer component - renders styled connections between canvas objects
  */
-const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, objects, groupDragState }) => {
+const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, objects, groupDragState, activeConnectionIndex, onConnectionClick }) => {
   return (
     <>
       {connections.map((conn, index) => {
@@ -393,6 +395,30 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
 
         const angle = getAngle(fromPos.x, fromPos.y, toPos.x, toPos.y);
         const midpoint = getMidpoint(fromPos.x, fromPos.y, toPos.x, toPos.y);
+
+        // Default to orthogonal (90-degree corners) for professional appearance
+        const effectiveLinePattern = linePattern || 'orthogonal';
+
+        // Calculate path data based on line pattern (used for highlight and hit area)
+        const getPathData = (): string => {
+          if (effectiveLinePattern === 'curved') {
+            return getSmoothCurvedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
+          }
+          if (effectiveLinePattern === 'stepped') {
+            return getSteppedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
+          }
+          // orthogonal or straight
+          return getOrthogonalPath(
+            fromPos.x,
+            fromPos.y,
+            toPos.x,
+            toPos.y,
+            conn.fromPoint,
+            conn.toPoint
+          );
+        };
+
+        const pathData = getPathData();
 
         // Render based on arrow type and line pattern
         const renderConnection = () => {
@@ -766,7 +792,35 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
           }
         };
 
-        return renderConnection();
+        const isActive = activeConnectionIndex === index;
+
+        return (
+          <Group 
+            key={`connection-wrapper-${index}`}
+            onClick={() => onConnectionClick?.(index)}
+            onTap={() => onConnectionClick?.(index)}
+          >
+            {/* Selection highlight - thicker path behind the connection following actual shape */}
+            {isActive && (
+              <Path
+                data={pathData}
+                stroke="#3B82F6"
+                strokeWidth={(borderThickness || 2) + 6}
+                opacity={0.4}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
+            {/* Invisible hit area for easier clicking - follows actual path shape */}
+            <Path
+              data={pathData}
+              stroke="transparent"
+              strokeWidth={20}
+              hitStrokeWidth={20}
+            />
+            {renderConnection()}
+          </Group>
+        );
         // // Get connection label (use name field)
         // const connectionLabel = conn.name || '';
         // const labelWidth = connectionLabel.length * 5.5 + 8;
