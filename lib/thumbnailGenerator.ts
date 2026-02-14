@@ -32,6 +32,17 @@ export async function generateThumbnailFromStage(
   const stageWidth = stage.width();
   const stageHeight = stage.height();
 
+  // Guard against 0 dimensions which would cause drawImage to fail
+  if (stageWidth <= 0 || stageHeight <= 0) {
+    // Return an empty transparent 1x1 pixel blob as fallback
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob || new Blob()), mimeType, quality);
+    });
+  }
+
   // Calculate scale to fit thumbnail dimensions while maintaining aspect ratio
   const scale = Math.min(width / stageWidth, height / stageHeight);
 
