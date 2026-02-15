@@ -1,5 +1,5 @@
 
-# Run and deploy your Vocal Canvas app
+# Run and deploy your System Design Canvas app
 
 This contains everything you need to run your app locally.
 
