@@ -9,7 +9,7 @@ View experimental demo at: https://nighutlabs.dev/mydesigns
 
 ---
 
-# 🎨 React Konva Canvas (collaboration-app)
+# 🎨 React Konva based System Design Canvas App (collaboration-app)
 
 A real-time system design collaboration application built with **Next.js** and designed for high-availability deployment on **Kubernetes**. This project serves as the flagship service for a hybrid homelab environment, bridging development on **Apple Silicon (M4 Mac Mini)** and production on **Ryzen/AMD64 (GMKtec K8 Plus)**.
 
