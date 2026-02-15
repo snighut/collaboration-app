@@ -17,7 +17,7 @@ A real-time system design collaboration application built with **Next.js** and d
 
 ## 🚀 1. What it Does
 
-* **Real-time Synchronization:** Multiple users can collaborate simultaneously.
+* **Real-time Design Generation:** Users can generate design using basic AI agent. They can also manually update the design using drag drop options.
 * **Responsive UI:** Optimized for both desktop and mobile layouts.
 * **Multi-Arch Support:** Custom Docker builds that run natively on both `arm64` (Mac) and `amd64` (Ryzen).
 * **GitOps Ready:** Integrated with Flux CD for automated "set and forget" deployments.
