@@ -3,15 +3,15 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1rnJ7EJDjkRHaoVKBGGk8HgdYawUS2JAP
+View experimental demo at: https://nighutlabs.dev/mydesigns
 
 **Prerequisites:**  Node.js
 
 ---
 
-# 🎨 Chronos Canvas (collaboration-app)
+# 🎨 React Konva Canvas (collaboration-app)
 
-A real-time collaboration application built with **Next.js** and designed for high-availability deployment on **Kubernetes**. This project serves as the flagship service for a hybrid homelab environment, bridging development on **Apple Silicon (M4 Mac Mini)** and production on **Ryzen/AMD64 (GMKtec K8 Plus)**.
+A real-time system design collaboration application built with **Next.js** and designed for high-availability deployment on **Kubernetes**. This project serves as the flagship service for a hybrid homelab environment, bridging development on **Apple Silicon (M4 Mac Mini)** and production on **Ryzen/AMD64 (GMKtec K8 Plus)**.
 
 ---
 
