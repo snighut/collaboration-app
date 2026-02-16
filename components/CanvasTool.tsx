@@ -74,6 +74,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const [activeConnectionIndex, setActiveConnectionIndex] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState('#4ECDC4');
   const [selectedConnectionType, setSelectedConnectionType] = useState<ConnectionType>(ConnectionType.DEFAULT);
+  const [selectedLinePattern, setSelectedLinePattern] = useState<'orthogonal' | 'curved' | 'stepped' | 'straight'>('curved');
   const [isDraggingObject, setIsDraggingObject] = useState(false);
   const [designGroupsExpanded, setDesignGroupsExpanded] = useState(false);
   const [mobilePanelExpanded, setMobilePanelExpanded] = useState(true);
@@ -649,7 +650,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             borderThickness: defaultStyle?.borderThickness || 2,
             borderStyle: defaultStyle?.borderStyle || 'solid',
             arrowType: defaultStyle?.arrowType,
-            linePattern: defaultStyle?.linePattern,
+            linePattern: selectedLinePattern,
           },
         }
       });
@@ -690,7 +691,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               borderThickness: defaultStyle?.borderThickness || 2,
               borderStyle: defaultStyle?.borderStyle || 'solid',
               arrowType: defaultStyle?.arrowType,
-              linePattern: defaultStyle?.linePattern,
+              linePattern: selectedLinePattern,
             },
           }
         });
@@ -1225,6 +1226,88 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Network size={14} /> CONNECTION TYPES
           </h4>
+                    
+          {/* Line Pattern Selector */}
+          <div className="mt-3 p-3 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-blue-900/20 rounded-lg border-2 border-purple-300 dark:border-purple-600 shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12 Q 8 6, 13 12 T 21 12" strokeLinecap="round"/>
+              </svg>
+              <h5 className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                Line Pattern
+              </h5>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                onClick={() => setSelectedLinePattern('straight')}
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
+                  selectedLinePattern === 'straight'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
+                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                }`}
+                title="Straight Line"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className={selectedLinePattern === 'straight' ? 'text-white' : 'text-gray-700 dark:text-gray-300'}>
+                  <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+                <span className={`text-[7px] font-bold text-center mt-1 ${selectedLinePattern === 'straight' ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                  STRAIGHT
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setSelectedLinePattern('orthogonal')}
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
+                  selectedLinePattern === 'orthogonal'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
+                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                }`}
+                title="Orthogonal (Right Angles)"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className={selectedLinePattern === 'orthogonal' ? 'text-white' : 'text-gray-700 dark:text-gray-300'}>
+                  <path d="M 4 12 L 10 12 L 10 6 L 20 6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className={`text-[7px] font-bold text-center mt-1 ${selectedLinePattern === 'orthogonal' ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                  ORTHO
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setSelectedLinePattern('curved')}
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
+                  selectedLinePattern === 'curved'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
+                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                }`}
+                title="Curved (Smooth Bezier)"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className={selectedLinePattern === 'curved' ? 'text-white' : 'text-gray-700 dark:text-gray-300'}>
+                  <path d="M 4 12 Q 12 6, 20 12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                </svg>
+                <span className={`text-[7px] font-bold text-center mt-1 ${selectedLinePattern === 'curved' ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                  CURVED
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setSelectedLinePattern('stepped')}
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
+                  selectedLinePattern === 'stepped'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
+                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                }`}
+                title="Stepped (Staircase)"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className={selectedLinePattern === 'stepped' ? 'text-white' : 'text-gray-700 dark:text-gray-300'}>
+                  <path d="M 4 12 L 8 12 L 8 8 L 12 8 L 12 12 L 16 12 L 16 8 L 20 8" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className={`text-[7px] font-bold text-center mt-1 ${selectedLinePattern === 'stepped' ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                  STEPPED
+                </span>
+              </button>
+            </div>
+          </div>
+          
           <div className="space-y-2">
             {Object.entries(getConnectionTypesByCategory()).map(([category, types]) => (
               <div key={category} className="space-y-1">
@@ -1258,6 +1341,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               </div>
             ))}
           </div>
+
           <div className="mt-2 p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
             <p className="text-[8px] text-gray-600 dark:text-gray-400 leading-tight">
               <span className="font-semibold text-blue-600 dark:text-blue-400">{getConnectionTypeDefinition(selectedConnectionType)?.label || 'Default'}</span>

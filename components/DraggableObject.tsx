@@ -65,6 +65,10 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   const groupRef = useRef<any>(null);
   const [draggable, setDraggable] = useState(true);
   const isDraggingRef = useRef(false);
+  
+  // Resize state management for text objects
+  const resizeStartRef = useRef<{ width: number; height: number; startX: number; startY: number } | null>(null);
+  const [resizingDimensions, setResizingDimensions] = useState<{ width: number; height: number } | null>(null);
 
   // Calculate anchor points based on object type
   const getAnchorPoints = () => {
@@ -244,6 +248,10 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
   };
 
   const renderShape = () => {
+    // Use resizing dimensions if actively resizing, otherwise use obj dimensions
+    const displayWidth = resizingDimensions?.width ?? obj.width;
+    const displayHeight = resizingDimensions?.height ?? obj.height;
+    
     switch (obj.type) {
       case 'text':
         return (
@@ -251,8 +259,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             <Rect
               x={0}
               y={0}
-              width={obj.width}
-              height={obj.height}
+              width={displayWidth}
+              height={displayHeight}
               fill={obj.backgroundColor || 'white'}
               shadowBlur={active ? 10 : 5}
               shadowOpacity={0.3}
@@ -261,8 +269,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             <KonvaText
               x={8}
               y={8}
-              width={obj.width - 16}
-              height={obj.height - 16}
+              width={displayWidth - 16}
+              height={displayHeight - 16}
               text={obj.content || 'Double-click to edit'}
               fontSize={obj.fontSize || 14}
               fontStyle={obj.fontStyle || 'normal'}
@@ -275,8 +283,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
               <Rect
                 x={0}
                 y={0}
-                width={obj.width}
-                height={obj.height}
+                width={displayWidth}
+                height={displayHeight}
                 stroke="#3B82F6"
                 strokeWidth={2}
               />
@@ -496,8 +504,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             <Rect
               x={0}
               y={0}
-              width={obj.width}
-              height={obj.height}
+              width={displayWidth}
+              height={displayHeight}
               fill="transparent"
               stroke={obj.borderColor || componentDef.color}
               strokeWidth={2}
@@ -511,14 +519,14 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             {/* Show icon only if NOT text-box with content */}
             {!hasCustomContent && (
               <Path
-                x={obj.width / 2}
-                y={obj.height / 2}
+                x={displayWidth / 2}
+                y={displayHeight / 2}
                 data={componentDef.iconPath}
                 stroke={obj.borderColor || componentDef.color}
                 strokeWidth={2}
                 fill="transparent"
-                scaleX={(obj.width * 0.6) / 24}
-                scaleY={(obj.height * 0.6) / 24}
+                scaleX={(displayWidth * 0.6) / 24}
+                scaleY={(displayHeight * 0.6) / 24}
                 offsetX={12}
                 offsetY={12}
                 opacity={1}
@@ -530,9 +538,9 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
             {/* Label - show custom content or default label */}
             <KonvaText
               x={hasCustomContent ? 8 : 4}
-              y={hasCustomContent ? 8 : obj.height - 18}
-              width={hasCustomContent ? obj.width - 16 : obj.width - 8}
-              height={hasCustomContent ? obj.height - 16 : undefined}
+              y={hasCustomContent ? 8 : displayHeight - 18}
+              width={hasCustomContent ? displayWidth - 16 : displayWidth - 8}
+              height={hasCustomContent ? displayHeight - 16 : undefined}
               text={displayText}
               fontSize={hasCustomContent ? (obj.fontSize || 12) : 9}
               fontStyle={hasCustomContent ? (obj.fontStyle || 'normal') : '600'}
@@ -547,8 +555,8 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
               <Rect
                 x={0}
                 y={0}
-                width={obj.width}
-                height={obj.height}
+                width={displayWidth}
+                height={displayHeight}
                 stroke="#3B82F6"
                 strokeWidth={3}
                 cornerRadius={8}
@@ -622,8 +630,134 @@ const DraggableObject: React.FC<DraggableObjectProps> = ({
         </Group>
       ))}
       
+      {/* Resize handle for text objects - only visible when active */}
+      {(() => {
+        const shouldShowResize = active && (obj.type === 'text' || obj.type === 'text-box');
+        return shouldShowResize && (
+          <Group
+            x={(resizingDimensions?.width ?? obj.width) - 20}
+            y={(resizingDimensions?.height ?? obj.height) - 20}
+            draggable={true}
+            onMouseEnter={(e) => {
+              const stage = e.target.getStage();
+              if (stage) stage.container().style.cursor = 'nwse-resize';
+            }}
+            onMouseLeave={(e) => {
+              const stage = e.target.getStage();
+              if (stage) stage.container().style.cursor = 'default';
+            }}
+            onDragStart={(e) => {
+            // Stop event from bubbling to parent group
+            e.cancelBubble = true;
+            
+            // Set cursor during drag
+            const stage = e.target.getStage();
+            if (stage) stage.container().style.cursor = 'nwse-resize';
+            
+            const pointerPos = stage?.getPointerPosition();
+            
+            // Store starting dimensions and pointer position
+            resizeStartRef.current = {
+              width: obj.width,
+              height: obj.height,
+              startX: pointerPos?.x || 0,
+              startY: pointerPos?.y || 0,
+            };
+          }}
+          onDragMove={(e) => {
+            // Stop event from bubbling
+            e.cancelBubble = true;
+            
+            const stage = e.target.getStage();
+            const pointerPos = stage?.getPointerPosition();
+            const startData = resizeStartRef.current;
+            
+            if (startData && pointerPos) {
+              // Calculate delta from start position
+              const deltaX = pointerPos.x - startData.startX;
+              const deltaY = pointerPos.y - startData.startY;
+              
+              // Calculate new dimensions with minimum size constraints
+              const minWidth = 60;
+              const minHeight = 40;
+              const newWidth = Math.max(minWidth, startData.width + deltaX);
+              const newHeight = Math.max(minHeight, startData.height + deltaY);
+              
+              // Update live preview
+              setResizingDimensions({
+                width: newWidth,
+                height: newHeight,
+              });
+            }
+            
+            // Reset the handle position (it should stay at corner)
+            const node = e.target;
+            node.x(0);
+            node.y(0);
+          }}
+          onDragEnd={(e) => {
+            // Stop event from bubbling
+            e.cancelBubble = true;
+            
+            const stage = e.target.getStage();
+            if (stage) stage.container().style.cursor = 'default';
+            
+            const startData = resizeStartRef.current;
+            
+            if (startData && resizingDimensions) {
+              // Commit the resize
+              onUpdate({
+                width: resizingDimensions.width,
+                height: resizingDimensions.height,
+              });
+            }
+            
+            // Clean up
+            resizeStartRef.current = null;
+            setResizingDimensions(null);
+            
+            // Reset handle position
+            const node = e.target;
+            node.x(0);
+            node.y(0);
+          }}
+        >
+          {/* Resize handle background */}
+          <Rect
+            x={0}
+            y={0}
+            width={20}
+            height={20}
+            fill="#4CAF50"
+            stroke="#2196F3"
+            strokeWidth={1}
+            cornerRadius={4}
+            opacity={1}
+            shadowBlur={4}
+            shadowColor="black"
+            shadowOpacity={0.5}
+            shadowOffsetX={2}
+            shadowOffsetY={2}
+          />
+          {/* Resize handle icon (diagonal lines) */}
+          <Line
+            points={[6, 14, 14, 6]}
+            stroke="white"
+            strokeWidth={2}
+            lineCap="round"
+          />
+          <Line
+            points={[10, 14, 14, 10]}
+            stroke="white"
+            strokeWidth={2}
+            lineCap="round"
+          />
+        </Group>
+      );
+      })()}
+      
       {/* Position indicator for active objects */}
-      {active && (
+      {active && obj.type !== 'text' && obj.type !== 'text-box' && (
         <>
           <Rect
             x={obj.width / 2 - 40}
