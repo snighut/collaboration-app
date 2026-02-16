@@ -46,7 +46,7 @@ const App: React.FC = () => {
   };
 
   const scrollToCreativeHub = () => {
-    const element = document.getElementById('creative-hub-trigger');
+    const element = document.getElementById('my-creations-section');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -151,7 +151,7 @@ const App: React.FC = () => {
             </div>
 
             {/* My Designs */}
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
+            <div id="my-creations-section" className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full scroll-mt-24">
               <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Layout className="text-purple-600 dark:text-purple-400" size={32} />
               </div>
