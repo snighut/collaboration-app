@@ -10,13 +10,10 @@ export enum ConnectionType {
   DEPENDENCY = 'dependency',
   
   // Inheritance & Implementation
-  GENERALIZATION = 'generalization',
   INHERITANCE = 'inheritance',
   REALIZATION = 'realization',
-  IMPLEMENTATION = 'implementation',
   
   // Flow Types
-  DATA_FLOW = 'dataFlow',
   CONTROL_FLOW = 'controlFlow',
   MESSAGE_FLOW = 'messageFlow',
   EVENT_FLOW = 'eventFlow',
@@ -34,26 +31,6 @@ export enum ConnectionType {
   // Directional Types
   UNIDIRECTIONAL = 'unidirectional',
   BIDIRECTIONAL = 'bidirectional',
-  
-  // Integration Types
-  API_CALL = 'apiCall',
-  REST_API = 'restApi',
-  GRAPHQL = 'graphql',
-  GRPC = 'grpc',
-  WEBSOCKET = 'websocket',
-  
-  // Data Persistence
-  DATABASE_CONNECTION = 'databaseConnection',
-  CACHE_CONNECTION = 'cacheConnection',
-  
-  // Messaging
-  MESSAGE_QUEUE = 'messageQueue',
-  EVENT_BUS = 'eventBus',
-  
-  // Network
-  TCP_CONNECTION = 'tcpConnection',
-  UDP_CONNECTION = 'udpConnection',
-  HTTP_REQUEST = 'httpRequest',
   
   // Custom/Default
   CUSTOM = 'custom',
@@ -139,9 +116,9 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
   
   // Inheritance & Implementation
   {
-    type: ConnectionType.GENERALIZATION,
-    label: 'Generalization',
-    description: 'Inheritance relationship (is-a)',
+    type: ConnectionType.INHERITANCE,
+    label: 'Inheritance',
+    description: 'Class inheritance (is-a relationship)',
     category: 'Inheritance',
     icon: '—▷',
     defaultStyle: {
@@ -153,23 +130,9 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
     },
   },
   {
-    type: ConnectionType.INHERITANCE,
-    label: 'Inheritance',
-    description: 'Class inheritance',
-    category: 'Inheritance',
-    icon: '—△',
-    defaultStyle: {
-      borderColor: '#F59E0B',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'hollow-triangle',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
     type: ConnectionType.REALIZATION,
     label: 'Realization',
-    description: 'Interface implementation (dashed hollow triangle)',
+    description: 'Interface implementation',
     category: 'Inheritance',
     icon: '- - ▷',
     defaultStyle: {
@@ -180,36 +143,8 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
       linePattern: 'orthogonal',
     },
   },
-  {
-    type: ConnectionType.IMPLEMENTATION,
-    label: 'Implementation',
-    description: 'Implements an interface',
-    category: 'Inheritance',
-    icon: '- - △',
-    defaultStyle: {
-      borderColor: '#D97706',
-      borderThickness: 2,
-      borderStyle: 'dashed',
-      arrowType: 'hollow-triangle',
-      linePattern: 'orthogonal',
-    },
-  },
   
   // Flow Types
-  {
-    type: ConnectionType.DATA_FLOW,
-    label: 'Data Flow',
-    description: 'Data flowing from one component to another',
-    category: 'Flow',
-    icon: '═►',
-    defaultStyle: {
-      borderColor: '#2563EB',
-      borderThickness: 3,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
   {
     type: ConnectionType.CONTROL_FLOW,
     label: 'Control Flow',
@@ -371,182 +306,6 @@ export const CONNECTION_TYPE_DEFINITIONS: ConnectionTypeDefinition[] = [
     },
   },
   
-  // Integration Types
-  {
-    type: ConnectionType.API_CALL,
-    label: 'API Call',
-    description: 'Generic API call',
-    category: 'Integration',
-    icon: 'API→',
-    defaultStyle: {
-      borderColor: '#0891B2',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.REST_API,
-    label: 'REST API',
-    description: 'RESTful API call',
-    category: 'Integration',
-    icon: 'REST',
-    defaultStyle: {
-      borderColor: '#059669',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.GRAPHQL,
-    label: 'GraphQL',
-    description: 'GraphQL query/mutation',
-    category: 'Integration',
-    icon: 'GQL',
-    defaultStyle: {
-      borderColor: '#E11D48',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.GRPC,
-    label: 'gRPC',
-    description: 'gRPC call',
-    category: 'Integration',
-    icon: 'RPC',
-    defaultStyle: {
-      borderColor: '#2563EB',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.WEBSOCKET,
-    label: 'WebSocket',
-    description: 'WebSocket connection',
-    category: 'Integration',
-    icon: 'WS',
-    defaultStyle: {
-      borderColor: '#7C3AED',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'double',
-      linePattern: 'orthogonal',
-    },
-  },
-  
-  // Data Persistence
-  {
-    type: ConnectionType.DATABASE_CONNECTION,
-    label: 'Database Connection',
-    description: 'Connection to database',
-    category: 'Persistence',
-    icon: '⛁',
-    defaultStyle: {
-      borderColor: '#0284C7',
-      borderThickness: 3,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.CACHE_CONNECTION,
-    label: 'Cache Connection',
-    description: 'Connection to cache layer',
-    category: 'Persistence',
-    icon: '⚡⛁',
-    defaultStyle: {
-      borderColor: '#F59E0B',
-      borderThickness: 2,
-      borderStyle: 'dashed',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  
-  // Messaging
-  {
-    type: ConnectionType.MESSAGE_QUEUE,
-    label: 'Message Queue',
-    description: 'Message queue communication',
-    category: 'Messaging',
-    icon: '▭→',
-    defaultStyle: {
-      borderColor: '#7C3AED',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'stepped',
-    },
-  },
-  {
-    type: ConnectionType.EVENT_BUS,
-    label: 'Event Bus',
-    description: 'Event bus communication',
-    category: 'Messaging',
-    icon: '⊷⊷→',
-    defaultStyle: {
-      borderColor: '#DB2777',
-      borderThickness: 2,
-      borderStyle: 'dashed',
-      arrowType: 'filled',
-      linePattern: 'curved',
-    },
-  },
-  
-  // Network
-  {
-    type: ConnectionType.TCP_CONNECTION,
-    label: 'TCP Connection',
-    description: 'TCP network connection',
-    category: 'Network',
-    icon: 'TCP',
-    defaultStyle: {
-      borderColor: '#1E40AF',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'double',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.UDP_CONNECTION,
-    label: 'UDP Connection',
-    description: 'UDP network connection',
-    category: 'Network',
-    icon: 'UDP',
-    defaultStyle: {
-      borderColor: '#7C3AED',
-      borderThickness: 2,
-      borderStyle: 'dashed',
-      arrowType: 'open',
-      linePattern: 'orthogonal',
-    },
-  },
-  {
-    type: ConnectionType.HTTP_REQUEST,
-    label: 'HTTP Request',
-    description: 'HTTP/HTTPS request',
-    category: 'Network',
-    icon: 'HTTP',
-    defaultStyle: {
-      borderColor: '#059669',
-      borderThickness: 2,
-      borderStyle: 'solid',
-      arrowType: 'filled',
-      linePattern: 'orthogonal',
-    },
-  },
-  
   // Custom/Default
   {
     type: ConnectionType.CUSTOM,
@@ -615,82 +374,6 @@ export function getDefaultStyleForType(type: ConnectionType) {
  */
 export function getDefaultConnectionData(type: ConnectionType): Record<string, any> | undefined {
   switch (type) {
-    case ConnectionType.REST_API:
-      return {
-        protocol: 'HTTPS',
-        method: 'GET',
-        dataFormat: 'JSON',
-        timeout: 30000,
-      };
-    
-    case ConnectionType.GRAPHQL:
-      return {
-        protocol: 'HTTPS',
-        dataFormat: 'JSON',
-        pattern: 'request-reply',
-      };
-    
-    case ConnectionType.GRPC:
-      return {
-        protocol: 'HTTP/2',
-        dataFormat: 'Protobuf',
-        synchronous: true,
-      };
-    
-    case ConnectionType.WEBSOCKET:
-      return {
-        protocol: 'WSS',
-        pattern: 'streaming',
-        synchronous: false,
-      };
-    
-    case ConnectionType.DATABASE_CONNECTION:
-      return {
-        protocol: 'TCP',
-        port: 5432,
-        encryption: 'SSL/TLS',
-        timeout: 5000,
-      };
-    
-    case ConnectionType.CACHE_CONNECTION:
-      return {
-        protocol: 'TCP',
-        port: 6379,
-        timeout: 1000,
-      };
-    
-    case ConnectionType.MESSAGE_QUEUE:
-      return {
-        pattern: 'fire-and-forget',
-        qos: 'at-least-once',
-        synchronous: false,
-      };
-    
-    case ConnectionType.EVENT_BUS:
-      return {
-        pattern: 'publish-subscribe',
-        synchronous: false,
-      };
-    
-    case ConnectionType.HTTP_REQUEST:
-      return {
-        protocol: 'HTTP/1.1',
-        method: 'GET',
-        timeout: 30000,
-      };
-    
-    case ConnectionType.TCP_CONNECTION:
-      return {
-        protocol: 'TCP',
-        synchronous: true,
-      };
-    
-    case ConnectionType.UDP_CONNECTION:
-      return {
-        protocol: 'UDP',
-        synchronous: false,
-      };
-    
     case ConnectionType.SYNCHRONOUS_CALL:
       return {
         synchronous: true,
@@ -716,11 +399,6 @@ export function getDefaultConnectionData(type: ConnectionType): Record<string, a
         synchronous: false,
       };
     
-    case ConnectionType.DATA_FLOW:
-      return {
-        dataFormat: 'JSON',
-      };
-    
     case ConnectionType.COMPOSITION:
       return {
         cardinality: '1:N',
@@ -729,12 +407,6 @@ export function getDefaultConnectionData(type: ConnectionType): Record<string, a
     case ConnectionType.AGGREGATION:
       return {
         cardinality: '1:N',
-      };
-    
-    case ConnectionType.API_CALL:
-      return {
-        protocol: 'HTTPS',
-        timeout: 30000,
       };
     
     // For other types, return undefined (no default data)
