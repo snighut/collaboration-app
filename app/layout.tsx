@@ -52,7 +52,7 @@ export default function RootLayout({
               name: 'Nighutlabs',
               url: 'https://nighutlabs.dev',
               logo: 'https://nighutlabs.dev/favicon.png',
-              description: 'An experimental AI-powered tool that transforms speech into professional system design diagrams.',
+              description: 'An experimental AI-powered tool that transforms text based prompts into professional system design diagrams.',
               founder: {
                 '@type': 'Person',
                 name: 'Swapnil Nighut',
