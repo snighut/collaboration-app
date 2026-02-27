@@ -12,6 +12,7 @@ const OPEN_POLL_INTERVAL_MS = 30000;
 const EXTENDED_HOURS_POLL_INTERVAL_MS = 60000;
 const CLOSED_POLL_INTERVAL_MS = 300000;
 const CLOSED_STALE_POLL_INTERVAL_MS = 900000;
+const SENTIMENT_POLL_INTERVAL_MS = 120000;
 const DEFAULT_TICKERS = ['AAPL', 'MSFT', 'NVDA'];
 
 const BASE_PRICES: Record<string, number> = {
@@ -23,6 +24,32 @@ const BASE_PRICES: Record<string, number> = {
   META: 470,
   GOOGL: 165,
 };
+
+type SentimentRange = 'days' | 'months' | 'years';
+
+interface SentimentPredictionPoint {
+  [horizon: string]: {
+    expected: string;
+  };
+}
+
+interface SentimentEntry {
+  timestamp: number;
+  confidence: number;
+  reputation: 'HIGH' | 'MEDIUM' | 'LOW' | string;
+  sentimentText: string;
+  futurePredictions: {
+    days: SentimentPredictionPoint[];
+    months: SentimentPredictionPoint[];
+    years: SentimentPredictionPoint[];
+  };
+}
+
+interface MiniSparkPoint {
+  xLabel: string;
+  yValue: number;
+  tooltip: string;
+}
 
 function makeInitialSeries(basePrice: number): PricePoint[] {
   const now = Date.now();
@@ -71,6 +98,130 @@ function valuationPill(valuation: StockSignalResult['valuation']): string {
     return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
   }
   return 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200';
+}
+
+function parseExpectedPercent(value: string): number {
+  const cleaned = value.replace('%', '').trim();
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildConfidencePoints(entries: SentimentEntry[], range: SentimentRange): MiniSparkPoint[] {
+  if (entries.length === 0) return [];
+
+  const latestTimestamp = entries[entries.length - 1].timestamp;
+
+  const daysWindow = entries.filter((entry) => latestTimestamp - entry.timestamp <= 30 * 24 * 60 * 60 * 1000);
+  const monthsWindow = entries.filter((entry) => latestTimestamp - entry.timestamp <= 365 * 24 * 60 * 60 * 1000);
+  const yearsWindow = entries.filter((entry) => latestTimestamp - entry.timestamp <= 5 * 365 * 24 * 60 * 60 * 1000);
+
+  if (range === 'days') {
+    return (daysWindow.length > 0 ? daysWindow : entries.slice(-30)).map((entry) => ({
+      xLabel: String(entry.timestamp),
+      yValue: entry.confidence,
+      tooltip: `${entry.confidence.toFixed(1)} • ${new Date(entry.timestamp).toLocaleDateString()}`,
+    }));
+  }
+
+  const targetBuckets = range === 'months' ? 12 : 5;
+  const source = range === 'months'
+    ? (monthsWindow.length > 0 ? monthsWindow : entries)
+    : (yearsWindow.length > 0 ? yearsWindow : entries);
+  const bucketSize = Math.max(1, Math.ceil(source.length / targetBuckets));
+  const buckets: MiniSparkPoint[] = [];
+
+  for (let index = 0; index < source.length; index += bucketSize) {
+    const slice = source.slice(index, index + bucketSize);
+    if (slice.length === 0) continue;
+
+    const avgConfidence = slice.reduce((sum, entry) => sum + entry.confidence, 0) / slice.length;
+    const startTime = new Date(slice[0].timestamp).toLocaleDateString();
+    const endTime = new Date(slice[slice.length - 1].timestamp).toLocaleDateString();
+
+    buckets.push({
+      xLabel: String(slice[slice.length - 1].timestamp),
+      yValue: Number(avgConfidence.toFixed(2)),
+      tooltip: `${avgConfidence.toFixed(1)} • ${startTime}-${endTime}`,
+    });
+  }
+
+  return buckets;
+}
+
+function MiniSparkline({
+  points,
+  lineClass,
+}: {
+  points: MiniSparkPoint[];
+  lineClass: string;
+}) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  if (points.length === 0) {
+    return (
+      <div className="h-16 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-[11px] text-slate-500 dark:text-slate-400">
+        No data
+      </div>
+    );
+  }
+
+  const minValue = Math.min(...points.map((point) => point.yValue));
+  const maxValue = Math.max(...points.map((point) => point.yValue));
+  const range = Math.max(0.0001, maxValue - minValue);
+  const hoveredPoint = hoveredIndex !== null ? points[hoveredIndex] : null;
+  const x = hoveredIndex !== null
+    ? (hoveredIndex / Math.max(1, points.length - 1)) * 300
+    : null;
+  const y = hoveredPoint
+    ? 56 - ((hoveredPoint.yValue - minValue) / range) * 52
+    : null;
+
+  return (
+    <div className="h-16 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-1.5 relative">
+      <svg
+        viewBox="0 0 300 60"
+        className="w-full h-full"
+        preserveAspectRatio="none"
+        onMouseMove={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          const relativeX = event.clientX - bounds.left;
+          const ratio = Math.max(0, Math.min(1, relativeX / bounds.width));
+          const index = Math.round(ratio * Math.max(0, points.length - 1));
+          setHoveredIndex(index);
+        }}
+        onMouseLeave={() => setHoveredIndex(null)}
+      >
+        <polyline
+          fill="none"
+          stroke="currentColor"
+          className={lineClass}
+          strokeWidth="2"
+          points={points
+            .map((point, index) => {
+              const chartX = (index / Math.max(1, points.length - 1)) * 300;
+              const normalized = (point.yValue - minValue) / range;
+              const chartY = 56 - normalized * 52;
+              return `${chartX},${chartY}`;
+            })
+            .join(' ')}
+        />
+        {hoveredPoint && x !== null && y !== null && (
+          <>
+            <line x1={x} y1={4} x2={x} y2={56} stroke="currentColor" className="text-slate-400 dark:text-slate-500" strokeDasharray="2 2" />
+            <circle cx={x} cy={y} r={2.4} fill="currentColor" className={lineClass} />
+          </>
+        )}
+      </svg>
+      {hoveredPoint && x !== null && (
+        <div
+          className="absolute -top-8 z-10 px-2 py-1 rounded-md text-[11px] bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 whitespace-nowrap pointer-events-none"
+          style={{ left: `${(x / 300) * 100}%`, transform: 'translateX(-50%)' }}
+        >
+          {hoveredPoint.tooltip}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function SparklineChart({ points }: { points: PricePoint[] }) {
@@ -159,6 +310,9 @@ export default function StockAnalysisPage() {
   const [marketStatusLabel, setMarketStatusLabel] = useState('Market status unknown');
   const [marketStateByTicker, setMarketStateByTicker] = useState<Record<string, string>>({});
   const [chartViewByTicker, setChartViewByTicker] = useState<Record<string, 'auto' | 'recent' | 'full'>>({});
+  const [sentimentByTicker, setSentimentByTicker] = useState<Record<string, SentimentEntry[]>>({});
+  const [sentimentRangeByTicker, setSentimentRangeByTicker] = useState<Record<string, SentimentRange>>({});
+  const [sentimentFeedStatus, setSentimentFeedStatus] = useState('Loading sentiment feed...');
   const [lastUpdateAt, setLastUpdateAt] = useState<number | null>(null);
   const [pollIntervalMs, setPollIntervalMs] = useState(OPEN_POLL_INTERVAL_MS);
   const [priceSeriesByTicker, setPriceSeriesByTicker] = useState<Record<string, PricePoint[]>>({});
@@ -213,7 +367,66 @@ export default function StockAnalysisPage() {
       }
       return nextState;
     });
+
+    setSentimentRangeByTicker((previous) => {
+      const nextState = { ...previous };
+      for (const ticker of tickers) {
+        if (!nextState[ticker]) {
+          nextState[ticker] = 'days';
+        }
+      }
+      for (const existingTicker of Object.keys(nextState)) {
+        if (!tickers.includes(existingTicker)) {
+          delete nextState[existingTicker];
+        }
+      }
+      return nextState;
+    });
+
+    setSentimentByTicker((previous) => {
+      const nextState = { ...previous };
+      for (const existingTicker of Object.keys(nextState)) {
+        if (!tickers.includes(existingTicker)) {
+          delete nextState[existingTicker];
+        }
+      }
+      return nextState;
+    });
   }, [tickers]);
+
+  useEffect(() => {
+    if (!isStreaming || tickers.length === 0) return;
+
+    const fetchSentiments = async () => {
+      try {
+        const symbols = tickers.join(',');
+        const response = await fetch(`/api/stock/sentiments?symbols=${encodeURIComponent(symbols)}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error('Sentiment request failed');
+        }
+
+        const payload = await response.json();
+        const data = (payload?.data ?? {}) as Record<string, SentimentEntry[]>;
+        setSentimentByTicker((previous) => {
+          const nextState = { ...previous };
+          for (const ticker of tickers) {
+            nextState[ticker] = Array.isArray(data[ticker]) ? data[ticker] : [];
+          }
+          return nextState;
+        });
+        setSentimentFeedStatus('Sentiment feed active.');
+      } catch {
+        setSentimentFeedStatus('Sentiment feed unavailable.');
+      }
+    };
+
+    fetchSentiments();
+    const intervalId = setInterval(fetchSentiments, SENTIMENT_POLL_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, [isStreaming, tickers]);
 
   useEffect(() => {
     if (!isStreaming) return;
@@ -473,6 +686,9 @@ export default function StockAnalysisPage() {
             <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
               <span>Poll interval: {Math.round(pollIntervalMs / 1000)}s</span>
             </div>
+            <div className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+              <span>{sentimentFeedStatus}</span>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -523,6 +739,32 @@ export default function StockAnalysisPage() {
             const selectedView = chartViewByTicker[signal.ticker] ?? 'auto';
             const shouldUseFull = selectedView === 'full' || (selectedView === 'auto' && tickerMarketState === 'CLOSED');
             const chartPoints = shouldUseFull ? series : series.slice(-30);
+            const sentimentSeries = sentimentByTicker[signal.ticker] ?? [];
+            const latestSentiment = sentimentSeries[sentimentSeries.length - 1] ?? null;
+            const selectedSentimentRange = sentimentRangeByTicker[signal.ticker] ?? 'days';
+
+            const confidencePoints: MiniSparkPoint[] = buildConfidencePoints(sentimentSeries, selectedSentimentRange);
+
+            const selectedPredictionList = latestSentiment
+              ? latestSentiment.futurePredictions[selectedSentimentRange] ?? []
+              : [];
+
+            const growthPoints: MiniSparkPoint[] = selectedPredictionList
+              .map((prediction) => {
+                const horizon = Object.keys(prediction)[0];
+                const expected = prediction[horizon]?.expected ?? '0%';
+                return {
+                  horizon: Number(horizon),
+                  point: {
+                    xLabel: horizon,
+                    yValue: parseExpectedPercent(expected),
+                    tooltip: `${horizon}${selectedSentimentRange === 'days' ? 'd' : selectedSentimentRange === 'months' ? 'm' : 'y'} • ${expected}`,
+                  },
+                };
+              })
+              .sort((left, right) => left.horizon - right.horizon)
+              .map((entry) => entry.point);
+
             const rangeLabel = selectedView === 'recent'
               ? 'Recent 30 points (manual)'
               : selectedView === 'full'
@@ -618,6 +860,52 @@ export default function StockAnalysisPage() {
                     <li key={reason}>{reason}</li>
                   ))}
                 </ul>
+
+                <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Sentiment</h3>
+                    <div className="inline-flex rounded-md border border-slate-200 dark:border-slate-600 overflow-hidden">
+                      <button
+                        onClick={() => setSentimentRangeByTicker((previous) => ({ ...previous, [signal.ticker]: 'days' }))}
+                        className={`px-2 py-0.5 text-[11px] ${selectedSentimentRange === 'days' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                      >
+                        DAYS
+                      </button>
+                      <button
+                        onClick={() => setSentimentRangeByTicker((previous) => ({ ...previous, [signal.ticker]: 'months' }))}
+                        className={`px-2 py-0.5 text-[11px] border-l border-slate-200 dark:border-slate-600 ${selectedSentimentRange === 'months' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                      >
+                        MONTHS
+                      </button>
+                      <button
+                        onClick={() => setSentimentRangeByTicker((previous) => ({ ...previous, [signal.ticker]: 'years' }))}
+                        className={`px-2 py-0.5 text-[11px] border-l border-slate-200 dark:border-slate-600 ${selectedSentimentRange === 'years' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                      >
+                        YEARS
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Confidence History</p>
+                      <MiniSparkline points={confidencePoints} lineClass="text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Future Expected Growth ({selectedSentimentRange.toUpperCase()})</p>
+                      <MiniSparkline points={growthPoints} lineClass="text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                  </div>
+
+                  {latestSentiment && (
+                    <div className="rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                        Reputation: <span className="font-semibold text-slate-700 dark:text-slate-200">{latestSentiment.reputation}</span>
+                      </p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">{latestSentiment.sentimentText}</p>
+                    </div>
+                  )}
+                </div>
               </article>
             );
           })}
