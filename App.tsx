@@ -77,7 +77,7 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center px-8 shadow-sm">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight drop-shadow-sm">
-          Swapnil Nighut • Full-Stack Journey: Systems, AI & Market Intelligence
+          Swapnil Nighut • Full-Stack Journey: Systems, AI & Analysis
         </h1>
         <nav className="ml-auto hidden md:flex space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300 items-center">
           {/* Dark Mode Toggle */}
@@ -131,14 +131,14 @@ const App: React.FC = () => {
           
           {/* Bottom Trigger Section */}
           <div id="creative-hub-trigger" className="flex flex-col items-center justify-center py-20 border-t border-gray-100 dark:border-slate-800 scroll-mt-24 gap-8">
-            {/* Creative Voice to Design App */}
+            {/* Creative Prompt to Design App */}
             <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Voice to Visual Design App</h3>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Prompt to Visual Design App</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
-                An experimental voice-to-diagram orchestration engine. This project demonstrates how AI can synthesize natural language into structured visual relationships and auto-generate optimized layouts. Developed as a technical deep-dive into LLM-driven UI design and distributed homelab architecture
+                An experimental prompt-to-diagram orchestration engine. This project demonstrates how AI can synthesize natural language into structured visual relationships and auto-generate optimized layouts. Developed as a technical deep-dive into LLM-driven UI design and distributed homelab architecture
               </p>
               <div className="flex justify-center">
                 <button 
