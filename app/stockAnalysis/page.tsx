@@ -13,16 +13,15 @@ const EXTENDED_HOURS_POLL_INTERVAL_MS = 60000;
 const CLOSED_POLL_INTERVAL_MS = 300000;
 const CLOSED_STALE_POLL_INTERVAL_MS = 900000;
 const SENTIMENT_POLL_INTERVAL_MS = 120000;
-const DEFAULT_TICKERS = ['AAPL', 'MSFT', 'NVDA'];
+const DEFAULT_TICKERS = ['CLX', 'TGT', 'FISV', 'ADBE', 'CRNC', 'BRCB'];
 
 const BASE_PRICES: Record<string, number> = {
-  AAPL: 190,
-  MSFT: 420,
-  NVDA: 910,
-  TSLA: 210,
-  AMZN: 175,
-  META: 470,
-  GOOGL: 165,
+  'CLX': 190,
+  'TGT': 160,
+  'FISV': 120,
+  'ADBE': 450,
+  'CRNC': 25,
+  'BRCB': 30
 };
 
 type SentimentRange = 'days' | 'months' | 'years';
@@ -49,6 +48,7 @@ interface MiniSparkPoint {
   xLabel: string;
   yValue: number;
   tooltip: string;
+  timestamp?: number;
 }
 
 function makeInitialSeries(basePrice: number): PricePoint[] {
@@ -120,6 +120,7 @@ function buildConfidencePoints(entries: SentimentEntry[], range: SentimentRange)
       xLabel: String(entry.timestamp),
       yValue: entry.confidence,
       tooltip: `${entry.confidence.toFixed(1)} • ${new Date(entry.timestamp).toLocaleDateString()}`,
+      timestamp: entry.timestamp,
     }));
   }
 
@@ -142,6 +143,7 @@ function buildConfidencePoints(entries: SentimentEntry[], range: SentimentRange)
       xLabel: String(slice[slice.length - 1].timestamp),
       yValue: Number(avgConfidence.toFixed(2)),
       tooltip: `${avgConfidence.toFixed(1)} • ${startTime}-${endTime}`,
+      timestamp: slice[slice.length - 1].timestamp,
     });
   }
 
@@ -151,9 +153,11 @@ function buildConfidencePoints(entries: SentimentEntry[], range: SentimentRange)
 function MiniSparkline({
   points,
   lineClass,
+  pageLoadTimestamp,
 }: {
   points: MiniSparkPoint[];
   lineClass: string;
+  pageLoadTimestamp: number;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -205,10 +209,36 @@ function MiniSparkline({
             })
             .join(' ')}
         />
+        {points.map((point, index) => {
+          if (!point.timestamp || point.timestamp <= pageLoadTimestamp) {
+            return null;
+          }
+
+          const chartX = (index / Math.max(1, points.length - 1)) * 300;
+          const normalized = (point.yValue - minValue) / range;
+          const chartY = 56 - normalized * 52;
+
+          return (
+            <circle
+              key={`${point.xLabel}-${index}`}
+              cx={chartX}
+              cy={chartY}
+              r={2.2}
+              fill="currentColor"
+              className="text-emerald-500 dark:text-emerald-400"
+            />
+          );
+        })}
         {hoveredPoint && x !== null && y !== null && (
           <>
             <line x1={x} y1={4} x2={x} y2={56} stroke="currentColor" className="text-slate-400 dark:text-slate-500" strokeDasharray="2 2" />
-            <circle cx={x} cy={y} r={2.4} fill="currentColor" className={lineClass} />
+            <circle
+              cx={x}
+              cy={y}
+              r={2.4}
+              fill="currentColor"
+              className={hoveredPoint.timestamp && hoveredPoint.timestamp > pageLoadTimestamp ? 'text-emerald-500 dark:text-emerald-400' : lineClass}
+            />
           </>
         )}
       </svg>
@@ -217,14 +247,14 @@ function MiniSparkline({
           className="absolute -top-8 z-10 px-2 py-1 rounded-md text-[11px] bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 whitespace-nowrap pointer-events-none"
           style={{ left: `${(x / 300) * 100}%`, transform: 'translateX(-50%)' }}
         >
-          {hoveredPoint.tooltip}
+          {hoveredPoint.tooltip}{hoveredPoint.timestamp && hoveredPoint.timestamp > pageLoadTimestamp ? ' • New' : ''}
         </div>
       )}
     </div>
   );
 }
 
-function SparklineChart({ points }: { points: PricePoint[] }) {
+function SparklineChart({ points, pageLoadTimestamp }: { points: PricePoint[]; pageLoadTimestamp: number }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (points.length === 0) {
@@ -276,10 +306,36 @@ function SparklineChart({ points }: { points: PricePoint[] }) {
             })
             .join(' ')}
         />
+        {points.map((point, index) => {
+          if (point.timestamp <= pageLoadTimestamp) {
+            return null;
+          }
+
+          const chartX = (index / Math.max(1, points.length - 1)) * 300;
+          const normalized = (point.price - minPrice) / range;
+          const chartY = 56 - normalized * 52;
+
+          return (
+            <circle
+              key={`${point.timestamp}-${index}`}
+              cx={chartX}
+              cy={chartY}
+              r={2.4}
+              fill="currentColor"
+              className="text-emerald-500 dark:text-emerald-400"
+            />
+          );
+        })}
         {hoveredPoint && x !== null && y !== null && (
           <>
             <line x1={x} y1={4} x2={x} y2={56} stroke="currentColor" className="text-slate-400 dark:text-slate-500" strokeDasharray="2 2" />
-            <circle cx={x} cy={y} r={2.8} fill="currentColor" className="text-blue-600 dark:text-blue-400" />
+            <circle
+              cx={x}
+              cy={y}
+              r={2.8}
+              fill="currentColor"
+              className={hoveredPoint.timestamp > pageLoadTimestamp ? 'text-emerald-500 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}
+            />
           </>
         )}
       </svg>
@@ -291,7 +347,7 @@ function SparklineChart({ points }: { points: PricePoint[] }) {
             transform: 'translateX(-50%)',
           }}
         >
-          ${formatNumber(hoveredPoint.price)} • {new Date(hoveredPoint.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          ${formatNumber(hoveredPoint.price)} • {new Date(hoveredPoint.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{hoveredPoint.timestamp > pageLoadTimestamp ? ' • New' : ''}
         </div>
       )}
     </div>
@@ -316,6 +372,7 @@ export default function StockAnalysisPage() {
   const [lastUpdateAt, setLastUpdateAt] = useState<number | null>(null);
   const [pollIntervalMs, setPollIntervalMs] = useState(OPEN_POLL_INTERVAL_MS);
   const [priceSeriesByTicker, setPriceSeriesByTicker] = useState<Record<string, PricePoint[]>>({});
+  const pageLoadTimestampRef = useRef(Date.now());
   const lastSeenTimestampRef = useRef<number | null>(null);
   const stalePollCountRef = useRef(0);
   const hydratedLiveTickersRef = useRef<Set<string>>(new Set());
@@ -813,7 +870,7 @@ export default function StockAnalysisPage() {
                   </span>
                 </div>
 
-                <SparklineChart points={chartPoints} />
+                <SparklineChart points={chartPoints} pageLoadTimestamp={pageLoadTimestampRef.current} />
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-4">
                   <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900">
@@ -889,11 +946,19 @@ export default function StockAnalysisPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Confidence History</p>
-                      <MiniSparkline points={confidencePoints} lineClass="text-violet-600 dark:text-violet-400" />
+                      <MiniSparkline
+                        points={confidencePoints}
+                        lineClass="text-violet-600 dark:text-violet-400"
+                        pageLoadTimestamp={pageLoadTimestampRef.current}
+                      />
                     </div>
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Future Expected Growth ({selectedSentimentRange.toUpperCase()})</p>
-                      <MiniSparkline points={growthPoints} lineClass="text-emerald-600 dark:text-emerald-400" />
+                      <MiniSparkline
+                        points={growthPoints}
+                        lineClass="text-emerald-600 dark:text-emerald-400"
+                        pageLoadTimestamp={pageLoadTimestampRef.current}
+                      />
                     </div>
                   </div>
 
