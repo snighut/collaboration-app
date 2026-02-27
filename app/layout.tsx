@@ -5,13 +5,13 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Nighutlabs | Speech to System Design',
-  description: 'Nighutlabs is an experimental AI-powered tool that transforms speech into professional system design diagrams. Create architecture blueprints through natural language using cutting-edge LLM technology.',
-  keywords: ['system design', 'architecture diagrams', 'AI design tool', 'speech to diagram', 'Nighutlabs', 'visual design', 'LLM', 'software architecture'],
+  title: 'Nighutlabs | Prompts to System Design',
+  description: 'Nighutlabs is an experimental AI-powered tool that transforms prompts into professional system design diagrams. Create architecture blueprints through natural language using cutting-edge LLM technology.',
+  keywords: ['system design', 'architecture diagrams', 'AI design tool', 'prompts to diagram', 'Nighutlabs', 'visual design', 'LLM', 'software architecture'],
   authors: [{ name: 'Swapnil Nighut' }],
   openGraph: {
-    title: 'Nighutlabs | Speech to System Design',
-    description: 'Transform speech into professional system design diagrams with AI-powered visual design technology.',
+    title: 'Nighutlabs | Prommpts to System Design',
+    description: 'Transform prompts into professional system design diagrams with AI-powered visual design technology.',
     url: 'https://nighutlabs.dev',
     siteName: 'Nighutlabs',
     locale: 'en_US',
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Nighutlabs | Speech to System Design',
-    description: 'Transform speech into professional system design diagrams with AI-powered visual design technology.',
+    title: 'Nighutlabs | Prompts to System Design',
+    description: 'Transform prompts into professional system design diagrams with AI-powered visual design technology.',
   },
   robots: {
     index: true,
