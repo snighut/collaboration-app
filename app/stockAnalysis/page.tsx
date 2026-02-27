@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Play, Pause, Plus, Trash2, Activity } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Plus, Trash2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { PricePoint, classifyStock, StockSignalResult } from '@/lib/stockAnalysis';
 
@@ -368,6 +368,7 @@ export default function StockAnalysisPage() {
   const [chartViewByTicker, setChartViewByTicker] = useState<Record<string, 'auto' | 'recent' | 'full'>>({});
   const [sentimentByTicker, setSentimentByTicker] = useState<Record<string, SentimentEntry[]>>({});
   const [sentimentRangeByTicker, setSentimentRangeByTicker] = useState<Record<string, SentimentRange>>({});
+  const [sentimentCollapsedByTicker, setSentimentCollapsedByTicker] = useState<Record<string, boolean>>({});
   const [sentimentFeedStatus, setSentimentFeedStatus] = useState('Loading sentiment feed...');
   const [lastUpdateAt, setLastUpdateAt] = useState<number | null>(null);
   const [pollIntervalMs, setPollIntervalMs] = useState(OPEN_POLL_INTERVAL_MS);
@@ -442,6 +443,21 @@ export default function StockAnalysisPage() {
 
     setSentimentByTicker((previous) => {
       const nextState = { ...previous };
+      for (const existingTicker of Object.keys(nextState)) {
+        if (!tickers.includes(existingTicker)) {
+          delete nextState[existingTicker];
+        }
+      }
+      return nextState;
+    });
+
+    setSentimentCollapsedByTicker((previous) => {
+      const nextState = { ...previous };
+      for (const ticker of tickers) {
+        if (nextState[ticker] === undefined) {
+          nextState[ticker] = true;
+        }
+      }
       for (const existingTicker of Object.keys(nextState)) {
         if (!tickers.includes(existingTicker)) {
           delete nextState[existingTicker];
@@ -789,7 +805,7 @@ export default function StockAnalysisPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {stockSignals.map((signal) => {
             const series = priceSeriesByTicker[signal.ticker] ?? [];
             const tickerMarketState = (marketStateByTicker[signal.ticker] ?? 'UNKNOWN').toUpperCase();
@@ -799,6 +815,7 @@ export default function StockAnalysisPage() {
             const sentimentSeries = sentimentByTicker[signal.ticker] ?? [];
             const latestSentiment = sentimentSeries[sentimentSeries.length - 1] ?? null;
             const selectedSentimentRange = sentimentRangeByTicker[signal.ticker] ?? 'days';
+            const isSentimentCollapsed = sentimentCollapsedByTicker[signal.ticker] ?? true;
 
             const confidencePoints: MiniSparkPoint[] = buildConfidencePoints(sentimentSeries, selectedSentimentRange);
 
@@ -823,11 +840,11 @@ export default function StockAnalysisPage() {
               .map((entry) => entry.point);
 
             const rangeLabel = selectedView === 'recent'
-              ? 'Recent 30 points (manual)'
+              ? 'Recent 30 points'
               : selectedView === 'full'
-                ? 'Full-day view (manual)'
+                ? 'Daily view'
                 : tickerMarketState === 'CLOSED'
-                  ? 'Full-day view (market closed)'
+                  ? 'Daily view (market closed)'
                   : 'Recent 30 points';
 
             return (
@@ -921,6 +938,18 @@ export default function StockAnalysisPage() {
                 <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Sentiment</h3>
+                    <button
+                      onClick={() => setSentimentCollapsedByTicker((previous) => ({
+                        ...previous,
+                        [signal.ticker]: !isSentimentCollapsed,
+                      }))}
+                      className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      aria-expanded={!isSentimentCollapsed}
+                      aria-label={`${isSentimentCollapsed ? 'Expand' : 'Collapse'} sentiment for ${signal.ticker}`}
+                    >
+                      {isSentimentCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                      {isSentimentCollapsed ? 'Show' : 'Hide'}
+                    </button>
                     <div className="inline-flex rounded-md border border-slate-200 dark:border-slate-600 overflow-hidden">
                       <button
                         onClick={() => setSentimentRangeByTicker((previous) => ({ ...previous, [signal.ticker]: 'days' }))}
@@ -943,32 +972,36 @@ export default function StockAnalysisPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Confidence History</p>
-                      <MiniSparkline
-                        points={confidencePoints}
-                        lineClass="text-violet-600 dark:text-violet-400"
-                        pageLoadTimestamp={pageLoadTimestampRef.current}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Future Expected Growth ({selectedSentimentRange.toUpperCase()})</p>
-                      <MiniSparkline
-                        points={growthPoints}
-                        lineClass="text-emerald-600 dark:text-emerald-400"
-                        pageLoadTimestamp={pageLoadTimestampRef.current}
-                      />
-                    </div>
-                  </div>
+                  {!isSentimentCollapsed && (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Confidence History</p>
+                          <MiniSparkline
+                            points={confidencePoints}
+                            lineClass="text-violet-600 dark:text-violet-400"
+                            pageLoadTimestamp={pageLoadTimestampRef.current}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Expected Growth ({selectedSentimentRange.toUpperCase()})</p>
+                          <MiniSparkline
+                            points={growthPoints}
+                            lineClass="text-emerald-600 dark:text-emerald-400"
+                            pageLoadTimestamp={pageLoadTimestampRef.current}
+                          />
+                        </div>
+                      </div>
 
-                  {latestSentiment && (
-                    <div className="rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5">
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-                        Reputation: <span className="font-semibold text-slate-700 dark:text-slate-200">{latestSentiment.reputation}</span>
-                      </p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300">{latestSentiment.sentimentText}</p>
-                    </div>
+                      {latestSentiment && (
+                        <div className="rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                            Reputation: <span className="font-semibold text-slate-700 dark:text-slate-200">{latestSentiment.reputation}</span>
+                          </p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300">{latestSentiment.sentimentText}</p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </article>
