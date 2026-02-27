@@ -92,6 +92,28 @@ export async function GET(request: NextRequest) {
   }
 
   const uniqueSymbols = [...new Set(symbols)].slice(0, 20);
+
+  const quantServiceBaseUrl = process.env.QUANT_SERVICE_URL;
+  if (quantServiceBaseUrl) {
+    try {
+      const proxyUrl = `${quantServiceBaseUrl.replace(/\/$/, '')}/api/v1/quant/sentiments?symbols=${encodeURIComponent(uniqueSymbols.join(','))}`;
+      const response = await fetch(proxyUrl, {
+        cache: 'no-store',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        if (payload?.data && typeof payload.data === 'object') {
+          return NextResponse.json(payload);
+        }
+      }
+    } catch {
+    }
+  }
+
   const data: Record<string, SentimentEntry[]> = {};
 
   for (const symbol of uniqueSymbols) {
