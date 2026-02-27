@@ -5,7 +5,7 @@ import AchievementSection from './components/AchievementSection';
 import ChatSidebar from './components/ChatSidebar';
 import Auth from './components/Auth';
 import { YEARS, INITIAL_ACHIEVEMENTS } from './constants';
-import { Sparkles, Layout, Moon, Sun, Github, Linkedin, Mail, Globe } from 'lucide-react';
+import { Sparkles, Layout, Moon, Sun, Github, Linkedin, Mail, TrendingUp } from 'lucide-react';
 
 const App: React.FC = () => {
   const router = useRouter();
@@ -165,6 +165,25 @@ const App: React.FC = () => {
                   className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
                   Go To My Creations
+                </button>
+              </div>
+            </div>
+
+            {/* Stock Analysis */}
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full scroll-mt-24">
+              <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={32} />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Stock Analysis (Quant MVP)</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
+                Analyze a live stream of stock prices for your selected tickers with moving averages and valuation signals such as Undervalued or Overvalued.
+              </p>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => router.push('/stockAnalysis')}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all transform hover:scale-105 active:scale-95"
+                >
+                  Open Stock Analysis
                 </button>
               </div>
             </div>
