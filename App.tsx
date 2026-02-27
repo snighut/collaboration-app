@@ -77,7 +77,7 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center px-8 shadow-sm">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight drop-shadow-sm">
-          Nighutlabs • Full-Stack Journey: Systems, AI & Market Intelligence
+          Swapnil Nighut • Full-Stack Journey: Systems, AI & Market Intelligence
         </h1>
         <nav className="ml-auto hidden md:flex space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300 items-center">
           {/* Dark Mode Toggle */}
