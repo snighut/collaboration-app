@@ -75,9 +75,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center px-8 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 h-24 md:h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center px-8 shadow-sm">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight drop-shadow-sm">
-          Swapnil Nighut • Full-Stack Journey: Systems, AI & Analysis
+          Swapnil Nighut • Full-Stack Journey: Systems, AI & Analytics
         </h1>
         <nav className="ml-auto hidden md:flex space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300 items-center">
           {/* Dark Mode Toggle */}
@@ -113,7 +113,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex flex-1 pt-16">
+      <main className="flex flex-1 pt-24 md:pt-16">
         {/* Left Side: Timeline (25%) */}
         <aside className="w-1/4 fixed h-[calc(100vh-64px)] overflow-y-auto border-r border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm hidden md:block">
           <Timeline activeYear={activeYear} onYearChange={handleYearChange} />

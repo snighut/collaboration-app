@@ -16,6 +16,7 @@ import { getDesign, updateDesignTitle } from '../actions/designs';
 import { clearDesignCache } from '../../lib/localCache';
 import { Design } from '@/types';
 import InlineEditText from '@/components/InlineEditText';
+import PDFUploadButton from '@/components/PDFUploadButton';
 
 
 function DesignPageContent() {
@@ -53,6 +54,12 @@ function DesignPageContent() {
               <List size={22} className="shrink-0" />
               <span className="font-medium hidden xs:inline">My Creations</span>
             </button>
+            
+            {/* PDF Upload Button */}
+            {session?.access_token && (
+              <PDFUploadButton userId={user?.id} />
+            )}
+            
             <div className="flex items-center gap-2 min-w-0 overflow-hidden">
               <Sparkles size={20} className="text-blue-600 dark:text-blue-400 shrink-0" />
               {designId === 'new' ? (
