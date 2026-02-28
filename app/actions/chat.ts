@@ -117,3 +117,57 @@ export async function generateDesign(query: string, accessToken?: string) {
     };
   }
 }
+
+// RAG Chat using LLM service
+export async function ragChat(prompt: string) {
+  try {
+    const LLM_SERVICE_URL = process.env.LLM_SERVICE_URL || 'http://localhost:3002';
+    
+    // Encode the prompt as a query parameter
+    const params = new URLSearchParams({ prompt });
+    const urlWithParams = `${LLM_SERVICE_URL}/api/v1/llm/v2/rag?${params.toString()}`;
+
+    const response = await fetch(urlWithParams, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`RAG Chat Error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Failed to get RAG response: ${response.statusText}`);
+    }
+
+    // Check content type to handle both JSON and text responses
+    const contentType = response.headers.get('content-type');
+    let content = '';
+    let metadata = {};
+
+    if (contentType?.includes('application/json')) {
+      // Response is JSON
+      const data = await response.json();
+      content = data.response || data.content || data.answer || 'No response received';
+      metadata = data.metadata || {};
+    } else {
+      // Response is plain text
+      content = await response.text();
+    }
+
+    return {
+      success: true,
+      data: {
+        content,
+        metadata,
+      },
+    };
+  } catch (error) {
+    console.error('Error calling RAG Chat:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get RAG response',
+    };
+  }
+}

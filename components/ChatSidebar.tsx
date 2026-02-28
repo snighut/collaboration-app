@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, X, Sparkles, ExternalLink } from 'lucide-react';
-import { sendChatMessage, askMistral, generateDesign } from '../app/actions/chat';
+import { Send, Loader2, Bot, X, Sparkles, ExternalLink, BookOpen } from 'lucide-react';
+import { sendChatMessage, askMistral, generateDesign, ragChat } from '../app/actions/chat';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 
@@ -28,6 +28,8 @@ const ChatSidebar: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDesign, setIsGeneratingDesign] = useState(false);
+  const [isRagLoading, setIsRagLoading] = useState(false);
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   // For streaming completion
   const [streamingCompletion, setStreamingCompletion] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -162,9 +164,58 @@ const ChatSidebar: React.FC = () => {
     }
   };
 
+  // Handle RAG Chat
+  const handleRagChat = async () => {
+    if (!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputValue.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsRagLoading(true);
+
+    try {
+      const result = await ragChat(userMessage.content);
+
+      if (result.success && result.data) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `📚 **RAG Response:**\n\n${result.data.content}`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `❌ Failed to get RAG response: ${result.error || 'Unknown error'}`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Error calling RAG Chat:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '❌ An error occurred while getting RAG response. Please try again.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsRagLoading(false);
+    }
+  };
+
   // Handle design generation with AI agent
   const handleGenerateDesign = async () => {
-    if (!inputValue.trim() || isLoading || isGeneratingDesign) return;
+    if (!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -248,18 +299,32 @@ const ChatSidebar: React.FC = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Ask me anything about system designs or generate visual architectures!
             </p>
-            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
-              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                <span className="font-semibold text-blue-600 dark:text-blue-400">Chat</span> uses a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span> running on my custom, AI-native infrastructure for low-latency, private inference. <span className="italic text-gray-500 dark:text-gray-400">(RAG pipeline integration coming soon for context-aware answers!)</span> Have fun and share your feedback via{' '}
-                <a href="mailto:swapnil.nighut@example.com" className="underline hover:text-blue-600 dark:hover:text-blue-400">email</a> or{' '}
-                <a href="https://linkedin.com/in/swapnilnighut" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600 dark:hover:text-blue-400">LinkedIn</a>!
-              </p>
-            </div>
-            <div className="mt-2 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg">
-              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                <span className="font-semibold text-purple-600 dark:text-purple-400">Generate Design</span> triggers a <span className="font-semibold">LangChain</span> call that leverages my design APIs and <span className="font-semibold">OpenAI LLM</span> to create meaningful, visual system architectures from your natural language descriptions. <span className="italic text-gray-500 dark:text-gray-400">(Requires login — this is a secure API.)</span>
-              </p>
-            </div>
+            <button
+              onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+              className="mt-3 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 transition-colors"
+            >
+              <span>{isInfoExpanded ? '▼' : '▶'}</span>
+              <span>{isInfoExpanded ? 'Hide' : 'Show'} feature details</span>
+            </button>
+            {isInfoExpanded && (
+              <>
+                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">Chat</span> uses a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span> running on my machine.
+                  </p>
+                </div>
+                <div className="mt-2 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <span className="font-semibold text-purple-600 dark:text-purple-400">Generate Design</span> triggers a <span className="font-semibold">LangChain</span> call <span className="italic text-gray-500 dark:text-gray-400">(Requires login — this is a secure API.)</span>
+                  </p>
+                </div>
+                <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <span className="font-semibold text-green-600 dark:text-green-400">Knowledge Base</span> uses RAG to answer questions via vector search.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -335,13 +400,18 @@ const ChatSidebar: React.FC = () => {
                     </div>
                   </div>
                 )}
-                {(isLoading || isGeneratingDesign) && (
+                {(isLoading || isGeneratingDesign || isRagLoading) && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-4 py-3 flex items-center gap-2">
                       <Loader2 className="text-gray-500 dark:text-gray-400 animate-spin" size={20} />
                       {isGeneratingDesign && (
                         <span className="text-sm text-gray-600 dark:text-gray-300">
                           Generating design...
+                        </span>
+                      )}
+                      {isRagLoading && (
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          Searching knowledge base...
                         </span>
                       )}
                     </div>
@@ -366,7 +436,7 @@ const ChatSidebar: React.FC = () => {
                   placeholder="Ask a question or describe a system design..."
                   rows={2}
                   className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  disabled={isLoading || isGeneratingDesign}
+                  disabled={isLoading || isGeneratingDesign || isRagLoading}
                   style={{ 
                     fontSize: '16px',
                     WebkitTextSizeAdjust: '100%',
@@ -374,20 +444,31 @@ const ChatSidebar: React.FC = () => {
                   }}
                 />
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={!inputValue.trim() || isLoading || isGeneratingDesign}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send size={18} />
-                  <span>Chat</span>
-                </button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send size={18} />
+                    <span>Chat</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRagChat}
+                    disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 dark:from-green-500 dark:to-emerald-500 dark:hover:from-green-600 dark:hover:to-emerald-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <BookOpen size={18} />
+                    <span>Knowledge Base</span>
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={handleGenerateDesign}
-                  disabled={!inputValue.trim() || isLoading || isGeneratingDesign}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 dark:from-purple-500 dark:to-pink-500 dark:hover:from-purple-600 dark:hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
+                  className="w-full flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 dark:from-purple-500 dark:to-pink-500 dark:hover:from-purple-600 dark:hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles size={18} />
                   <span>Generate Design</span>
@@ -395,7 +476,7 @@ const ChatSidebar: React.FC = () => {
               </div>
             </form>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              Press Enter for chat • Use "Generate Design" to create visual architecture
+              Press Enter for chat • Use "Knowledge Base" for RAG answers • "Generate Design" for visual architecture
             </p>
           </div>
         )}
