@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Play, Pause, Plus, Trash2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
-import { useAuth } from '@/components/AuthProvider';
 import { PricePoint, classifyStock, StockSignalResult } from '@/lib/stockAnalysis';
 
 const MAX_POINTS = 240;
@@ -356,7 +355,6 @@ function SparklineChart({ points, pageLoadTimestamp }: { points: PricePoint[]; p
 
 export default function StockAnalysisPage() {
   const router = useRouter();
-  const { session, loading } = useAuth();
 
   const [tickers, setTickers] = useState<string[]>(DEFAULT_TICKERS);
   const [tickerInput, setTickerInput] = useState('');
@@ -377,12 +375,6 @@ export default function StockAnalysisPage() {
   const lastSeenTimestampRef = useRef<number | null>(null);
   const stalePollCountRef = useRef(0);
   const hydratedLiveTickersRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!loading && !session) {
-      router.replace('/login?redirect=/stockAnalysis');
-    }
-  }, [loading, session, router]);
 
   useEffect(() => {
     setPriceSeriesByTicker((previous) => {
