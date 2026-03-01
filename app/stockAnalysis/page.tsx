@@ -6,6 +6,7 @@ import { ArrowLeft, Play, Pause, Activity } from 'lucide-react';
 import { PricePoint, classifyStock, StockSignalResult } from '@/lib/stockAnalysis';
 import QuantDashboard from '@/components/QuantDashboard';
 import TickerSection from '@/components/TickerSection';
+import Footer from '@/components/Footer';
 
 const MAX_POINTS = 240;
 const SIMULATION_INTERVAL_MS = 1000;
@@ -491,6 +492,9 @@ export default function StockAnalysisPage() {
           </p>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer showFullSections={true} />
     </div>
   );
 }
