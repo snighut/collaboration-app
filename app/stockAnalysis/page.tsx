@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Play, Pause, Plus, Trash2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import { PricePoint, classifyStock, StockSignalResult } from '@/lib/stockAnalysis';
-import { useAuth } from '@/components/AuthProvider';
 
 const MAX_POINTS = 240;
 const SIMULATION_INTERVAL_MS = 1000;
@@ -356,7 +355,6 @@ function SparklineChart({ points, pageLoadTimestamp }: { points: PricePoint[]; p
 
 export default function StockAnalysisPage() {
   const router = useRouter();
-  const { session, loading } = useAuth();
 
   const [tickers, setTickers] = useState<string[]>(DEFAULT_TICKERS);
   const [tickerInput, setTickerInput] = useState('');
@@ -689,17 +687,6 @@ export default function StockAnalysisPage() {
   const handleRemoveTicker = (tickerToDelete: string) => {
     setTickers((previous) => previous.filter((ticker) => ticker !== tickerToDelete));
   };
-
-  if (loading || !session) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-gray-600 dark:text-gray-400">Loading stock analysis...</p>
-        </div>
-      </div>
-    );
-  }
 
   const lastUpdateLabel = lastUpdateAt
     ? new Date(lastUpdateAt).toLocaleTimeString([], {
