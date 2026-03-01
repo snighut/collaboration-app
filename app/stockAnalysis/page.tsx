@@ -483,6 +483,13 @@ export default function StockAnalysisPage() {
             );
           })}
         </section>
+
+        <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200 text-center">
+            ⚠️ <strong>Experimental Analysis:</strong> This chart and analysis are for experimental purposes only. 
+            Do not follow this information blindly. Always conduct your own research and consult with financial professionals before making investment decisions.
+          </p>
+        </div>
       </main>
     </div>
   );
