@@ -173,26 +173,50 @@ export default function StockAnalysisPage() {
       if (tickers.length === 0) return;
       const symbols = tickers.join(',');
 
-      try {
-        const response = await fetch(`/api/stock/prices?symbols=${encodeURIComponent(symbols)}`, {
-          cache: 'no-store',
-        });
+      // Determine which tickers need historical data vs just latest price
+      const needHistorical = tickers.filter(ticker => !hydratedLiveTickersRef.current.has(ticker));
+      const needLatest = tickers.filter(ticker => hydratedLiveTickersRef.current.has(ticker));
 
-        if (!response.ok) {
-          throw new Error('Live price request failed');
+      try {
+        let incomingData: Record<string, PricePoint[]> = {};
+        let metadata: Record<string, { marketState?: string; latestTimestamp?: number | null }> = {};
+        let failedSymbols: string[] = [];
+
+        // Fetch historical data for new tickers (initial load)
+        if (needHistorical.length > 0) {
+          const historicalSymbols = needHistorical.join(',');
+          const historicalResponse = await fetch(
+            `/api/stock/prices?symbols=${encodeURIComponent(historicalSymbols)}&mode=historical`,
+            { cache: 'no-store' }
+          );
+
+          if (historicalResponse.ok) {
+            const payload = await historicalResponse.json();
+            incomingData = { ...incomingData, ...(payload?.data ?? {}) };
+            metadata = { ...metadata, ...(payload?.metadata ?? {}) };
+            failedSymbols = [...failedSymbols, ...(payload?.failedSymbols ?? [])];
+          }
         }
 
-        const payload = await response.json();
-        const incomingData = payload?.data as Record<string, PricePoint[]> | undefined;
-        if (!incomingData || Object.keys(incomingData).length === 0) {
+        // Fetch latest prices for already-hydrated tickers (batch update)
+        if (needLatest.length > 0) {
+          const latestSymbols = needLatest.join(',');
+          const latestResponse = await fetch(
+            `/api/stock/prices?symbols=${encodeURIComponent(latestSymbols)}&mode=latest`,
+            { cache: 'no-store' }
+          );
+
+          if (latestResponse.ok) {
+            const payload = await latestResponse.json();
+            incomingData = { ...incomingData, ...(payload?.data ?? {}) };
+            metadata = { ...metadata, ...(payload?.metadata ?? {}) };
+            failedSymbols = [...failedSymbols, ...(payload?.failedSymbols ?? [])];
+          }
+        }
+
+        if (Object.keys(incomingData).length === 0) {
           throw new Error('No live price data returned');
         }
-
-        const metadata = (payload?.metadata ?? {}) as Record<string, {
-          marketState?: string;
-          latestTimestamp?: number | null;
-        }>;
-
         setMarketStateByTicker((previous) => {
           const nextState = { ...previous };
           for (const ticker of tickers) {
@@ -272,7 +296,6 @@ export default function StockAnalysisPage() {
         });
 
         setDataMode('live');
-        const failedSymbols = Array.isArray(payload?.failedSymbols) ? payload.failedSymbols : [];
         if (failedSymbols.length > 0) {
           setFeedStatus(`Live feed active (partial): ${failedSymbols.join(', ')} unavailable.`);
         } else {
@@ -300,12 +323,34 @@ export default function StockAnalysisPage() {
 
     fetchLivePrices();
 
-    const liveIntervalId = setInterval(() => {
-      fetchLivePrices();
-    }, pollIntervalMs);
+    // Synchronized polling: All users poll at :00 and :30 seconds of each minute
+    // This maximizes request deduplication on the server
+    let timeoutId: NodeJS.Timeout;
+    
+    const scheduleNextPoll = () => {
+      const now = Date.now();
+      const currentSecond = Math.floor(now / 1000) % 60;
+      const msIntoSecond = now % 1000;
+      
+      let msUntilNextSync;
+      if (currentSecond < 30) {
+        // We're before :30, wait until :30
+        msUntilNextSync = (30 - currentSecond) * 1000 - msIntoSecond;
+      } else {
+        // We're after :30, wait until next minute's :00
+        msUntilNextSync = (60 - currentSecond) * 1000 - msIntoSecond;
+      }
+      
+      timeoutId = setTimeout(() => {
+        fetchLivePrices();
+        scheduleNextPoll();
+      }, msUntilNextSync);
+    };
+    
+    scheduleNextPoll();
 
-    return () => clearInterval(liveIntervalId);
-  }, [isStreaming, tickers, pollIntervalMs]);
+    return () => clearTimeout(timeoutId);
+  }, [isStreaming, tickers]);
 
   useEffect(() => {
     if (!isStreaming || dataMode !== 'simulated') return;
