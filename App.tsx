@@ -156,7 +156,7 @@ const App: React.FC = () => {
               <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Layout className="text-purple-600 dark:text-purple-400" size={32} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My Creations</h3>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My System Designs</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
                 Full CRUD Control for System Design Blueprints. Manage the entire lifecycle of your architecture diagrams. Use AI to iterate on designs or take the wheel with manual orchestration to refine the details. Every change is tracked and stored, giving a persistent workspace for professional-grade system design.
               </p>
@@ -165,7 +165,7 @@ const App: React.FC = () => {
                   onClick={() => router.push('/mydesigns')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
                 >
-                  Go To My Creations
+                  Go To My Designs
                 </button>
               </div>
             </div>
