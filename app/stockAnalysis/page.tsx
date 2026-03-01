@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Play, Pause, Plus, Trash2, Activity, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Plus, Trash2, Activity, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
 import { PricePoint, classifyStock, StockSignalResult } from '@/lib/stockAnalysis';
 
 const MAX_POINTS = 240;
@@ -370,6 +370,8 @@ export default function StockAnalysisPage() {
   const [sentimentFeedStatus, setSentimentFeedStatus] = useState('Loading sentiment feed...');
   const [lastUpdateAt, setLastUpdateAt] = useState<number | null>(null);
   const [pollIntervalMs, setPollIntervalMs] = useState(OPEN_POLL_INTERVAL_MS);
+  const [sortBy, setSortBy] = useState<'price' | 'percentage' | 'confidence' | 'score'>('score');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [priceSeriesByTicker, setPriceSeriesByTicker] = useState<Record<string, PricePoint[]>>({});
   const pageLoadTimestampRef = useRef(Date.now());
   const lastSeenTimestampRef = useRef<number | null>(null);
@@ -407,7 +409,7 @@ export default function StockAnalysisPage() {
       const nextState = { ...previous };
       for (const ticker of tickers) {
         if (!nextState[ticker]) {
-          nextState[ticker] = 'auto';
+          nextState[ticker] = 'full';
         }
       }
       for (const existingTicker of Object.keys(nextState)) {
@@ -724,7 +726,29 @@ export default function StockAnalysisPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
         <section className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 sm:p-5">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2">Quant Signal Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold">Quant Signal Dashboard</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'price' | 'percentage' | 'confidence' | 'score')}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm"
+              >
+                <option value="score">Opportunity Score</option>
+                <option value="price">Price</option>
+                <option value="percentage">Percentage</option>
+                <option value="confidence">Confidence</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="p-1.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"
+                title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+              >
+                {sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+              </button>
+            </div>
+          </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Real-time market polling with moving averages and z-score based valuation classification.
           </p>
@@ -787,16 +811,45 @@ export default function StockAnalysisPage() {
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {stockSignals.map((signal) => {
+          {[...stockSignals].sort((a, b) => {
+            let comparison = 0;
+            if (sortBy === 'price') {
+              comparison = b.latestPrice - a.latestPrice;
+            } else if (sortBy === 'percentage') {
+              const seriesA = priceSeriesByTicker[a.ticker] ?? [];
+              const seriesB = priceSeriesByTicker[b.ticker] ?? [];
+              const percentA = seriesA[0]?.price ? ((a.latestPrice - seriesA[0].price) / seriesA[0].price) * 100 : 0;
+              const percentB = seriesB[0]?.price ? ((b.latestPrice - seriesB[0].price) / seriesB[0].price) * 100 : 0;
+              comparison = percentB - percentA;
+            } else if (sortBy === 'confidence') {
+              comparison = b.confidence - a.confidence;
+            } else {
+              comparison = b.score - a.score;
+            }
+            return sortOrder === 'asc' ? -comparison : comparison;
+          }).map((signal) => {
             const series = priceSeriesByTicker[signal.ticker] ?? [];
             const tickerMarketState = (marketStateByTicker[signal.ticker] ?? 'UNKNOWN').toUpperCase();
-            const selectedView = chartViewByTicker[signal.ticker] ?? 'auto';
+            const selectedView = chartViewByTicker[signal.ticker] ?? 'full';
             const shouldUseFull = selectedView === 'full' || (selectedView === 'auto' && tickerMarketState === 'CLOSED');
             const chartPoints = shouldUseFull ? series : series.slice(-30);
             const sentimentSeries = sentimentByTicker[signal.ticker] ?? [];
             const latestSentiment = sentimentSeries[sentimentSeries.length - 1] ?? null;
             const selectedSentimentRange = sentimentRangeByTicker[signal.ticker] ?? 'days';
             const isSentimentCollapsed = sentimentCollapsedByTicker[signal.ticker] ?? true;
+
+            // Calculate daily percentage change
+            const firstPrice = series[0]?.price;
+            const latestPrice = signal.latestPrice;
+            const percentChange = firstPrice && latestPrice 
+              ? ((latestPrice - firstPrice) / firstPrice) * 100 
+              : null;
+            const changeColor = percentChange !== null
+              ? percentChange >= 0 
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-600 dark:text-red-400'
+              : 'text-gray-600 dark:text-gray-400';
+            const changeSign = percentChange !== null && percentChange >= 0 ? '+' : '';
 
             const confidencePoints: MiniSparkPoint[] = buildConfidencePoints(sentimentSeries, selectedSentimentRange);
 
@@ -820,14 +873,6 @@ export default function StockAnalysisPage() {
               .sort((left, right) => left.horizon - right.horizon)
               .map((entry) => entry.point);
 
-            const rangeLabel = selectedView === 'recent'
-              ? 'Recent 30 points'
-              : selectedView === 'full'
-                ? 'Daily view'
-                : tickerMarketState === 'CLOSED'
-                  ? 'Daily view (market closed)'
-                  : 'Recent 30 points';
-
             return (
               <article
                 key={signal.ticker}
@@ -837,10 +882,17 @@ export default function StockAnalysisPage() {
                   <div>
                     <h2 className="text-lg font-bold">{signal.ticker}</h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Price ${formatNumber(signal.latestPrice)} • Trend {signal.trend}
+                      Price ${formatNumber(signal.latestPrice)}
+                      {percentChange !== null && (
+                        <span className={`ml-2 font-semibold ${changeColor}`}>
+                          {changeSign}{formatNumber(percentChange)}%
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Trend {signal.trend}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{rangeLabel}</p>
                       <div className="inline-flex rounded-md border border-slate-200 dark:border-slate-600 overflow-hidden">
                         <button
                           onClick={() => setChartViewByTicker((previous) => ({ ...previous, [signal.ticker]: 'auto' }))}
@@ -852,13 +904,13 @@ export default function StockAnalysisPage() {
                           onClick={() => setChartViewByTicker((previous) => ({ ...previous, [signal.ticker]: 'recent' }))}
                           className={`px-2 py-0.5 text-[11px] border-l border-slate-200 dark:border-slate-600 ${selectedView === 'recent' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
                         >
-                          Recent
+                          Last 30m
                         </button>
                         <button
                           onClick={() => setChartViewByTicker((previous) => ({ ...previous, [signal.ticker]: 'full' }))}
                           className={`px-2 py-0.5 text-[11px] border-l border-slate-200 dark:border-slate-600 ${selectedView === 'full' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
                         >
-                          Full
+                          Daily
                         </button>
                       </div>
                     </div>
