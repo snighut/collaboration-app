@@ -121,7 +121,7 @@ const App: React.FC = () => {
         </aside>
 
         {/* Middle Section: Achievements (65%) */}
-        <div className="md:ml-[25%] md:w-[65%] w-full p-8 space-y-32 mb-32" id="achievements">
+        <div className="md:ml-[25%] md:w-[65%] w-full p-6 space-y-12 mb-16" id="achievements">
           {YEARS.map((year) => (
             <AchievementSection 
               key={year} 
@@ -130,15 +130,21 @@ const App: React.FC = () => {
             />
           ))}
           
-          {/* Bottom Trigger Section */}
-          <div id="creative-hub-trigger" className="flex flex-col items-center justify-center py-20 border-t border-gray-100 dark:border-slate-800 scroll-mt-24 gap-8">
-            {/* Creative Prompt to Design App */}
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full">
-              <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="text-blue-600 dark:text-blue-400" size={32} />
+          {/* Projects Section */}
+          <div id="creative-hub-trigger" className="py-8 border-t border-gray-100 dark:border-slate-800 scroll-mt-24">
+            {/* Section Header */}
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-black text-gray-800 dark:text-gray-100 mb-2">Featured Projects</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Creative Prompt to Design App */}
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full">
+              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="text-blue-600 dark:text-blue-400" size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Creative Prompt to Visual Design App</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 text-center">Creative Prompt to Visual Design App</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-center">
                 An experimental prompt-to-diagram orchestration engine. This project demonstrates how AI can synthesize natural language into structured visual relationships and auto-generate optimized layouts. Developed as a technical deep-dive into LLM-driven UI design and distributed homelab architecture
               </p>
               <div className="flex justify-center">
@@ -152,9 +158,9 @@ const App: React.FC = () => {
             </div>
 
             {/* My Designs */}
-            <div id="my-creations-section" className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full scroll-mt-24">
-              <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Layout className="text-purple-600 dark:text-purple-400" size={32} />
+            <div id="my-creations-section" className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full scroll-mt-24">
+              <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Layout className="text-purple-600 dark:text-purple-400" size={28} />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My System Designs</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
@@ -171,12 +177,12 @@ const App: React.FC = () => {
             </div>
 
             {/* Stock Analysis */}
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 max-w-xl w-full scroll-mt-24">
-              <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={32} />
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full scroll-mt-24">
+              <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">Stock Analysis (Quant MVP)</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 text-center">Stock Analysis (Quant MVP)</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-center">
                 Analyze a live stream of stock prices for your selected tickers with moving averages and valuation signals such as Undervalued or Overvalued.
               </p>
               <div className="flex justify-center">
@@ -187,6 +193,7 @@ const App: React.FC = () => {
                   Open Stock Analysis
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
