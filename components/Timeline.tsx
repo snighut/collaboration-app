@@ -9,9 +9,9 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({ activeYear, onYearChange }) => {
   return (
-    <div className="p-8">
-      <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-8">Journey through time</h2>
-      <div className="space-y-4">
+    <div className="p-6">
+      <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Journey through time</h2>
+      <div className="space-y-2">
         {YEARS.map((year) => (
           <label 
             key={year}

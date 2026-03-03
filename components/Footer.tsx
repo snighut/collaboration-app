@@ -12,10 +12,10 @@ interface FooterProps {
  */
 const Footer: React.FC<FooterProps> = ({ className = '', showFullSections = false }) => {
   return (
-    <footer className={`bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-12 px-8 ${className}`}>
+    <footer className={`bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-8 px-8 ${className}`}>
       <div className="max-w-6xl mx-auto">
         {showFullSections && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* About Section */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">About</h3>
@@ -70,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', showFullSections = fals
         )}
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-6 border-t border-gray-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             © 2026 Swapnil Nighut. Built with passion and curiosity.
           </p>
