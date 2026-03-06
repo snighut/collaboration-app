@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   keywords: ['system design', 'architecture diagrams', 'AI design tool', 'prompts to diagram', 'Nighutlabs', 'visual design', 'LLM', 'software architecture'],
   authors: [{ name: 'Swapnil Nighut' }],
   openGraph: {
-    title: 'Nighutlabs | Prommpts to System Design',
+    title: 'Nighutlabs | Prompts to System Design',
     description: 'Transform prompts into professional system design diagrams with AI-powered visual design technology.',
     url: 'https://nighutlabs.dev',
     siteName: 'Nighutlabs',
