@@ -87,7 +87,7 @@ export default function StockAnalysisPage() {
   const [sentimentFeedStatus, setSentimentFeedStatus] = useState('Loading sentiment feed...');
   const [lastUpdateAt, setLastUpdateAt] = useState<number | null>(null);
   const [pollIntervalMs, setPollIntervalMs] = useState(OPEN_POLL_INTERVAL_MS);
-  const [sortBy, setSortBy] = useState<'price' | 'percentage' | 'confidence' | 'score'>('score');
+  const [sortBy, setSortBy] = useState<'price' | 'percentage' | 'confidence' | 'score'>('percentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [priceSeriesByTicker, setPriceSeriesByTicker] = useState<Record<string, PricePoint[]>>({});
   const pageLoadTimestampRef = useRef(Date.now());
