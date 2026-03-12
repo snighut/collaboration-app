@@ -95,11 +95,141 @@ const getMidpoint = (x1: number, y1: number, x2: number, y2: number) => ({
   y: (y1 + y2) / 2,
 });
 
+const getAnchorDirection = (anchorPoint: string): { x: number; y: number } => {
+  switch (anchorPoint) {
+    case 'right':
+      return { x: 1, y: 0 };
+    case 'left':
+      return { x: -1, y: 0 };
+    case 'bottom':
+      return { x: 0, y: 1 };
+    case 'top':
+      return { x: 0, y: -1 };
+    default:
+      return { x: 1, y: 0 };
+  }
+};
+
 /**
  * Calculate angle between two points
  */
 const getAngle = (x1: number, y1: number, x2: number, y2: number) => {
   return Math.atan2(y2 - y1, x2 - x1);
+};
+
+/**
+ * Resolve anchor points based on current object geometry so arrows always
+ * approach target from the exterior-facing side.
+ */
+const resolveRenderAnchors = (
+  fromObj: CanvasObject | undefined,
+  toObj: CanvasObject | undefined,
+  fallbackFromPoint: string,
+  fallbackToPoint: string
+): { fromPoint: string; toPoint: string } => {
+  if (!fromObj || !toObj) {
+    return { fromPoint: fallbackFromPoint, toPoint: fallbackToPoint };
+  }
+
+  const fromIsLinear = fromObj.type === 'line' || fromObj.type === 'arrow';
+  const toIsLinear = toObj.type === 'line' || toObj.type === 'arrow';
+
+  if (fromIsLinear || toIsLinear) {
+    return { fromPoint: fallbackFromPoint, toPoint: fallbackToPoint };
+  }
+
+  const fromCenter = {
+    x: fromObj.x + fromObj.width / 2,
+    y: fromObj.y + fromObj.height / 2,
+  };
+  const toCenter = {
+    x: toObj.x + toObj.width / 2,
+    y: toObj.y + toObj.height / 2,
+  };
+
+  const dx = toCenter.x - fromCenter.x;
+  const dy = toCenter.y - fromCenter.y;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0
+      ? { fromPoint: 'right', toPoint: 'left' }
+      : { fromPoint: 'left', toPoint: 'right' };
+  }
+
+  return dy > 0
+    ? { fromPoint: 'bottom', toPoint: 'top' }
+    : { fromPoint: 'top', toPoint: 'bottom' };
+};
+
+const getDirectionalArrowPoints = (
+  position: { x: number; y: number },
+  anchorPoint: string,
+  direction: 'into-target' | 'out-of-source',
+  arrowLength: number = 18,
+  outsideOffset: number = 1
+): number[] => {
+  const { x, y } = position;
+
+  if (direction === 'into-target') {
+    switch (anchorPoint) {
+      case 'right':
+        return [x + arrowLength + outsideOffset, y, x + outsideOffset, y];
+      case 'left':
+        return [x - arrowLength - outsideOffset, y, x - outsideOffset, y];
+      case 'bottom':
+        return [x, y + arrowLength + outsideOffset, x, y + outsideOffset];
+      case 'top':
+        return [x, y - arrowLength - outsideOffset, x, y - outsideOffset];
+      default:
+        return [x + arrowLength + outsideOffset, y, x + outsideOffset, y];
+    }
+  }
+
+  switch (anchorPoint) {
+    case 'right':
+      return [x - arrowLength + outsideOffset, y, x + outsideOffset, y];
+    case 'left':
+      return [x + arrowLength - outsideOffset, y, x - outsideOffset, y];
+    case 'bottom':
+      return [x, y - arrowLength + outsideOffset, x, y + outsideOffset];
+    case 'top':
+      return [x, y + arrowLength - outsideOffset, x, y - outsideOffset];
+    default:
+      return [x - arrowLength + outsideOffset, y, x + outsideOffset, y];
+  }
+};
+
+const getExteriorAnchorPosition = (
+  position: { x: number; y: number },
+  anchorPoint: string,
+  clearance: number = 8
+): { x: number; y: number } => {
+  switch (anchorPoint) {
+    case 'right':
+      return { x: position.x + clearance, y: position.y };
+    case 'left':
+      return { x: position.x - clearance, y: position.y };
+    case 'bottom':
+      return { x: position.x, y: position.y + clearance };
+    case 'top':
+      return { x: position.x, y: position.y - clearance };
+    default:
+      return position;
+  }
+};
+
+const getAdaptiveExteriorClearance = (
+  obj: CanvasObject | undefined,
+  anchorDistance: number,
+  borderThickness: number
+): number => {
+  const baseClearance = 10;
+  const sizeBoost = obj ? Math.min(Math.min(obj.width, obj.height) * 0.09, 9) : 0;
+  const densityBoost = anchorDistance < 260 ? Math.min((260 - anchorDistance) / 10, 14) : 0;
+  const strokeBoost = Math.min(Math.max(borderThickness - 2, 0), 3);
+  const userBoost = obj?.type === 'user' ? 6 : 0;
+
+  return Math.min(baseClearance + sizeBoost + densityBoost + strokeBoost + userBoost, 28);
 };
 
 /**
@@ -216,6 +346,37 @@ const getSmoothCurvedPath = (x1: number, y1: number, x2: number, y2: number): st
     const controlY2 = y2 - controlOffset;
     return `M ${x1} ${y1} C ${x1} ${controlY1}, ${x2} ${controlY2}, ${x2} ${y2}`;
   }
+};
+
+const getSmoothCurvedPathWithAnchors = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  fromPoint: string,
+  toPoint: string
+): string => {
+  const fromDir = getAnchorDirection(fromPoint);
+  const toDir = getAnchorDirection(toPoint);
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  const lead = Math.min(Math.max(distance * 0.2, 18), 48);
+  const control = Math.min(Math.max(distance * 0.35, 32), 140);
+
+  const fromLeadX = x1 + fromDir.x * lead;
+  const fromLeadY = y1 + fromDir.y * lead;
+  const toLeadX = x2 + toDir.x * lead;
+  const toLeadY = y2 + toDir.y * lead;
+
+  const c1x = fromLeadX + fromDir.x * control;
+  const c1y = fromLeadY + fromDir.y * control;
+  const c2x = toLeadX + toDir.x * control;
+  const c2y = toLeadY + toDir.y * control;
+
+  return `M ${x1} ${y1} L ${fromLeadX} ${fromLeadY} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${toLeadX} ${toLeadY} L ${x2} ${y2}`;
 };
 
 /**
@@ -376,9 +537,9 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         const fromName = typeof conn.from === 'string' ? conn.from : conn.from.name;
         const toName = typeof conn.to === 'string' ? conn.to : conn.to.name;
 
-        // Get anchor positions (with group drag offset applied)
-        const fromPos = getAnchorPosition(fromName, conn.fromPoint, objects, groupDragState);
-        const toPos = getAnchorPosition(toName, conn.toPoint, objects, groupDragState);
+        const fromObj = objects.find(o => o.name === fromName);
+        const toObj = objects.find(o => o.name === toName);
+        const resolvedAnchors = resolveRenderAnchors(fromObj, toObj, conn.fromPoint, conn.toPoint);
 
         // Determine connection type and get default styles
         const connectionType = (conn.connectionType as ConnectionType) || ConnectionType.DEFAULT;
@@ -393,6 +554,15 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         const linePattern = conn.uidata?.linePattern || defaultStyle.linePattern;
         const dashArray = getBorderDashArray(borderStyle);
 
+        // Get anchor positions (with group drag offset applied) and push into exterior space
+        const fromAnchorPos = getAnchorPosition(fromName, resolvedAnchors.fromPoint, objects, groupDragState);
+        const toAnchorPos = getAnchorPosition(toName, resolvedAnchors.toPoint, objects, groupDragState);
+        const anchorDistance = Math.hypot(toAnchorPos.x - fromAnchorPos.x, toAnchorPos.y - fromAnchorPos.y);
+        const fromClearance = getAdaptiveExteriorClearance(fromObj, anchorDistance, borderThickness);
+        const toClearance = getAdaptiveExteriorClearance(toObj, anchorDistance, borderThickness);
+        const fromPos = getExteriorAnchorPosition(fromAnchorPos, resolvedAnchors.fromPoint, fromClearance);
+        const toPos = getExteriorAnchorPosition(toAnchorPos, resolvedAnchors.toPoint, toClearance);
+
         const angle = getAngle(fromPos.x, fromPos.y, toPos.x, toPos.y);
         const midpoint = getMidpoint(fromPos.x, fromPos.y, toPos.x, toPos.y);
 
@@ -402,7 +572,14 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         // Calculate path data based on line pattern (used for highlight and hit area)
         const getPathData = (): string => {
           if (effectiveLinePattern === 'curved') {
-            return getSmoothCurvedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
+            return getSmoothCurvedPathWithAnchors(
+              fromPos.x,
+              fromPos.y,
+              toPos.x,
+              toPos.y,
+              resolvedAnchors.fromPoint,
+              resolvedAnchors.toPoint
+            );
           }
           if (effectiveLinePattern === 'stepped') {
             return getSteppedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
@@ -413,8 +590,8 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
             fromPos.y,
             toPos.x,
             toPos.y,
-            conn.fromPoint,
-            conn.toPoint
+            resolvedAnchors.fromPoint,
+            resolvedAnchors.toPoint
           );
         };
 
@@ -427,7 +604,16 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
           
           // Handle different line patterns
           if (effectiveLinePattern === 'curved') {
-            const pathData = getSmoothCurvedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
+            const pathData = getSmoothCurvedPathWithAnchors(
+              fromPos.x,
+              fromPos.y,
+              toPos.x,
+              toPos.y,
+              resolvedAnchors.fromPoint,
+              resolvedAnchors.toPoint
+            );
+            const targetArrowPoints = getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
+            const sourceArrowPoints = getDirectionalArrowPoints(fromPos, resolvedAnchors.fromPoint, 'out-of-source');
             
             // Render the curved path
             const baseCurve = (
@@ -446,7 +632,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
                 <Group key={`connection-${index}`}>
                   {baseCurve}
                   <Arrow
-                    points={[toPos.x - 15, toPos.y, toPos.x, toPos.y]}
+                    points={targetArrowPoints}
                     stroke={borderColor}
                     strokeWidth={borderThickness}
                     fill={arrowType === 'filled' ? borderColor : 'transparent'}
@@ -460,7 +646,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
                 <Group key={`connection-${index}`}>
                   {baseCurve}
                   <Arrow
-                    points={[fromPos.x + 15, fromPos.y, fromPos.x, fromPos.y]}
+                    points={sourceArrowPoints}
                     stroke={borderColor}
                     strokeWidth={borderThickness}
                     fill={borderColor}
@@ -468,7 +654,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
                     pointerWidth={10}
                   />
                   <Arrow
-                    points={[toPos.x - 15, toPos.y, toPos.x, toPos.y]}
+                    points={targetArrowPoints}
                     stroke={borderColor}
                     strokeWidth={borderThickness}
                     fill={borderColor}
@@ -502,6 +688,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
 
           if (effectiveLinePattern === 'stepped') {
             const pathData = getSteppedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
+            const targetArrowPoints = getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
             return (
               <Group key={`connection-${index}`}>
                 <Path
@@ -513,7 +700,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
                 />
                 {arrowType === 'filled' && (
                   <Arrow
-                    points={[toPos.x - 15, toPos.y, toPos.x, toPos.y]}
+                    points={targetArrowPoints}
                     stroke={borderColor}
                     strokeWidth={borderThickness}
                     fill={borderColor}
@@ -532,8 +719,8 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
               fromPos.y, 
               toPos.x, 
               toPos.y,
-              conn.fromPoint,
-              conn.toPoint
+              resolvedAnchors.fromPoint,
+              resolvedAnchors.toPoint
             );
             
             // Render the orthogonal path
@@ -552,45 +739,11 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
             // Calculate arrow direction based on toPoint anchor
             // Arrow should point INTO the target object from outside
             const getArrowPoints = () => {
-              const arrowLength = 18;
-              const offset = -2; // Position arrow just outside the object boundary to be fully visible
-              switch (conn.toPoint) {
-                case 'right':
-                  // Arrow pointing left (into right side)
-                  return [toPos.x + arrowLength - offset, toPos.y, toPos.x - offset, toPos.y];
-                case 'left':
-                  // Arrow pointing right (into left side)
-                  return [toPos.x - arrowLength + offset, toPos.y, toPos.x + offset, toPos.y];
-                case 'bottom':
-                  // Arrow pointing up (into bottom side)
-                  return [toPos.x, toPos.y + arrowLength - offset, toPos.x, toPos.y - offset];
-                case 'top':
-                  // Arrow pointing down (into top side)
-                  return [toPos.x, toPos.y - arrowLength + offset, toPos.x, toPos.y + offset];
-                default:
-                  return [toPos.x + arrowLength - offset, toPos.y, toPos.x - offset, toPos.y];
-              }
+              return getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
             };
 
             const getStartArrowPoints = () => {
-              const arrowLength = 18;
-              const offset = -2;
-              switch (conn.fromPoint) {
-                case 'right':
-                  // Arrow pointing right (out of right side)
-                  return [fromPos.x - arrowLength + offset, fromPos.y, fromPos.x + offset, fromPos.y];
-                case 'left':
-                  // Arrow pointing left (out of left side)
-                  return [fromPos.x + arrowLength - offset, fromPos.y, fromPos.x - offset, fromPos.y];
-                case 'bottom':
-                  // Arrow pointing down (out of bottom side)
-                  return [fromPos.x, fromPos.y - arrowLength + offset, fromPos.x, fromPos.y + offset];
-                case 'top':
-                  // Arrow pointing up (out of top side)
-                  return [fromPos.x, fromPos.y + arrowLength - offset, fromPos.x, fromPos.y - offset];
-                default:
-                  return [fromPos.x - arrowLength + offset, fromPos.y, fromPos.x + offset, fromPos.y];
-              }
+              return getDirectionalArrowPoints(fromPos, resolvedAnchors.fromPoint, 'out-of-source');
             };
 
             // Add arrow heads based on arrow type
@@ -637,7 +790,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
               let diamondY = fromPos.y;
               const diamondOffset = 10; // Offset to position diamond outside the object
               
-              switch (conn.fromPoint) {
+              switch (resolvedAnchors.fromPoint) {
                 case 'right':
                   diamondAngle = Math.PI / 2; // pointing right
                   diamondX += diamondOffset;
@@ -668,7 +821,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
               let triangleY = toPos.y;
               const triangleOffset = 2; // Offset to position triangle outside the object
               
-              switch (conn.toPoint) {
+              switch (resolvedAnchors.toPoint) {
                 case 'right':
                   triangleAngle = -Math.PI / 2; // pointing left (into right side)
                   triangleX += triangleOffset;
