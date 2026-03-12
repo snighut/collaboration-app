@@ -13,6 +13,11 @@ interface Message {
   timestamp: Date;
   designId?: string;
   reasoning?: string[];
+  validationDetails?: {
+    thresholdMet?: boolean;
+    validationScore?: number;
+    missingRequirements?: string[];
+  };
   metadata?: {
     componentsCount?: number;
     connectionsCount?: number;
@@ -240,6 +245,7 @@ const ChatSidebar: React.FC = () => {
           timestamp: new Date(),
           designId: result.data.designId,
           reasoning: result.data.reasoning,
+          validationDetails: result.data.validationDetails || undefined,
           metadata: result.data.metadata,
         };
         setMessages(prev => [...prev, assistantMessage]);
@@ -366,6 +372,30 @@ const ChatSidebar: React.FC = () => {
                           <span>{streamingCompletion}</span>
                         )}
                       </p>
+                      {message.role === 'assistant' && message.validationDetails && (
+                        <div className="mt-3 rounded-lg border border-gray-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 p-2.5">
+                          <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                            {typeof message.validationDetails.thresholdMet === 'boolean' && (
+                              <p>
+                                <span className="font-semibold">Threshold Met:</span>{' '}
+                                {message.validationDetails.thresholdMet ? 'Yes' : 'No'}
+                              </p>
+                            )}
+                            {typeof message.validationDetails.validationScore === 'number' && (
+                              <p>
+                                <span className="font-semibold">Validation Score:</span>{' '}
+                                {message.validationDetails.validationScore}
+                              </p>
+                            )}
+                            {!!message.validationDetails.missingRequirements?.length && (
+                              <p>
+                                <span className="font-semibold">Missing Requirements:</span>{' '}
+                                {message.validationDetails.missingRequirements.slice(0, 3).join(', ')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       {/* Show "View Design" button if message has a designId */}
                       {message.designId && (
                         <button

@@ -5,6 +5,14 @@ interface Message {
   content: string;
 }
 
+interface GenerateDesignOptions {
+  enableRagContext?: boolean;
+  enableValidationLoop?: boolean;
+  validationThreshold?: number;
+  maxRefinementCycles?: number;
+  maxIterations?: number;
+}
+
 // Streaming server action for Mistral LLM
 export async function askMistral(prompt: string) {
   // Use an env var that changes based on where the app is running
@@ -67,7 +75,11 @@ export async function sendChatMessage(messages: Message[]) {
 }
 
 // Generate design using LLM agent
-export async function generateDesign(query: string, accessToken?: string) {
+export async function generateDesign(
+  query: string,
+  accessToken?: string,
+  options?: GenerateDesignOptions,
+) {
   try {
     if (!accessToken) {
       return {
@@ -77,6 +89,14 @@ export async function generateDesign(query: string, accessToken?: string) {
     }
 
     const LLM_SERVICE_URL = process.env.LLM_SERVICE_URL || 'http://localhost:3002';
+    const resolvedOptions: GenerateDesignOptions = {
+      enableRagContext: true,
+      enableValidationLoop: true,
+      validationThreshold: 85,
+      maxRefinementCycles: 3,
+      maxIterations: 12,
+      ...(options || {}),
+    };
     
     const response = await fetch(`${LLM_SERVICE_URL}/api/v1/agent/generate-design`, {
       method: 'POST',
@@ -84,7 +104,7 @@ export async function generateDesign(query: string, accessToken?: string) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, options: resolvedOptions }),
       cache: 'no-store',
     });
 
@@ -107,6 +127,7 @@ export async function generateDesign(query: string, accessToken?: string) {
         name: data.name,
         reasoning: data.reasoning || [],
         metadata: data.metadata || {},
+        validationDetails: data.validationDetails || null,
       },
     };
   } catch (error) {
