@@ -560,7 +560,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         const anchorDistance = Math.hypot(toAnchorPos.x - fromAnchorPos.x, toAnchorPos.y - fromAnchorPos.y);
         const fromClearance = getAdaptiveExteriorClearance(fromObj, anchorDistance, borderThickness);
         const toClearance = getAdaptiveExteriorClearance(toObj, anchorDistance, borderThickness);
-        const fromPos = getExteriorAnchorPosition(fromAnchorPos, resolvedAnchors.fromPoint, fromClearance);
+        const fromPos = fromAnchorPos;
         const toPos = getExteriorAnchorPosition(toAnchorPos, resolvedAnchors.toPoint, toClearance);
 
         const angle = getAngle(fromPos.x, fromPos.y, toPos.x, toPos.y);
@@ -612,8 +612,8 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
               resolvedAnchors.fromPoint,
               resolvedAnchors.toPoint
             );
-            const targetArrowPoints = getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
-            const sourceArrowPoints = getDirectionalArrowPoints(fromPos, resolvedAnchors.fromPoint, 'out-of-source');
+            const targetArrowPoints = [toPos.x, toPos.y, toAnchorPos.x, toAnchorPos.y];
+            const sourceArrowPoints = getDirectionalArrowPoints(fromAnchorPos, resolvedAnchors.fromPoint, 'out-of-source', 18, 0);
             
             // Render the curved path
             const baseCurve = (
@@ -688,7 +688,7 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
 
           if (effectiveLinePattern === 'stepped') {
             const pathData = getSteppedPath(fromPos.x, fromPos.y, toPos.x, toPos.y);
-            const targetArrowPoints = getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
+            const targetArrowPoints = [toPos.x, toPos.y, toAnchorPos.x, toAnchorPos.y];
             return (
               <Group key={`connection-${index}`}>
                 <Path
@@ -739,11 +739,11 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
             // Calculate arrow direction based on toPoint anchor
             // Arrow should point INTO the target object from outside
             const getArrowPoints = () => {
-              return getDirectionalArrowPoints(toPos, resolvedAnchors.toPoint, 'into-target');
+              return [toPos.x, toPos.y, toAnchorPos.x, toAnchorPos.y];
             };
 
             const getStartArrowPoints = () => {
-              return getDirectionalArrowPoints(fromPos, resolvedAnchors.fromPoint, 'out-of-source');
+              return getDirectionalArrowPoints(fromAnchorPos, resolvedAnchors.fromPoint, 'out-of-source', 18, 0);
             };
 
             // Add arrow heads based on arrow type
