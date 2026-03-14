@@ -97,7 +97,7 @@ function MyDesigns() {
             <span className="font-medium hidden xs:inline">Home</span>
           </button>
           <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight truncate">
-            My Creations
+            Architected Solutions
           </h1>
         </div>
         {/* Desktop actions */}
