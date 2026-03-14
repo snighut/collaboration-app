@@ -530,9 +530,10 @@ const getOrthogonalPath = (
  * Main ConnectionRenderer component - renders styled connections between canvas objects
  */
 const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, objects, groupDragState, activeConnectionIndex, onConnectionClick }) => {
-  return (
-    <>
-      {connections.map((conn, index) => {
+  
+  const renderConnectionComponent = (conn: Connection, index: number) => {
+    // All the logic from the original .map() callback
+
         // Extract from and to names
         const fromName = typeof conn.from === 'string' ? conn.from : conn.from.name;
         const toName = typeof conn.to === 'string' ? conn.to : conn.to.name;
@@ -565,6 +566,32 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
 
         const angle = getAngle(fromPos.x, fromPos.y, toPos.x, toPos.y);
         const midpoint = getMidpoint(fromPos.x, fromPos.y, toPos.x, toPos.y);
+
+        // --- BEGIN: Calculate label offset for multiple connections ---
+        const labelOffset = { x: 0, y: 0 };
+        const siblingConnections = connections.filter(
+          (c) =>
+            c.name &&
+            (((typeof c.from === 'string' ? c.from : c.from.name) === fromName && (typeof c.to === 'string' ? c.to : c.to.name) === toName) ||
+              ((typeof c.from === 'string' ? c.from : c.from.name) === toName && (typeof c.to === 'string' ? c.to : c.to.name) === fromName))
+        );
+
+        if (siblingConnections.length > 1) {
+          const siblingIndex = siblingConnections.findIndex(c => c === conn);
+          const perpAngle = angle + Math.PI / 2;
+          const isHorizontalish = Math.abs(Math.cos(angle)) > 0.7071; // cos(45deg)
+
+          const offsetDistance = isHorizontalish
+            ? 22 // Stack vertically for horizontal-ish lines (based on label height)
+            : 90; // Stack horizontally for vertical-ish lines (based on typical label width)
+
+          const totalSpread = (siblingConnections.length - 1) * offsetDistance;
+          const currentOffset = siblingIndex * offsetDistance - totalSpread / 2;
+
+          labelOffset.x = Math.cos(perpAngle) * currentOffset;
+          labelOffset.y = Math.sin(perpAngle) * currentOffset;
+        }
+        // --- END: Calculate label offset ---
 
         // Default to orthogonal (90-degree corners) for professional appearance
         const effectiveLinePattern = linePattern || 'orthogonal';
@@ -946,12 +973,29 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
         };
 
         const isActive = activeConnectionIndex === index;
+        let isDimmed = false;
+
+        // Dim connections only if they are siblings of the active connection
+        if (activeConnectionIndex !== null && !isActive) {
+          const activeConn = connections[activeConnectionIndex];
+          if (activeConn) {
+            const activeFromName = typeof activeConn.from === 'string' ? activeConn.from : activeConn.from.name;
+            const activeToName = typeof activeConn.to === 'string' ? activeConn.to : activeConn.to.name;
+
+            const isSiblingOfActive =
+              (fromName === activeFromName && toName === activeToName) ||
+              (fromName === activeToName && toName === activeFromName);
+
+            if (isSiblingOfActive) isDimmed = true;
+          }
+        }
 
         return (
           <Group 
             key={`connection-wrapper-${index}`}
             onClick={() => onConnectionClick?.(index)}
             onTap={() => onConnectionClick?.(index)}
+            opacity={isDimmed ? 0.3 : 1}
           >
             {/* Selection highlight - thicker path behind the connection following actual shape */}
             {isActive && (
@@ -972,43 +1016,49 @@ const ConnectionRenderer: React.FC<ConnectionRendererProps> = ({ connections, ob
               hitStrokeWidth={20}
             />
             {renderConnection()}
+            {/* Render connection label at midpoint with background */}
+            {conn.name && (
+              <Label
+                x={midpoint.x + labelOffset.x}
+                y={midpoint.y + labelOffset.y}
+                offset={{
+                  x: (conn.name.length * 5.5 + 8) / 2,
+                  y: 12,
+                }}
+              >
+                <Tag
+                  fill={'rgba(255, 255, 255, 0.9)'}
+                  stroke={'#e5e7eb'}
+                  strokeWidth={1}
+                  cornerRadius={3}
+                />
+                <Text
+                  text={conn.name}
+                  fontSize={10}
+                  fontFamily="Inter, system-ui, sans-serif"
+                  padding={4}
+                  fill="#374151"
+                />
+              </Label>
+            )}
           </Group>
         );
-        // // Get connection label (use name field)
-        // const connectionLabel = conn.name || '';
-        // const labelWidth = connectionLabel.length * 5.5 + 8;
-        // const labelHeight = 16;
+  };
 
-        // return (
-        //   <Group key={`connection-group-${index}`}>
-        //     {renderConnection()}
-        //     {/* Render connection label at midpoint with background */}
-        //     {connectionLabel && (
-        //       <Group
-        //         x={midpoint.x - labelWidth / 2}
-        //         y={midpoint.y - labelHeight / 2 - 4}
-        //       >
-        //         <Rect
-        //           width={labelWidth}
-        //           height={labelHeight}
-        //           fill="rgba(255, 255, 255, 0.9)"
-        //           stroke="#e5e7eb"
-        //           strokeWidth={1}
-        //           cornerRadius={3}
-        //         />
-        //         <Text
-        //           x={4}
-        //           y={3}
-        //           text={connectionLabel}
-        //           fontSize={10}
-        //           fontFamily="Inter, system-ui, sans-serif"
-        //           fill="#374151"
-        //         />
-        //       </Group>
-        //     )}
-        //   </Group>
-        // );
+  // Separate active connection to render it last (on top)
+  const activeConnection = activeConnectionIndex !== null ? connections[activeConnectionIndex] : null;
+
+  return (
+    <>
+      {/* Render all inactive connections first */}
+      {connections.map((conn, index) => {
+        if (index === activeConnectionIndex) return null;
+        return renderConnectionComponent(conn, index);
       })}
+      {/* Render the active connection last so it appears on top */}
+      {activeConnection && activeConnectionIndex !== null &&
+        renderConnectionComponent(activeConnection, activeConnectionIndex)
+      }
     </>
   );
 };
