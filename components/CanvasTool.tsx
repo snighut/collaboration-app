@@ -299,6 +299,15 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
   const SCALE_MIN = 0.25;
   const SCALE_MAX = 3;
   const SCALE_STEP = 0.1;
+
+  // Set default zoom for mobile devices (zoomed out by 2 steps)
+  useEffect(() => {
+    // Basic mobile detection
+    const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      setScale(1 - 4 * SCALE_STEP); // Zoom out by 2 steps (0.8)
+    }
+  }, []);
   
   // Refs for pinch zoom gesture tracking
   const lastCenter = useRef<{ x: number; y: number } | null>(null);
