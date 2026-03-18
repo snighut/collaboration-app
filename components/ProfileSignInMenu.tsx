@@ -29,7 +29,7 @@ export default function ProfileSignInMenu() {
     return (
       <div className="relative flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-300">DARK MODE</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300">Theme</span>
           <ThemeToggleButton />
         </div>
         <button
@@ -79,7 +79,7 @@ export default function ProfileSignInMenu() {
   return (
     <div className="relative flex items-center gap-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600 dark:text-gray-300">DARK MODE</span>
+        <span className="text-sm text-gray-600 dark:text-gray-300">Theme</span>
         <ThemeToggleButton />
       </div>
       <button
