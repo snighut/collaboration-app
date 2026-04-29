@@ -15,7 +15,28 @@ echo -e "${GREEN}📦 New tag: ${NEW_TAG}${NC}"
 
 # Step 1: Build and push Docker image
 echo -e "${BLUE}🔨 Building and pushing Docker image...${NC}"
-docker buildx build --platform linux/amd64 -t sbnighut/collaboration-app:${NEW_TAG} --push .
+
+# Use a remote builder (Mac mini) by default so local machine compute is not used.
+BUILDER_NAME="${BUILDER_NAME:-mini-builder}"
+
+if ! docker buildx inspect "${BUILDER_NAME}" >/dev/null 2>&1; then
+	echo -e "${RED}❌ Buildx builder '${BUILDER_NAME}' not found.${NC}"
+	echo -e "${BLUE}   Create it once with something like:${NC}"
+	echo -e "${BLUE}   docker buildx create --name ${BUILDER_NAME} --driver docker-container --use mini${NC}"
+	exit 1
+fi
+
+if ! docker buildx inspect "${BUILDER_NAME}" --bootstrap >/dev/null 2>&1; then
+	echo -e "${RED}❌ Remote builder '${BUILDER_NAME}' is unreachable.${NC}"
+	echo -e "${BLUE}   Check SSH/network connectivity to your Mac mini and try again.${NC}"
+	exit 1
+fi
+
+docker buildx build \
+	--builder "${BUILDER_NAME}" \
+	--platform linux/amd64 \
+	-t sbnighut/collaboration-app:${NEW_TAG} \
+	--push .
 
 # Step 2: Update the YAML file
 FLEET_INFRA_PATH="${FLEET_INFRA_PATH:-/Users/swapnilnighut/git/fleet-infra}"
