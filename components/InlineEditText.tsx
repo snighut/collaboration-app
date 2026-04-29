@@ -37,6 +37,7 @@ const InlineEditText: React.FC<InlineEditTextProps> = ({
       {isEditing ? (
         <form onSubmit={handleSave} className="flex items-center gap-2">
           <input
+            data-testid="title-input"
             type="text"
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
@@ -45,6 +46,7 @@ const InlineEditText: React.FC<InlineEditTextProps> = ({
             className="bg-transparent border-b border-blue-400 text-lg font-bold px-1 outline-none w-40"
           />
           <button
+            data-testid="save-title-button"
             type="submit"
             disabled={loading}
             className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800"
@@ -63,9 +65,10 @@ const InlineEditText: React.FC<InlineEditTextProps> = ({
         </form>
       ) : (
         <span className="text-lg font-bold flex items-center gap-2 min-w-0">
-          <span className="truncate">{value}</span>
+          <span data-testid="inline-title-value" className="truncate">{value}</span>
           {editable && showEditIcon && (
             <button
+              data-testid="edit-title-button"
               className="shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
               onClick={() => {
                 setIsEditing(true);
