@@ -959,6 +959,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       {/* Save icon for mobile/iPhone view */}
       <div className="fixed top-20 right-4 z-[2000] flex items-center md:hidden mr-12">
         <button
+          data-testid="canvas-save-button-mobile"
           onClick={handleSave}
           className="p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors"
           disabled={saving}
@@ -976,6 +977,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
       {/* Save button for desktop view */}
       <div className="fixed top-3 right-3 z-[2000] hidden md:flex items-center">
         <button
+          data-testid="canvas-save-button"
           onClick={handleSave}
           className="px-5 py-2 rounded-lg bg-blue-600 text-white font-bold shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors text-base"
           disabled={saving}

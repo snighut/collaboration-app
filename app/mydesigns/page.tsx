@@ -179,7 +179,7 @@ function MyDesigns() {
           <div className="mb-8 flex gap-4">
             <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-xl border border-gray-200 dark:border-slate-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">Total Designs</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{designs.length}</p>
+              <p data-testid="total-design-count" className="text-2xl font-bold text-gray-900 dark:text-gray-100">{designs.length}</p>
             </div>
           </div>
 
@@ -188,7 +188,7 @@ function MyDesigns() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <Loader2 className="w-12 h-12 text-purple-600 dark:text-purple-400 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Loading designs...</p>
+                <p data-testid="loading-designs" className="text-gray-600 dark:text-gray-400">Loading designs...</p>
               </div>
             </div>
           )}
@@ -214,6 +214,7 @@ function MyDesigns() {
               {designs.map((design) => (
                 <div
                   key={design.id}
+                  data-testid={`project-card-${design.id}`}
                   className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
                 >
                 {/* Thumbnail */}
@@ -240,6 +241,7 @@ function MyDesigns() {
                             e.stopPropagation();
                             router.push(`/design?id=${design.id}`);
                           }}
+                          data-testid={`project-view-edit-control-${design.id}`}
                           className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                           disabled={isPending}
                         >
@@ -260,6 +262,7 @@ function MyDesigns() {
                             e.stopPropagation();
                             handleDeleteDesign(design.id);
                           }}
+                          data-testid={`project-delete-button-${design.id}`}
                           className="p-1.5 bg-white/90 rounded-md hover:bg-white transition-colors"
                           disabled={isPending}
                         >
@@ -272,7 +275,7 @@ function MyDesigns() {
 
                 {/* Content */}
                 <div className="p-2 md:p-3">
-                  <h3 className="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
+                  <h3 data-testid={`project-title-${design.id}`} className="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
                     {design.name}
                   </h3>
                   
@@ -313,6 +316,7 @@ function MyDesigns() {
               {designs.map((design) => (
                 <div
                   key={design.id}
+                  data-testid={`project-card-${design.id}`}
                   className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md transition-all duration-300 group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
@@ -333,7 +337,7 @@ function MyDesigns() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
+                      <h3 data-testid={`project-title-${design.id}`} className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate">
                         {design.name}
                       </h3>
                       <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
@@ -370,6 +374,7 @@ function MyDesigns() {
                               e.stopPropagation();
                               router.push(`/design?id=${design.id}`);
                             }}
+                            data-testid={`project-view-edit-control-${design.id}`}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
@@ -390,6 +395,7 @@ function MyDesigns() {
                               e.stopPropagation();
                               handleDeleteDesign(design.id);
                             }}
+                            data-testid={`project-delete-button-${design.id}`}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
