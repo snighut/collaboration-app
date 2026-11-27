@@ -70,8 +70,8 @@ export default function AccountPage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-900">
+      <div className="w-full max-w-md p-8 bg-white dark:bg-neutral-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Account Settings</h2>
         <form onSubmit={handleUpdate} className="flex flex-col gap-4">
           <div>
@@ -81,7 +81,7 @@ export default function AccountPage() {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-lg bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -91,7 +91,7 @@ export default function AccountPage() {
               id="bio"
               value={bio}
               onChange={e => setBio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-lg bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={2}
               placeholder="Tell us about yourself"
             />
@@ -103,7 +103,7 @@ export default function AccountPage() {
               type="text"
               value={location}
               onChange={e => setLocation(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-lg bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="City, Country"
             />
           </div>
@@ -114,7 +114,7 @@ export default function AccountPage() {
               type="url"
               value={website}
               onChange={e => setWebsite(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-lg bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://yourwebsite.com"
             />
           </div>
@@ -129,7 +129,7 @@ export default function AccountPage() {
           </button>
           <button
             type="button"
-            className="mt-4 px-4 py-2 rounded-lg bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-100 font-semibold shadow hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors w-full"
+            className="mt-4 px-4 py-2 rounded-lg bg-gray-200 dark:bg-neutral-700 text-gray-800 dark:text-gray-100 font-semibold shadow hover:bg-gray-300 dark:hover:bg-neutral-600 transition-colors w-full"
             onClick={() => router.back()}
           >
             Done

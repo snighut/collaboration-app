@@ -283,20 +283,20 @@ const ChatSidebar: React.FC = () => {
     <>
       {/* Expandable Sidebar */}
       <div
-        className={`fixed top-16 right-0 h-[calc(100vh-64px)] bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 shadow-2xl transition-all duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-16 right-0 h-[calc(100vh-64px)] bg-white dark:bg-neutral-800 border-l border-gray-200 dark:border-neutral-700 shadow-2xl transition-all duration-300 ease-in-out flex flex-col ${
           isExpanded ? 'w-full md:w-96 z-50' : 'w-0 z-40'
         }`}
       >
         {/* Chat Header - Fixed at top */}
         {isExpanded && (
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+          <div className="p-4 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shrink-0">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                 AI Assistant
               </h2>
               <button
                 onClick={() => setIsExpanded(false)}
-                className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 aria-label="Close AI chat"
               >
                 <X size={20} />
@@ -314,19 +314,19 @@ const ChatSidebar: React.FC = () => {
             </button>
             {isInfoExpanded && (
               <>
-                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <div className="mt-3 p-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg">
                   <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <span className="font-semibold text-blue-600 dark:text-blue-400">Chat</span> uses a <span className="font-semibold text-blue-600 dark:text-blue-400">Mistral-Nemo LLM</span> running on my machine.
+                    <span className="font-semibold text-neutral-900 dark:text-neutral-100">Chat</span> uses the configured language model.
                   </p>
                 </div>
-                <div className="mt-2 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg">
+                <div className="mt-2 p-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg">
                   <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <span className="font-semibold text-purple-600 dark:text-purple-400">Generate Design</span> triggers a <span className="font-semibold">LangChain</span> call <span className="italic text-gray-500 dark:text-gray-400">(Requires login — this is a secure API.)</span>
+                    <span className="font-semibold text-neutral-900 dark:text-neutral-100">Generate Design</span> triggers a <span className="font-semibold">LangChain</span> call <span className="italic text-gray-500 dark:text-gray-400">(Requires login — this is a secure API.)</span>
                   </p>
                 </div>
-                <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-lg">
+                <div className="mt-2 p-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg">
                   <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <span className="font-semibold text-green-600 dark:text-green-400">Knowledge Base</span> uses RAG to answer questions via vector search.
+                    <span className="font-semibold text-neutral-900 dark:text-neutral-100">Knowledge Base</span> uses RAG to answer questions via vector search.
                   </p>
                 </div>
               </>
@@ -362,7 +362,7 @@ const ChatSidebar: React.FC = () => {
                       className={`max-w-[85%] rounded-2xl px-4 py-2 ${
                         message.role === 'user'
                           ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                          : 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-gray-100'
+                          : 'bg-gray-100 dark:bg-neutral-700 text-gray-900 dark:text-gray-100'
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap break-words">
@@ -373,7 +373,7 @@ const ChatSidebar: React.FC = () => {
                         )}
                       </p>
                       {message.role === 'assistant' && message.validationDetails && (
-                        <div className="mt-3 rounded-lg border border-gray-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 p-2.5">
+                        <div className="mt-3 rounded-lg border border-gray-200 dark:border-neutral-600 bg-white/70 dark:bg-neutral-800/70 p-2.5">
                           <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
                             {typeof message.validationDetails.thresholdMet === 'boolean' && (
                               <p>
@@ -425,14 +425,14 @@ const ChatSidebar: React.FC = () => {
                 {/* Show streaming completion as a new message if not yet added to messages */}
                 {isLoading && streamingCompletion && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-gray-100">
+                    <div className="max-w-[85%] rounded-2xl px-4 py-2 bg-gray-100 dark:bg-neutral-700 text-gray-900 dark:text-gray-100">
                       <p className="text-sm whitespace-pre-wrap break-words">{streamingCompletion}</p>
                     </div>
                   </div>
                 )}
                 {(isLoading || isGeneratingDesign || isRagLoading) && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 dark:bg-slate-700 rounded-2xl px-4 py-3 flex items-center gap-2">
+                    <div className="bg-gray-100 dark:bg-neutral-700 rounded-2xl px-4 py-3 flex items-center gap-2">
                       <Loader2 className="text-gray-500 dark:text-gray-400 animate-spin" size={20} />
                       {isGeneratingDesign && (
                         <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -455,7 +455,7 @@ const ChatSidebar: React.FC = () => {
 
         {/* Input Area - Fixed at bottom */}
         {isExpanded && (
-          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+          <div className="p-3 md:p-4 border-t border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shrink-0">
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <textarea
@@ -465,7 +465,7 @@ const ChatSidebar: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   placeholder="Ask a question or describe a system design..."
                   rows={2}
-                  className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                  className="flex-1 px-3 py-2 text-base bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   disabled={isLoading || isGeneratingDesign || isRagLoading}
                   style={{ 
                     fontSize: '16px',
@@ -479,7 +479,7 @@ const ChatSidebar: React.FC = () => {
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send size={18} />
                     <span>Chat</span>
@@ -488,7 +488,7 @@ const ChatSidebar: React.FC = () => {
                     type="button"
                     onClick={handleRagChat}
                     disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 dark:from-green-500 dark:to-emerald-500 dark:hover:from-green-600 dark:hover:to-emerald-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-neutral-900 dark:text-neutral-100 text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <BookOpen size={18} />
                     <span>Knowledge Base</span>
@@ -498,7 +498,7 @@ const ChatSidebar: React.FC = () => {
                   type="button"
                   onClick={handleGenerateDesign}
                   disabled={!inputValue.trim() || isLoading || isGeneratingDesign || isRagLoading}
-                  className="w-full flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 dark:from-purple-500 dark:to-pink-500 dark:hover:from-purple-600 dark:hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-1 px-3 md:px-4 py-2 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles size={18} />
                   <span>Generate Design</span>
@@ -516,7 +516,7 @@ const ChatSidebar: React.FC = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="fixed top-[calc(50%-100px)] right-0 -translate-y-1/2 z-[2000] bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
+          className="fixed top-[calc(50%-100px)] right-0 -translate-y-1/2 z-[2000] bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 p-3 shadow-lg transition-all duration-300 group rounded-l-xl"
           aria-label="Open AI chat"
           title="Open AI Assistant"
         >

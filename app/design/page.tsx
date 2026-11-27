@@ -42,9 +42,9 @@ function DesignPageContent() {
 
   return (
     <>
-      <div className="fixed inset-0 z-[99] flex flex-col bg-white dark:bg-slate-900">
+      <div className="fixed inset-0 z-[99] flex flex-col bg-white dark:bg-neutral-900">
         <ChatSidebar />
-        <header className="h-16 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-8 bg-white dark:bg-slate-800 shrink-0">
+        <header className="h-16 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between px-4 sm:px-8 bg-white dark:bg-neutral-800 shrink-0">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => router.push('/mydesigns')}
@@ -103,7 +103,7 @@ function DesignPageContent() {
           {/* Mobile actions: only menu button */}
           <div className="flex sm:hidden items-center gap-1">
             <button
-              className="ml-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none"
+              className="ml-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors focus:outline-none"
               aria-label="Open menu"
               onClick={() => setMenuOpen(true)}
             >
@@ -142,7 +142,7 @@ function DesignPageContent() {
 export default function DesignPage() {
   return (
     <Suspense fallback={
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-slate-900">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-neutral-900">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading design...</p>

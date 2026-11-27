@@ -74,10 +74,10 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-24 md:h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center px-8 shadow-sm">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight drop-shadow-sm">
+      <header className="fixed top-0 left-0 right-0 h-24 md:h-16 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-gray-200 dark:border-neutral-700 z-50 flex items-center px-8 shadow-sm">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 uppercase tracking-tight">
           Swapnil Nighut • Full-Stack Journey: Systems, AI & Analytics
         </h1>
         <nav className="ml-auto hidden md:flex space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300 items-center">
@@ -86,7 +86,7 @@ const App: React.FC = () => {
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Dark Mode</span>
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="relative w-14 h-8 rounded-full bg-gray-300 dark:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+              className="relative w-14 h-8 rounded-full bg-gray-300 dark:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-neutral-800"
               aria-label="Toggle dark mode"
             >
               <span
@@ -116,7 +116,7 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex flex-1 pt-24 md:pt-16">
         {/* Left Side: Timeline (25%) */}
-        <aside className="w-1/4 fixed h-[calc(100vh-64px)] overflow-y-auto border-r border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm hidden md:block">
+        <aside className="w-1/4 fixed h-[calc(100vh-64px)] overflow-y-auto border-r border-gray-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 backdrop-blur-sm hidden md:block">
           <Timeline activeYear={activeYear} onYearChange={handleYearChange} />
         </aside>
 
@@ -131,7 +131,7 @@ const App: React.FC = () => {
           ))}
           
           {/* Projects Section */}
-          <div id="creative-hub-trigger" className="py-8 border-t border-gray-100 dark:border-slate-800 scroll-mt-24">
+          <div id="creative-hub-trigger" className="py-8 border-t border-gray-100 dark:border-neutral-800 scroll-mt-24">
             {/* Section Header */}
             <div className="text-center mb-8">
               <h2 className="text-4xl font-black text-gray-800 dark:text-gray-100 mb-2">Featured Projects</h2>
@@ -139,9 +139,9 @@ const App: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Creative Prompt to Design App */}
-              <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full">
-              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="text-blue-600 dark:text-blue-400" size={28} />
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-neutral-700 w-full">
+              <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="text-neutral-700 dark:text-neutral-200" size={28} />
               </div>
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 text-center">Creative Prompt to Visual Design App</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-center">
@@ -150,7 +150,7 @@ const App: React.FC = () => {
               <div className="flex justify-center">
                 <button 
                   onClick={() => router.push('/design?id=new')}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all transform hover:scale-105 active:scale-95"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 font-bold rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
                 >
                   Start Creating
                 </button>
@@ -158,9 +158,9 @@ const App: React.FC = () => {
             </div>
 
             {/* My Designs */}
-            <div id="my-creations-section" className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full scroll-mt-24">
-              <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Layout className="text-purple-600 dark:text-purple-400" size={28} />
+            <div id="my-creations-section" className="bg-white dark:bg-neutral-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-neutral-700 w-full scroll-mt-24">
+              <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Layout className="text-neutral-700 dark:text-neutral-200" size={28} />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">View My System Designs</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-center">
@@ -169,7 +169,7 @@ const App: React.FC = () => {
               <div className="flex justify-center">
                 <button 
                   onClick={() => router.push('/mydesigns')}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 dark:shadow-purple-900/30 transition-all transform hover:scale-105 active:scale-95"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 font-bold rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
                 >
                   Go To My Designs
                 </button>
@@ -177,9 +177,9 @@ const App: React.FC = () => {
             </div>
 
             {/* Stock Analysis */}
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-700 w-full scroll-mt-24">
-              <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={28} />
+            <div className="bg-white dark:bg-neutral-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-neutral-700 w-full scroll-mt-24">
+              <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="text-neutral-700 dark:text-neutral-200" size={28} />
               </div>
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 text-center">Stock Analysis (Quant MVP)</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-center">
@@ -188,7 +188,7 @@ const App: React.FC = () => {
               <div className="flex justify-center">
                 <button
                   onClick={() => router.push('/stockAnalysis')}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 transition-all transform hover:scale-105 active:scale-95"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 font-bold rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
                 >
                   Open Stock Analysis
                 </button>

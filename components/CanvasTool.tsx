@@ -986,11 +986,11 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
         </button>
       </div>
       {/* Left Panel: Architecture Components */}
-      <aside className={`w-full md:w-1/5 md:min-w-[300px] ${mobilePanelExpanded ? 'h-[40%]' : 'h-auto'} md:h-full bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col transition-all duration-300`}>
+      <aside className={`w-full md:w-1/5 md:min-w-[300px] ${mobilePanelExpanded ? 'h-[40%]' : 'h-auto'} md:h-full bg-gray-50 dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 flex flex-col transition-all duration-300`}>
         {/* Mobile Toggle Header */}
         <button
           onClick={() => setMobilePanelExpanded(!mobilePanelExpanded)}
-          className="md:hidden flex items-center justify-between w-full p-3 border-b border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-700"
+          className="md:hidden flex items-center justify-between w-full p-3 border-b border-gray-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-700"
         >
           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">TOOL PANEL</span>
           {mobilePanelExpanded ? <ChevronUp size={18} className="text-gray-500 dark:text-gray-400" /> : <ChevronDown size={18} className="text-gray-500 dark:text-gray-400" />}
@@ -1006,13 +1006,13 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <div className="space-y-2">
             <button 
               onClick={addDesignGroup}
-              className="w-full flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-700 border-2 border-dashed border-gray-300 dark:border-slate-500 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 dark:hover:border-green-500 transition-all text-gray-700 dark:text-gray-200"
+              className="w-full flex items-center justify-center gap-2 p-3 bg-white dark:bg-neutral-700 border-2 border-dashed border-gray-300 dark:border-neutral-500 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 dark:hover:border-green-500 transition-all text-gray-700 dark:text-gray-200"
             >
               <Plus size={16} className="text-green-500" />
               <span className="text-xs font-semibold">Add Design Group</span>
             </button>
             {canvasState.designGroups.length > 0 && (
-              <div className="mt-2 p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
+              <div className="mt-2 p-2 bg-gray-50 dark:bg-neutral-700/50 rounded-lg border border-gray-200 dark:border-neutral-600">
                 <button
                   onClick={() => setDesignGroupsExpanded(!designGroupsExpanded)}
                   className="w-full flex items-center justify-between text-[9px] text-gray-500 dark:text-gray-400 mb-0 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
@@ -1031,7 +1031,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                         className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition-all ${
                           activeGroupId === group.id 
                             ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
-                            : 'hover:bg-gray-100 dark:hover:bg-slate-600'
+                            : 'hover:bg-gray-100 dark:hover:bg-neutral-600'
                         }`}
                       >
                         <div 
@@ -1061,7 +1061,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <div className="grid grid-cols-3 gap-2">
             <button 
               onClick={() => addObject('api-gateway')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100 relative group"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100 relative group"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['api-gateway'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['api-gateway'].iconPath} />
@@ -1070,7 +1070,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('microservice')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['microservice'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['microservice'].iconPath} />
@@ -1079,7 +1079,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('database')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['database'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['database'].iconPath} />
@@ -1088,7 +1088,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('cache')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:border-yellow-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:border-yellow-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cache'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['cache'].iconPath} />
@@ -1097,7 +1097,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('message-queue')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['message-queue'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['message-queue'].iconPath} />
@@ -1106,7 +1106,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('load-balancer')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['load-balancer'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['load-balancer'].iconPath} />
@@ -1115,7 +1115,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('storage')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:border-pink-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:border-pink-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['storage'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['storage'].iconPath} />
@@ -1124,7 +1124,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('cdn')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cdn'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['cdn'].iconPath} />
@@ -1133,7 +1133,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('lambda')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['lambda'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['lambda'].iconPath} />
@@ -1142,7 +1142,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('container')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['container'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['container'].iconPath} />
@@ -1151,7 +1151,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('kubernetes')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['kubernetes'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['kubernetes'].iconPath} />
@@ -1160,7 +1160,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('cloud')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['cloud'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['cloud'].iconPath} />
@@ -1169,7 +1169,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('server')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['server'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['server'].iconPath} />
@@ -1178,7 +1178,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('user')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['user'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['user'].iconPath} />
@@ -1187,7 +1187,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('mobile-app')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['mobile-app'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['mobile-app'].iconPath} />
@@ -1196,7 +1196,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('web-app')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['web-app'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['web-app'].iconPath} />
@@ -1205,7 +1205,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('firewall')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['firewall'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['firewall'].iconPath} />
@@ -1214,7 +1214,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('monitor')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['monitor'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['monitor'].iconPath} />
@@ -1223,7 +1223,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
             </button>
             <button 
               onClick={() => addObject('text-box')}
-              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/20 hover:border-gray-400 transition-all text-gray-900 dark:text-gray-100"
+              className="flex flex-col items-center justify-center p-3 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/20 hover:border-gray-400 transition-all text-gray-900 dark:text-gray-100"
             >
               <svg viewBox="0 0 24 24" className="w-6 h-6 mb-1" fill="none" stroke={ARCHITECTURE_COMPONENTS['text-box'].color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d={ARCHITECTURE_COMPONENTS['text-box'].iconPath} />
@@ -1239,12 +1239,12 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </h4>
                     
           {/* Line Pattern Selector */}
-          <div className="mt-3 p-3 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-blue-900/20 rounded-lg border-2 border-purple-300 dark:border-purple-600 shadow-lg">
+          <div className="mt-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-600">
             <div className="flex items-center gap-2 mb-3">
-              <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4 h-4 text-neutral-600 dark:text-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 12 Q 8 6, 13 12 T 21 12" strokeLinecap="round"/>
               </svg>
-              <h5 className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+              <h5 className="text-[10px] font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider">
                 Line Pattern
               </h5>
             </div>
@@ -1253,8 +1253,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onClick={() => setSelectedLinePattern('straight')}
                 className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
                   selectedLinePattern === 'straight'
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
-                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                    ? 'bg-neutral-700 dark:bg-neutral-600 border-neutral-700 dark:border-neutral-400 shadow-sm ring-2 ring-neutral-300 dark:ring-neutral-500'
+                    : 'bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-600'
                 }`}
                 title="Straight Line"
               >
@@ -1270,8 +1270,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onClick={() => setSelectedLinePattern('orthogonal')}
                 className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
                   selectedLinePattern === 'orthogonal'
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
-                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                    ? 'bg-neutral-700 dark:bg-neutral-600 border-neutral-700 dark:border-neutral-400 shadow-sm ring-2 ring-neutral-300 dark:ring-neutral-500'
+                    : 'bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-600'
                 }`}
                 title="Orthogonal (Right Angles)"
               >
@@ -1287,8 +1287,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onClick={() => setSelectedLinePattern('curved')}
                 className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
                   selectedLinePattern === 'curved'
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
-                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                    ? 'bg-neutral-700 dark:bg-neutral-600 border-neutral-700 dark:border-neutral-400 shadow-sm ring-2 ring-neutral-300 dark:ring-neutral-500'
+                    : 'bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-600'
                 }`}
                 title="Curved (Smooth Bezier)"
               >
@@ -1304,8 +1304,8 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                 onClick={() => setSelectedLinePattern('stepped')}
                 className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border-2 transition-all transform ${
                   selectedLinePattern === 'stepped'
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 border-blue-400 shadow-xl scale-105 ring-2 ring-purple-300 dark:ring-purple-600'
-                    : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-slate-600 dark:hover:to-slate-600 hover:scale-102 hover:shadow-md'
+                    ? 'bg-neutral-700 dark:bg-neutral-600 border-neutral-700 dark:border-neutral-400 shadow-sm ring-2 ring-neutral-300 dark:ring-neutral-500'
+                    : 'bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-600'
                 }`}
                 title="Stepped (Staircase)"
               >
@@ -1333,7 +1333,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
                       className={`flex flex-col items-center justify-center py-2 px-1 rounded border transition-all ${
                         selectedConnectionType === typeDef.type
                           ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 dark:border-blue-600 text-blue-700 dark:text-blue-400'
-                          : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300'
+                          : 'bg-white dark:bg-neutral-700 border-gray-200 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-600 text-gray-700 dark:text-gray-300'
                       }`}
                       title={typeDef.description}
                     >
@@ -1386,7 +1386,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
               <button 
                 key={svg.name}
                 onClick={() => addObject('svg', svg.path)}
-                className="p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 flex items-center justify-center"
+                className="p-2 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-600 flex items-center justify-center"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-gray-600 dark:text-gray-300">
                   <path d={svg.path} />
@@ -1425,13 +1425,13 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </div>
           <button 
             onClick={() => addObject('color', selectedColor)}
-            className="w-full mt-3 py-2 bg-gray-800 dark:bg-slate-600 text-white text-[10px] font-bold rounded-lg hover:bg-black dark:hover:bg-slate-500 transition-colors"
+            className="w-full mt-3 py-2 bg-gray-800 dark:bg-neutral-600 text-white text-[10px] font-bold rounded-lg hover:bg-black dark:hover:bg-neutral-500 transition-colors"
           >
             ADD COLOR BLOCK
           </button>
         </div>
 
-        {/* <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
+        {/* <div className="pt-6 border-t border-gray-200 dark:border-neutral-700">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-2xl">🔗</span>
@@ -1458,14 +1458,14 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           </div>
         </div> */}
 
-        <div className="pt-6 border-t border-gray-200 dark:border-slate-700">
+        <div className="pt-6 border-t border-gray-200 dark:border-neutral-700">
           <div className="flex items-center justify-between mb-2">
              <span className="text-xs text-gray-400 dark:text-gray-500">Everything below is for development purpose</span>
              <Layers size={14} className="text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
-        <div className="order-t border-gray-200 dark:border-slate-700">
+        <div className="order-t border-gray-200 dark:border-neutral-700">
           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">
             DEBUG PANEL
           </h4>
@@ -1535,7 +1535,7 @@ const CanvasTool: React.FC<CanvasToolProps> = ({ designId, onTitleChange, refres
           <textarea
             id="patch-canvas-json"
             style={{ color: 'green', backgroundColor: 'rgb(0 0 0 / 1)' }}
-            className="w-full min-h-[80px] max-h-40 p-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-800 text-xs font-mono mb-2"
+            className="w-full min-h-[80px] max-h-40 p-2 rounded-lg border border-gray-300 dark:border-neutral-600 bg-gray-100 dark:bg-neutral-800 text-xs font-mono mb-2"
             placeholder="Paste JSON object here..."
             value={patchJson}
             onChange={e => { setPatchJson(e.target.value); setPatchError(''); }}

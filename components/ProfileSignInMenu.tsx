@@ -50,7 +50,7 @@ export default function ProfileSignInMenu() {
           )}
         </button>
         {open && (
-          <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
+          <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg shadow-lg z-50">
             <button
               className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
               onClick={() => {
@@ -61,7 +61,7 @@ export default function ProfileSignInMenu() {
               Account
             </button>
             <button
-              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-slate-700"
+              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-neutral-700"
               onClick={async () => {
                 setOpen(false);
                 await supabase.auth.signOut();
@@ -93,15 +93,15 @@ export default function ProfileSignInMenu() {
         <span>Sign In</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 top-12 w-32 bg-white/100 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg shadow-lg z-50">
           {/* <button
-            className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-slate-700"
+            className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-neutral-700"
             onClick={() => handleMenuClick('/login')}
           >
             Sign In
           </button> */}
           {/* <button
-            className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-slate-700"
+            className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700 dark:hover:bg-neutral-700"
             onClick={() => handleMenuClick('/login')}
           >
             Sign Up

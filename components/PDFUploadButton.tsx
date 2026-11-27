@@ -203,7 +203,7 @@ export default function PDFUploadButton({ userId }: { userId?: string }) {
       </button>
 
       {uploading && (
-        <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-lg shadow-lg p-3 min-w-[280px] z-50 border border-gray-200 dark:border-slate-700">
+        <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-3 min-w-[280px] z-50 border border-gray-200 dark:border-neutral-700">
           <div className="flex items-center gap-2 mb-2">
             <Loader2 size={16} className="animate-spin text-blue-600" />
             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">

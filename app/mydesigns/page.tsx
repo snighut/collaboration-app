@@ -85,9 +85,9 @@ function MyDesigns() {
   return (
     <>
       <ChatSidebar />
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-50 flex items-center justify-between px-4 sm:px-8 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-gray-200 dark:border-neutral-700 z-50 flex items-center justify-between px-4 sm:px-8 shadow-sm">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={() => router.push('/')}
@@ -97,7 +97,7 @@ function MyDesigns() {
             <Home size={20} />
             <span className="font-medium hidden xs:inline">Home</span>
           </button>
-          <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-400 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent uppercase tracking-tight truncate">
+          <h1 className="text-base sm:text-xl font-bold text-neutral-900 dark:text-neutral-100 uppercase tracking-tight truncate">
             AI Architected Solutions
           </h1>
         </div>
@@ -105,13 +105,13 @@ function MyDesigns() {
         <div className="hidden sm:flex items-center gap-2">
           <ProfileSignInMenu />
           {/* View Toggle */}
-          <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+          <div className="flex items-center bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-neutral-200 dark:bg-neutral-600 text-neutral-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700'
               }`}
               title="Grid View"
             >
@@ -121,8 +121,8 @@ function MyDesigns() {
               onClick={() => setViewMode('list')}
               className={`p-2 transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'bg-neutral-200 dark:bg-neutral-600 text-neutral-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700'
               }`}
               title="List View"
             >
@@ -131,7 +131,7 @@ function MyDesigns() {
           </div>
           <button 
             onClick={() => router.push('/design?id=new')}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-medium rounded-lg transition-colors"
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 font-medium rounded-lg transition-colors"
           >
             <Plus size={18} />
             <span>New Design</span>
@@ -141,13 +141,13 @@ function MyDesigns() {
         <div className="flex sm:hidden items-center gap-1">
           <button 
             onClick={() => router.push('/design?id=new')}
-            className="p-2.5 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white rounded-lg transition-colors"
+            className="p-2.5 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 rounded-lg transition-colors"
             title="New Design"
           >
             <Plus size={20} />
           </button>
           <button
-            className="ml-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none"
+            className="ml-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors focus:outline-none"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
           >
@@ -178,7 +178,7 @@ function MyDesigns() {
         <div className="max-w-7xl mx-auto">
           {/* Stats Bar */}
           <div className="mb-8 flex gap-4">
-            <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-xl border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-neutral-800 px-6 py-4 rounded-xl border border-gray-200 dark:border-neutral-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">Total Designs</p>
               <p data-testid="total-design-count" className="text-2xl font-bold text-gray-900 dark:text-gray-100">{designs.length}</p>
             </div>
@@ -188,7 +188,7 @@ function MyDesigns() {
           {isLoading && (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <Loader2 className="w-12 h-12 text-purple-600 dark:text-purple-400 animate-spin mx-auto mb-4" />
+                <Loader2 className="w-12 h-12 text-neutral-700 dark:text-neutral-300 animate-spin mx-auto mb-4" />
                 <p data-testid="loading-designs" className="text-gray-600 dark:text-gray-400">Loading designs...</p>
               </div>
             </div>
@@ -216,10 +216,10 @@ function MyDesigns() {
                 <div
                   key={design.id}
                   data-testid={`project-card-${design.id}`}
-                  className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                  className="bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
                 >
                 {/* Thumbnail */}
-                <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 relative overflow-hidden">
+                <div className="aspect-square bg-neutral-100 dark:bg-neutral-700 relative overflow-hidden">
                   {design.thumbnail ? (
                     <DesignThumbnail
                       src={design.thumbnail}
@@ -319,11 +319,11 @@ function MyDesigns() {
                 <div
                   key={design.id}
                   data-testid={`project-card-${design.id}`}
-                  className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md transition-all duration-300 group cursor-pointer"
+                  className="bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 p-4 hover:shadow-md transition-all duration-300 group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     {/* Thumbnail */}
-                    <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 overflow-hidden shrink-0">
+                    <div className="w-20 h-20 rounded-lg bg-neutral-100 dark:bg-neutral-700 overflow-hidden shrink-0">
                       {design.thumbnail ? (
                         <DesignThumbnail
                           src={design.thumbnail}
@@ -378,7 +378,7 @@ function MyDesigns() {
                               router.push(`/design?id=${design.id}`);
                             }}
                             data-testid={`project-view-edit-control-${design.id}`}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
                             <Eye size={16} className="text-gray-600 dark:text-gray-400" />
@@ -388,7 +388,7 @@ function MyDesigns() {
                               e.stopPropagation();
                               router.push(`/design?id=${design.id}`);
                             }}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
                             <Edit size={16} className="text-gray-600 dark:text-gray-400" />
@@ -399,7 +399,7 @@ function MyDesigns() {
                               handleDeleteDesign(design.id);
                             }}
                             data-testid={`project-delete-button-${design.id}`}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
                             disabled={isPending}
                           >
                             <Trash2 size={16} className="text-red-600 dark:text-red-400" />
@@ -416,8 +416,8 @@ function MyDesigns() {
           {/* Empty State */}
           {!isLoading && !error && designs.length === 0 && (
             <div className="text-center py-20">
-              <div className="w-20 h-20 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Plus size={32} className="text-purple-600 dark:text-purple-400" />
+              <div className="w-20 h-20 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Plus size={32} className="text-neutral-700 dark:text-neutral-200" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 No designs yet
@@ -427,7 +427,7 @@ function MyDesigns() {
               </p>
               <button 
                 onClick={() => router.push('/design?id=new')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-900 hover:bg-neutral-700 dark:bg-neutral-200 dark:hover:bg-white text-white dark:text-neutral-900 font-medium rounded-lg transition-colors"
               >
                 <Plus size={18} />
                 Create Project
@@ -437,7 +437,7 @@ function MyDesigns() {
 
           {/* Disclaimer Section */}
           {!isLoading && designs.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-gray-200 dark:border-slate-700">
+            <div className="mt-12 pt-8 border-t border-gray-200 dark:border-neutral-700">
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
                 <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
                   <strong>Note:</strong> These designs are experimental prototypes generated with AI assistance and do not represent 100% production-grade reality. They're works in progress created for learning and demonstration purposes as part of my personal portfolio project.

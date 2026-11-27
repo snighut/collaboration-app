@@ -19,13 +19,13 @@ export default function AppMobileMenu({ open, onClose, onThemeToggle, onHome, on
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 flex justify-end">
-      <div className="w-64 h-full bg-white dark:bg-slate-900 shadow-lg flex flex-col">
+      <div className="w-64 h-full bg-white dark:bg-neutral-900 shadow-lg flex flex-col">
         <button className="self-end p-4 text-gray-500 hover:text-gray-900 dark:hover:text-white" onClick={onClose}>
           ✕
         </button>
         <div className="flex-1 flex flex-col gap-2 px-6">
           <button 
-            className="py-2 text-left flex items-center gap-2 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-800 rounded" 
+            className="py-2 text-left flex items-center gap-2 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded"
             onClick={e => { 
               onThemeToggle();
             }}
@@ -58,7 +58,7 @@ export default function AppMobileMenu({ open, onClose, onThemeToggle, onHome, on
               </span>
             </span>
           </button>
-          <button className="py-2 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-800 rounded" onClick={onHome}>
+          <button className="py-2 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded" onClick={onHome}>
             Home
           </button>
         </div>
