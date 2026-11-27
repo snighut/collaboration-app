@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Home, Grid3x3, List, Plus, Loader2, ImageIcon, Edit, Trash2, Calendar, Clock, Eye, Mail, Github, Linkedin } from 'lucide-react';
 import { useAuth } from '../../components/AuthProvider';
 import { Design } from '@/types';
+import { DesignThumbnail } from '@/components/DesignThumbnail';
 
 function MyDesigns() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -220,9 +221,10 @@ function MyDesigns() {
                 {/* Thumbnail */}
                 <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 relative overflow-hidden">
                   {design.thumbnail ? (
-                    <img
+                    <DesignThumbnail
                       src={design.thumbnail}
                       alt={design.name}
+                      accessToken={session?.access_token}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
@@ -323,9 +325,10 @@ function MyDesigns() {
                     {/* Thumbnail */}
                     <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 overflow-hidden shrink-0">
                       {design.thumbnail ? (
-                        <img
+                        <DesignThumbnail
                           src={design.thumbnail}
                           alt={design.name}
+                          accessToken={session?.access_token}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
